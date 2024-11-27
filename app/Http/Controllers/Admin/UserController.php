@@ -127,8 +127,8 @@ class UserController extends Controller
             if ($request->hasFile('foto')) {
                 $file = $request->file('foto');
                 $filename = 'user-' . time() . '.' . $file->getClientOriginalExtension();
-                $file->move(public_path('img/user'), $filename);  // Simpan gambar ke folder public/img/user
-                $data->profile_photo_path = "img/user/$filename";  // Simpan path gambar ke database
+                $file->move(public_path('storage/user'), $filename);  // Simpan gambar ke folder public/storage/user
+                $data->profile_photo_path = "storage/user/$filename";  // Simpan path gambar ke database
             }
 
             $data->update();

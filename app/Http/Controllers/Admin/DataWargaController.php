@@ -115,10 +115,10 @@ class DataWargaController extends Controller
                 $file = $request->file('foto');
                 $filename = 'warga-' . time() . '.' . $file->getClientOriginalExtension();
                 $file->move(
-                    public_path('img/warga'),
+                    public_path('storage/warga'),
                     $filename
-                );  // Simpan gambar ke folder public/img/warga
-                $warga->foto = "img/warga/$filename";  // Simpan path gambar ke database
+                );  // Simpan gambar ke folder public/storage/warga
+                $warga->foto = "storage/warga/$filename";  // Simpan path gambar ke database
             } else {
                 // Jika file tidak di-upload, gunakan gambar default
                 if ($request->jenis_kelamin == "Laki-Laki") {
@@ -295,10 +295,10 @@ class DataWargaController extends Controller
             $file = $request->file('foto');
             $filename = 'warga-' . time() . '.' . $file->getClientOriginalExtension();
             $file->move(
-                public_path('img/warga'),
+                public_path('storage/warga'),
                 $filename
-            );  // Simpan gambar ke folder public/img/warga
-            $warga->foto = "img/warga/$filename";  // Simpan path gambar ke database
+            );  // Simpan gambar ke folder public/storage/warga
+            $warga->foto = "storage/warga/$filename";  // Simpan path gambar ke database
         }
         $warga->update();
 

@@ -128,8 +128,8 @@ class BayarPinjamanController extends Controller
             if ($request->hasFile('transfer_receipt_path')) {
                 $file = $request->file('transfer_receipt_path');
                 $filename = 'Kas-' . time() . '.' . $file->getClientOriginalExtension();
-                $file->move(public_path('img/kas/bayarPinjaman'), $filename);  // Simpan gambar ke folder public/img/kas/bayarPinjaman
-                $data->transfer_receipt_path = "img/kas/bayarPinjaman/$filename";  // Simpan path gambar ke database
+                $file->move(public_path('storage/kas/bayarPinjaman'), $filename);  // Simpan gambar ke folder public/storage/kas/bayarPinjaman
+                $data->transfer_receipt_path = "storage/kas/bayarPinjaman/$filename";  // Simpan path gambar ke database
             }
             $data->save();
 
@@ -296,8 +296,8 @@ class BayarPinjamanController extends Controller
         if ($request->hasFile('transfer_receipt_path')) {
             $file = $request->file('transfer_receipt_path');
             $filename = 'Kas-' . time() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('img/kas/bayarPinjaman'), $filename);  // Simpan gambar ke folder public/img/kas/bayarPinjaman
-            $data->transfer_receipt_path = "img/kas/bayarPinjaman/$filename";  // Simpan path gambar ke database
+            $file->move(public_path('storage/kas/bayarPinjaman'), $filename);  // Simpan gambar ke folder public/storage/kas/bayarPinjaman
+            $data->transfer_receipt_path = "storage/kas/bayarPinjaman/$filename";  // Simpan path gambar ke database
         }
 
         $data->update();
@@ -339,8 +339,8 @@ class BayarPinjamanController extends Controller
         if ($request->hasFile('transfer_receipt_path')) {
             $file = $request->file('transfer_receipt_path');
             $filename = 'Kas-' . time() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('img/kas/bayarPinjaman'), $filename);  // Simpan gambar ke folder public/img/kas/bayarPinjaman
-            $data->transfer_receipt_path = "img/kas/bayarPinjaman/$filename";  // Simpan path gambar ke database
+            $file->move(public_path('storage/kas/bayarPinjaman'), $filename);  // Simpan gambar ke folder public/storage/kas/bayarPinjaman
+            $data->transfer_receipt_path = "storage/kas/bayarPinjaman/$filename";  // Simpan path gambar ke database
         }
 
         $data->update();

@@ -83,10 +83,16 @@ class AdminAuthController extends Controller
         $admin->is_active = $request->is_active;
 
         // Cek apakah file profile_photo_path di-upload
+        // if ($request->hasFile('profile_photo_path')) {
+        //     $file = $request->file('profile_photo_path');
+        //     $path = $file->store('profile_photo_paths', 'public'); // Simpan gambar ke direktori public
+        //     $admin->profile_photo_path = $path;
+        // }
         if ($request->hasFile('profile_photo_path')) {
             $file = $request->file('profile_photo_path');
-            $path = $file->store('profile_photo_paths', 'public'); // Simpan gambar ke direktori public
-            $admin->profile_photo_path = $path;
+            $filename = 'Admin-' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('storage/admin'), $filename);  // Simpan gambar ke folder public/storage/admin
+            $admin->profile_photo_path = "storage/admin/$filename";  // Simpan path gambar ke database
         } else {
             // Jika file tidak di-upload, gunakan gambar default
             $admin->profile_photo_path = 'default/profile_picture.png'; // Set path gambar default
@@ -162,10 +168,17 @@ class AdminAuthController extends Controller
 
         $admin->phone_number = $request->phone_number;
 
+        // if ($request->hasFile('profile_photo_path')) {
+        //     $file = $request->file('profile_photo_path');
+        //     $path = $file->store('profile_photo_paths', 'public');
+        //     $admin->profile_photo_path = $path;
+        // }
+
         if ($request->hasFile('profile_photo_path')) {
             $file = $request->file('profile_photo_path');
-            $path = $file->store('profile_photo_paths', 'public');
-            $admin->profile_photo_path = $path;
+            $filename = 'Admin-' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('storage/admin'), $filename);  // Simpan gambar ke folder public/storage/admin
+            $admin->profile_photo_path = "storage/admin/$filename";  // Simpan path gambar ke database
         }
 
         $admin->save();

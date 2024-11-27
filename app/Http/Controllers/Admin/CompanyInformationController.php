@@ -89,8 +89,8 @@ class CompanyInformationController extends Controller
         if ($request->hasFile('logo')) {
             $file = $request->file('logo');
             $filename = 'logo-' . time() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('img/company'), $filename);  // Simpan gambar ke folder public/img/company
-            $companyInfo->logo = "img/company/$filename";  // Simpan path gambar ke database
+            $file->move(public_path('storage/company'), $filename);  // Simpan gambar ke folder public/storage/company
+            $companyInfo->logo = "storage/company/$filename";  // Simpan path gambar ke database
         }
 
 

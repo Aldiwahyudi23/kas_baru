@@ -691,8 +691,8 @@ class PinjamanController extends Controller
             if ($request->hasFile('disbursement_receipt_path')) {
                 $file = $request->file('disbursement_receipt_path');
                 $filename = 'Kas-' . time() . '.' . $file->getClientOriginalExtension();
-                $file->move(public_path('img/kas/pengeluaran/pinjaman'), $filename);  // Simpan gambar ke folder public/img/kas/pengeluaran
-                $data->disbursement_receipt_path = "img/kas/pengeluaran/pinjaman/$filename";  // Simpan path gambar ke database
+                $file->move(public_path('storage/kas/pengeluaran/pinjaman'), $filename);  // Simpan gambar ke folder public/storage/kas/pengeluaran
+                $data->disbursement_receipt_path = "storage/kas/pengeluaran/pinjaman/$filename";  // Simpan path gambar ke database
             }
 
             $data->update();

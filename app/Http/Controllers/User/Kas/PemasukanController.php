@@ -132,8 +132,8 @@ class PemasukanController extends Controller
             if ($request->hasFile('transfer_receipt_path')) {
                 $file = $request->file('transfer_receipt_path');
                 $filename = 'Kas-' . time() . '.' . $file->getClientOriginalExtension();
-                $file->move(public_path('img/kas/pemasukan'), $filename);  // Simpan gambar ke folder public/img/kas/pemasukan
-                $data->transfer_receipt_path = "img/kas/pemasukan/$filename";  // Simpan path gambar ke database
+                $file->move(public_path('storage/kas/pemasukan'), $filename);  // Simpan gambar ke folder public/storage/kas/pemasukan
+                $data->transfer_receipt_path = "storage/kas/pemasukan/$filename";  // Simpan path gambar ke database
             }
 
             $data->save();
@@ -300,8 +300,8 @@ class PemasukanController extends Controller
         if ($request->hasFile('transfer_receipt_path')) {
             $file = $request->file('transfer_receipt_path');
             $filename = 'Kas-' . time() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('img/kas/pemasukan'), $filename);  // Simpan gambar ke folder public/img/kas/pemasukan
-            $data->transfer_receipt_path = "img/kas/pemasukan/$filename";  // Simpan path gambar ke database
+            $file->move(public_path('storage/kas/pemasukan'), $filename);  // Simpan gambar ke folder public/storage/kas/pemasukan
+            $data->transfer_receipt_path = "storage/kas/pemasukan/$filename";  // Simpan path gambar ke database
         }
 
         $data->update();
@@ -344,8 +344,8 @@ class PemasukanController extends Controller
         if ($request->hasFile('transfer_receipt_path')) {
             $file = $request->file('transfer_receipt_path');
             $filename = 'Kas-' . time() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('img/kas/pemasukan'), $filename);  // Simpan gambar ke folder public/img/kas/pemasukan
-            $data->transfer_receipt_path = "img/kas/pemasukan/$filename";  // Simpan path gambar ke database
+            $file->move(public_path('storage/kas/pemasukan'), $filename);  // Simpan gambar ke folder public/storage/kas/pemasukan
+            $data->transfer_receipt_path = "storage/kas/pemasukan/$filename";  // Simpan path gambar ke database
         }
 
         $data->update();

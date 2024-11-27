@@ -118,8 +118,8 @@ class CashExpenditureController extends Controller
             if ($request->hasFile('receipt_path')) {
                 $file = $request->file('receipt_path');
                 $filename = 'Kas-' . time() . '.' . $file->getClientOriginalExtension();
-                $file->move(public_path('img/kas/pengeluaran'), $filename);  // Simpan gambar ke folder public/img/kas/pengeluaran
-                $data->receipt_path = "img/kas/pengeluaran/$filename";  // Simpan path gambar ke database
+                $file->move(public_path('storage/kas/pengeluaran'), $filename);  // Simpan gambar ke folder public/storage/kas/pengeluaran
+                $data->receipt_path = "storage/kas/pengeluaran/$filename";  // Simpan path gambar ke database
             }
 
             $data->save();
@@ -253,8 +253,8 @@ class CashExpenditureController extends Controller
         if ($request->hasFile('receipt_path')) {
             $file = $request->file('receipt_path');
             $filename = 'Kas-' . time() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('img/kas/pengeluaran'), $filename);  // Simpan gambar ke folder public/img/kas/pengeluaran
-            $data->receipt_path = "img/kas/pengeluaran/$filename";  // Simpan path gambar ke database
+            $file->move(public_path('storage/kas/pengeluaran'), $filename);  // Simpan gambar ke folder public/storage/kas/pengeluaran
+            $data->receipt_path = "storage/kas/pengeluaran/$filename";  // Simpan path gambar ke database
         }
 
         $data->update();
