@@ -80,7 +80,8 @@
                                 @elseif($pinjaman->status === 'approved_by_chairman')
                                 <span class="badge badge-secondary">Proses Pencairan oleh Bendahara</span>
                                 @elseif($pinjaman->status === 'disbursed_by_treasurer')
-                                <span class="badge badge-secondary">Sudah di cairkan, Menunggu konfirmasi bahwa uang telah
+                                <span class="badge badge-secondary">Sudah di cairkan, Menunggu konfirmasi bahwa uang
+                                    telah
                                     di terima </span>
                                 @else
                                 <span class="badge badge-light">Unknown</span> <!-- default if status is undefined -->
@@ -119,9 +120,9 @@
                 <br>
 
                 <div class="form-group col-6 col-sm-2 justify-between">
-                    <a href="{{ asset('storage/'.$pinjaman->disbursement_receipt_path) }}" data-toggle="lightbox"
+                    <a href="{{ asset($pinjaman->disbursement_receipt_path) }}" data-toggle="lightbox"
                         data-title="Tanda Bukti Transfer - {{$pinjaman->code}}" data-gallery="gallery">
-                        <img src="{{ asset('storage/'.$pinjaman->disbursement_receipt_path) }}" class="img-fluid mb-2"
+                        <img src="{{ asset($pinjaman->disbursement_receipt_path) }}" class="img-fluid mb-2"
                             alt="white sample" />
                     </a>
                 </div>

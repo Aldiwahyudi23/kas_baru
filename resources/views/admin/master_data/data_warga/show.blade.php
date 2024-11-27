@@ -8,7 +8,7 @@
         <div class="card card-primary">
             <div class="card-header">
                 <div class="text-center">
-                    <img class="profile-user-img img-fluid img-circle" src="{{asset('storage/'. $dataWarga->foto)}}"
+                    <img class="profile-user-img img-fluid img-circle" src="{{asset($dataWarga->foto)}}"
                         alt="User profile picture">
                 </div>
                 <h3 class="profile-username text-center">{{$dataWarga->name}}</h3>

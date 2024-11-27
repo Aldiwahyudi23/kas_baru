@@ -24,6 +24,7 @@ class AdminFactory extends Factory
         return [
             'name' => 'Aldi',
             'email' => 'keluargamahaya@gmail.com',
+            'phone_number' => '083',
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),

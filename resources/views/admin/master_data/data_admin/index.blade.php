@@ -51,7 +51,11 @@
                             <div class="form-group">
                                 <label for="profile_photo_path">Profile Picture</label>
                                 <input type="file" name="profile_photo_path" id="profile_photo_path"
-                                    class="form-control col-12">
+                                    value="{{old('profile_photo_path')}}" class="form-control col-12"
+                                    onchange="preview('.tampil-gambar', this.files[0])">
+                                <div class="tampil-gambar mt-3">
+
+                                </div>
                             </div>
                         </div>
                         <div class="col-12 col-sm-6">
@@ -119,33 +123,33 @@
 
 @section('script')
 <script>
-    const submitBtn = document.getElementById('submitBtn');
+const submitBtn = document.getElementById('submitBtn');
 
-    // Function to check form validation
-    function checkForm() {
-        const name = document.getElementById('name').value.trim();
-        const email = document.getElementById('email').value.trim();
-        const password = document.getElementById('password').value.trim();
-        const phoneNumber = document.getElementById('phone_number').value.trim();
+// Function to check form validation
+function checkForm() {
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const phoneNumber = document.getElementById('phone_number').value.trim();
 
-        // Check if all inputs are filled and if password >= 6 and phone_number >= 10
-        if (
-            name !== '' &&
-            email !== '' &&
-            password.length >= 6 && // Password must be at least 6 characters
-            phoneNumber.length >= 10 // Phone number must be at least 10 characters
-        ) {
-            submitBtn.disabled = false; // Enable submit button
-        } else {
-            submitBtn.disabled = true; // Disable submit button
-        }
+    // Check if all inputs are filled and if password >= 6 and phone_number >= 10
+    if (
+        name !== '' &&
+        email !== '' &&
+        password.length >= 6 && // Password must be at least 6 characters
+        phoneNumber.length >= 10 // Phone number must be at least 10 characters
+    ) {
+        submitBtn.disabled = false; // Enable submit button
+    } else {
+        submitBtn.disabled = true; // Disable submit button
     }
+}
 
-    // Add event listener to form fields
-    document.getElementById('name').addEventListener('input', checkForm);
-    document.getElementById('email').addEventListener('input', checkForm);
-    document.getElementById('password').addEventListener('input', checkForm);
-    document.getElementById('phone_number').addEventListener('input', checkForm);
+// Add event listener to form fields
+document.getElementById('name').addEventListener('input', checkForm);
+document.getElementById('email').addEventListener('input', checkForm);
+document.getElementById('password').addEventListener('input', checkForm);
+document.getElementById('phone_number').addEventListener('input', checkForm);
 </script>
 
 @endsection

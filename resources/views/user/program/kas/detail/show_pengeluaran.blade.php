@@ -90,12 +90,14 @@
                         <tr>
                             <td>Pencaian</td>
                             <td>:</td>
-                            <td>{{ isset($pengeluaran->bendahara->name) ? $pengeluaran->bendahara->name : 'Proses...'}}</td>
+                            <td>{{ isset($pengeluaran->bendahara->name) ? $pengeluaran->bendahara->name : 'Proses...'}}
+                            </td>
                         </tr>
                         <tr>
                             <td>Tanggal di cairkan</td>
                             <td>:</td>
-                            <td>{{ isset($pengeluaran->disbursed_date) ? $pengeluaran->disbursed_date : 'Proses...'}}</td>
+                            <td>{{ isset($pengeluaran->disbursed_date) ? $pengeluaran->disbursed_date : 'Proses...'}}
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -108,10 +110,9 @@
                 <br>
 
                 <div class="form-group col-6 col-sm-2 justify-between">
-                    <a href="{{ asset('storage/'.$pengeluaran->receipt_path) }}" data-toggle="lightbox"
+                    <a href="{{ asset($pengeluaran->receipt_path) }}" data-toggle="lightbox"
                         data-title="Tanda Bukti Transfer - {{$pengeluaran->code}}" data-gallery="gallery">
-                        <img src="{{ asset('storage/'.$pengeluaran->receipt_path) }}" class="img-fluid mb-2"
-                            alt="white sample" />
+                        <img src="{{ asset($pengeluaran->receipt_path) }}" class="img-fluid mb-2" alt="white sample" />
                     </a>
                 </div>
         </div>

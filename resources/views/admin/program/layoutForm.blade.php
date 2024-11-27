@@ -32,10 +32,9 @@
                 <!-- /.card-header -->
                 <div class="card-body">
                     <div class="form-group col-6 col-sm-2">
-                        <a href="{{ asset('storage/'.$layoutForm->icon_kas) }}" data-toggle="lightbox" data-title="Icon"
+                        <a href="{{ asset($layoutForm->icon_kas) }}" data-toggle="lightbox" data-title="Icon"
                             data-gallery="gallery">
-                            <img src="{{ asset('storage/'.$layoutForm->icon_kas) }}" class="img-fluid mb-2"
-                                alt="white sample" />
+                            <img src="{{ asset($layoutForm->icon_kas) }}" class="img-fluid mb-2" alt="white sample" />
                         </a>
                     </div>
 
@@ -83,9 +82,9 @@
                 <!-- /.card-header -->
                 <div class="card-body">
                     <div class="form-group col-6 col-sm-2">
-                        <a href="{{ asset('storage/'.$layoutForm->icon_tabungan) }}" data-toggle="lightbox"
-                            data-title="Icon" data-gallery="gallery">
-                            <img src="{{ asset('storage/'.$layoutForm->icon_tabungan) }}" class="img-fluid mb-2"
+                        <a href="{{ asset($layoutForm->icon_tabungan) }}" data-toggle="lightbox" data-title="Icon"
+                            data-gallery="gallery">
+                            <img src="{{ asset($layoutForm->icon_tabungan) }}" class="img-fluid mb-2"
                                 alt="white sample" />
                         </a>
                     </div>
@@ -135,9 +134,9 @@
                 <!-- /.card-header -->
                 <div class="card-body">
                     <div class="form-group col-6 col-sm-2">
-                        <a href="{{ asset('storage/'.$layoutForm->icon_b_pinjam) }}" data-toggle="lightbox"
-                            data-title="Icon" data-gallery="gallery">
-                            <img src="{{ asset('storage/'.$layoutForm->icon_b_pinjam) }}" class="img-fluid mb-2"
+                        <a href="{{ asset($layoutForm->icon_b_pinjam) }}" data-toggle="lightbox" data-title="Icon"
+                            data-gallery="gallery">
+                            <img src="{{ asset($layoutForm->icon_b_pinjam) }}" class="img-fluid mb-2"
                                 alt="white sample" />
                         </a>
                     </div>
@@ -186,9 +185,9 @@
                 <!-- /.card-header -->
                 <div class="card-body">
                     <div class="form-group col-6 col-sm-2">
-                        <a href="{{ asset('storage/'.$layoutForm->icon_pinjam) }}" data-toggle="lightbox"
-                            data-title="Icon" data-gallery="gallery">
-                            <img src="{{ asset('storage/'.$layoutForm->icon_pinjam) }}" class="img-fluid mb-2"
+                        <a href="{{ asset($layoutForm->icon_pinjam) }}" data-toggle="lightbox" data-title="Icon"
+                            data-gallery="gallery">
+                            <img src="{{ asset($layoutForm->icon_pinjam) }}" class="img-fluid mb-2"
                                 alt="white sample" />
                         </a>
                     </div>

@@ -1,12 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 
+
 <head>
+    <?php
+
+    use App\Models\CompanyInformation;
+
+    //Untuk memanggil Informasi Perusahan di dalam model CompanyInformasi,
+    $companyInfo = CompanyInformation::first(); // Ambil data informasi perusahaan
+
+    ?>
+
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>KeluargaMaHAYA</title>
+    <link rel="icon" href="{{ asset($companyInfo->logo) }}" type="image/png">
 
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet"
@@ -53,14 +64,7 @@
 
 </head>
 
-<?php
 
-use App\Models\CompanyInformation;
-
-//Untuk memanggil Informasi Perusahan di dalam model CompanyInformasi,
-$companyInfo = CompanyInformation::first(); // Ambil data informasi perusahaan
-
-?>
 
 <body class=" hold-transition dark-mode sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed">
     <div class="wrapper">
@@ -81,7 +85,7 @@ $companyInfo = CompanyInformation::first(); // Ambil data informasi perusahaan
             <!-- Brand Logo -->
 
             <a href="index3.html" class="brand-link">
-                <img src="{{ asset('storage/' . $companyInfo->logo) }}" alt="AdminLTE Logo"
+                <img src="{{ asset( $companyInfo->logo) }}" alt="AdminLTE Logo"
                     class="brand-image img-circle elevation-3" style="opacity: .8">
                 <span class="brand-text font-weight-light"> {{$companyInfo -> company_name}}</span>
             </a>

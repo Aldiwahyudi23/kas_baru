@@ -112,9 +112,9 @@
             <!-- Thumbnail Tanda Bukti Transfer -->
             @if ($bayarPinjaman->payment_method == "transfer")
             <div class="form-group col-6 col-sm-2 justify-between">
-                <a href="{{ asset('storage/'.$bayarPinjaman->transfer_receipt_path) }}" data-toggle="lightbox"
+                <a href="{{ asset($bayarPinjaman->transfer_receipt_path) }}" data-toggle="lightbox"
                     data-title="Tanda Bukti Transfer - {{$bayarPinjaman->code}}" data-gallery="gallery">
-                    <img src="{{ asset('storage/'.$bayarPinjaman->transfer_receipt_path) }}" class="img-fluid mb-2"
+                    <img src="{{ asset($bayarPinjaman->transfer_receipt_path) }}" class="img-fluid mb-2"
                         alt="white sample" />
                 </a>
             </div>

@@ -154,11 +154,19 @@
                             <div class="form-group" id="receipt">
                                 <label for="receipt_path">Upload Bukti Transfer</label>
                                 <input type="file" name="receipt_path" id="receipt_path" accept="image/*"
-                                    class="form-control col-12 @error('receipt_path') is-invalid @enderror">
-                                @error('receipt_path')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                    class="form-control col-12 @error('receipt_path') is-invalid @enderror"
+                                    onchange="preview('.tampil-gambar', this.files[0])">
                                 <span class="text-danger">Jika tidak mau di ubah, Kosongkan</span>
+                                <div class="tampil-gambar mt-2">
+                                    @if (isset($dataEx->receipt_path))
+                                    <a href="{{asset($dataEx->receipt_path)}}" data-toggle="lightbox"
+                                        data-title="Tanda Bukti" data-gallery="gallery">
+                                        <img src="{{asset($dataEx->receipt_path)}}" class="img-fluid mb-10"
+                                            width="100px" alt="Tanda Bukti" />
+                                    </a>
+                                    @endif
+                                </div>
+
                             </div>
 
                             <div class="form-group">
@@ -171,13 +179,7 @@
                                     mau di ubah, Kosongkan</span>
                             </div>
 
-                            <div class="col-6 col-sm-2">
-                                <a href="{{asset('storage/'.$dataEx->receipt_path)}}" data-toggle="lightbox"
-                                    data-title="Tanda Bukti" data-gallery="gallery">
-                                    <img src="{{asset('storage/'.$dataEx->receipt_path)}}" class="img-fluid mb-10"
-                                        alt="Tanda Bukti" />
-                                </a>
-                            </div>
+
 
                         </div>
                     </div>

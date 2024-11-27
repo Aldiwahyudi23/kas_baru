@@ -122,10 +122,9 @@
             <!-- Thumbnail Tanda Bukti Transfer -->
             @if ($pengeluaran->receipt_path)
             <div class="form-group col-6 col-sm-2 justify-between">
-                <a href="{{ asset('storage/'.$pengeluaran->receipt_path) }}" data-toggle="lightbox"
+                <a href="{{ asset($pengeluaran->receipt_path) }}" data-toggle="lightbox"
                     data-title="Tanda Bukti Transfer - {{$pengeluaran->code}}" data-gallery="gallery">
-                    <img src="{{ asset('storage/'.$pengeluaran->receipt_path) }}" class="img-fluid mb-2"
-                        alt="white sample" />
+                    <img src="{{ asset($pengeluaran->receipt_path) }}" class="img-fluid mb-2" alt="white sample" />
                 </a>
             </div>
             @endif

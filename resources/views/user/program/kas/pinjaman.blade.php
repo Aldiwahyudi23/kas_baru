@@ -150,8 +150,8 @@
                     @else
                     <!-- Akses kanggo form biasa -->
                     <center>
-                        <img src="{{asset('storage/'.$layout_form->icon_pinjaman)}}" alt=""
-                            class="img-fluid mb-10 justify-between" width="50%">
+                        <img src="{{asset($layout_form->icon_pinjaman)}}" alt="" class="img-fluid mb-10 justify-between"
+                            width="50%">
                     </center>
                     @include('user.program.kas.form.pinjaman')
                     @endif

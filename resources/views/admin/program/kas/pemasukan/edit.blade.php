@@ -86,10 +86,17 @@
                                 <label for="transfer_receipt_path">Upload Bukti Transfer</label>
                                 <input type="file" name="transfer_receipt_path" id="transfer_receipt_path"
                                     accept="image/*" value="{{old('payment_method',$dataKas->payment_method)}}"
-                                    class="form-control col-12 @error('transfer_receipt_path') is-invalid @enderror">
-                                @error('transfer_receipt_path')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                    class="form-control col-12 @error('transfer_receipt_path') is-invalid @enderror"
+                                    onchange="preview('.tampil-gambar', this.files[0])">
+                                <div class="tampil-gambar mt-3">
+                                    @if (isset($dataKas->transfer_receipt_path))
+                                    <a href="{{ asset( $dataKas->transfer_receipt_path) }}" data-toggle="lightbox"
+                                        data-title="Tanda Bukti Transfer - {{$dataKas->code}}" data-gallery="gallery">
+                                        <img src="{{ asset($dataKas->transfer_receipt_path) }}" class="img-fluid mb-2"
+                                            alt="white sample" width="100px" />
+                                    </a>
+                                    @endif
+                                </div>
                             </div>
 
 
@@ -181,14 +188,6 @@
                                 </select>
                             </div>
 
-                            <!-- Thumbnail Tanda Bukti Transfer -->
-                            <div class="form-group col-6 col-sm-2">
-                                <a href="{{ asset('storage/'.$dataKas->transfer_receipt_path) }}" data-toggle="lightbox"
-                                    data-title="Tanda Bukti Transfer - {{$dataKas->code}}" data-gallery="gallery">
-                                    <img src="{{ asset('storage/'.$dataKas->transfer_receipt_path) }}"
-                                        class="img-fluid mb-2" alt="white sample" />
-                                </a>
-                            </div>
 
                         </div>
                     </div>

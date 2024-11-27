@@ -70,7 +70,7 @@
                         <!-- Post -->
                         <div class="post">
                             <div class="user-block">
-                                <img class="img-circle img-bordered-sm" src="{{'storage/'.$dataKas->data_warga->foto}}"
+                                <img class="img-circle img-bordered-sm" src="{{$dataKas->data_warga->foto}}"
                                     alt="user image">
                                 <span class="username">
                                     <a href="#">{{$dataKas->data_warga->name}}</a>
@@ -235,10 +235,10 @@
 
                     <div class="tab-pane" id="settings">
                         <div class="form-group col-sm-4">
-                            <a href="{{ asset('storage/'.$dataKas->transfer_receipt_path) }}" data-toggle="lightbox"
+                            <a href="{{ asset($dataKas->transfer_receipt_path) }}" data-toggle="lightbox"
                                 data-title="Tanda Bukti Transfer - {{$dataKas->code}}" data-gallery="gallery">
-                                <img src="{{ asset('storage/'.$dataKas->transfer_receipt_path) }}"
-                                    class="img-fluid mb-2" alt="white sample" />
+                                <img src="{{ asset($dataKas->transfer_receipt_path) }}" class="img-fluid mb-2"
+                                    alt="white sample" />
                             </a>
                         </div>
                     </div>
@@ -257,28 +257,28 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-// Fungsi untuk menambahkan program baru
-$('#program-form').on('submit', function(event) {
-    event.preventDefault(); // Mencegah refresh form saat submit
+    // Fungsi untuk menambahkan program baru
+    $('#program-form').on('submit', function(event) {
+        event.preventDefault(); // Mencegah refresh form saat submit
 
-    $.ajax({
-        url: "{{ route('program-setting_store') }}", // URL tujuan request
-        method: "POST", // Metode HTTP
-        data: $(this).serialize(), // Mengirimkan data form
-        headers: {
-            'X-CSRF-TOKEN': "{{ csrf_token() }}" // Token CSRF untuk Laravel
-        },
-        success: function(response) {
-            if (response.success) {
-                // Tampilkan alert SweetAlert jika berhasil
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil',
-                    text: 'Data berhasil disimpan',
-                });
+        $.ajax({
+            url: "{{ route('program-setting_store') }}", // URL tujuan request
+            method: "POST", // Metode HTTP
+            data: $(this).serialize(), // Mengirimkan data form
+            headers: {
+                'X-CSRF-TOKEN': "{{ csrf_token() }}" // Token CSRF untuk Laravel
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Tampilkan alert SweetAlert jika berhasil
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: 'Data berhasil disimpan',
+                    });
 
-                // Tambahkan data baru ke dalam tabel secara real-time
-                let newData = `<tr id="row-${response.program.id}">
+                    // Tambahkan data baru ke dalam tabel secara real-time
+                    let newData = `<tr id="row-${response.program.id}">
                                     <td>${$('#program-list tbody tr').length + 1}</td>
                                     <td>${response.program.label_program}</td>
                                     <td>${response.program.catatan_program}</td>
@@ -288,98 +288,98 @@ $('#program-form').on('submit', function(event) {
                                         </button>
                                     </td>
                                   </tr>`;
-                $('#program-list tbody').append(newData);
+                    $('#program-list tbody').append(newData);
 
-                // Reset form setelah submit
-                $('#program-form')[0].reset();
-            } else {
-                // Tampilkan alert jika gagal
+                    // Reset form setelah submit
+                    $('#program-form')[0].reset();
+                } else {
+                    // Tampilkan alert jika gagal
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: 'Gagal menyimpan data',
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
+                // Tampilkan pesan error jika ada kesalahan
                 Swal.fire({
                     icon: 'error',
-                    title: 'Gagal',
-                    text: 'Gagal menyimpan data',
+                    title: 'Oops...',
+                    text: 'Terjadi kesalahan saat mengirim data!',
                 });
+                console.error(xhr.responseText);
             }
-        },
-        error: function(xhr, status, error) {
-            // Tampilkan pesan error jika ada kesalahan
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Terjadi kesalahan saat mengirim data!',
-            });
-            console.error(xhr.responseText);
-        }
+        });
     });
-});
 
-$(document).on('click', '.edit-program', function() {
-    const programId = $(this).data('id');
-    const label = $(this).data('label');
-    const catatan = $(this).data('catatan');
-    const url = $(this).data('data-url');
+    $(document).on('click', '.edit-program', function() {
+        const programId = $(this).data('id');
+        const label = $(this).data('label');
+        const catatan = $(this).data('catatan');
+        const url = $(this).data('data-url');
 
-    Swal.fire({
-        title: 'Edit Program',
-        html: `
+        Swal.fire({
+            title: 'Edit Program',
+            html: `
             <input id="swal-input-label" class="swal2-input" placeholder="Label" value="${label}">
             <textarea id="swal-input-catatan" class="swal2-textarea" placeholder="Catatan">${catatan}</textarea>
         `,
-        focusConfirm: false,
-        preConfirm: () => {
-            return {
-                label_program: document.getElementById('swal-input-label').value,
-                catatan_program: document.getElementById('swal-input-catatan').value
+            focusConfirm: false,
+            preConfirm: () => {
+                return {
+                    label_program: document.getElementById('swal-input-label').value,
+                    catatan_program: document.getElementById('swal-input-catatan').value
+                }
             }
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // AJAX request untuk mengupdate data
-            $.ajax({
-                url: url, // URL untuk update data
-                method: 'PUT', // Metode HTTP untuk update
-                headers: {
-                    'X-CSRF-TOKEN': "{{ csrf_token() }}" // Token CSRF untuk Laravel
-                },
-                data: result.value, // Data yang dikirim
-                success: function(response) {
-                    if (response.success) {
-                        // Update tabel secara real-time
-                        const row = $(`button[data-id="${programId}"]`).closest('tr');
-                        row.find('td:eq(1)').text(result.value
-                            .label_program); // Update Label
-                        row.find('td:eq(2)').text(result.value
-                            .catatan_program); // Update Catatan
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // AJAX request untuk mengupdate data
+                $.ajax({
+                    url: url, // URL untuk update data
+                    method: 'PUT', // Metode HTTP untuk update
+                    headers: {
+                        'X-CSRF-TOKEN': "{{ csrf_token() }}" // Token CSRF untuk Laravel
+                    },
+                    data: result.value, // Data yang dikirim
+                    success: function(response) {
+                        if (response.success) {
+                            // Update tabel secara real-time
+                            const row = $(`button[data-id="${programId}"]`).closest('tr');
+                            row.find('td:eq(1)').text(result.value
+                                .label_program); // Update Label
+                            row.find('td:eq(2)').text(result.value
+                                .catatan_program); // Update Catatan
 
-                        // Tampilkan alert SweetAlert jika berhasil
-                        Swal.fire(
-                            'Terupdate!',
-                            'Data telah diperbarui.',
-                            'success'
-                        );
-                    } else {
+                            // Tampilkan alert SweetAlert jika berhasil
+                            Swal.fire(
+                                'Terupdate!',
+                                'Data telah diperbarui.',
+                                'success'
+                            );
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Gagal',
+                                text: 'Gagal mengupdate data',
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        let errorMessage = xhr.responseJSON && xhr.responseJSON.message ? xhr
+                            .responseJSON.message : 'Terjadi kesalahan saat mengupdate data!';
                         Swal.fire({
                             icon: 'error',
-                            title: 'Gagal',
-                            text: 'Gagal mengupdate data',
+                            title: 'Oops...',
+                            text: errorMessage,
                         });
+                        console.error(xhr.responseText);
                     }
-                },
-                error: function(xhr, status, error) {
-                    let errorMessage = xhr.responseJSON && xhr.responseJSON.message ? xhr
-                        .responseJSON.message : 'Terjadi kesalahan saat mengupdate data!';
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: errorMessage,
-                    });
-                    console.error(xhr.responseText);
-                }
 
-            });
-        }
+                });
+            }
+        });
     });
-});
 </script>
 
 @endsection

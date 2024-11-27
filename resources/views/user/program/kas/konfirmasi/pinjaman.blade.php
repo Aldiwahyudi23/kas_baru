@@ -128,9 +128,9 @@
             <!-- Thumbnail Tanda Bukti Transfer -->
             @if ($pinjaman->disbursement_receipt_path)
             <div class="form-group col-6 col-sm-2 justify-between">
-                <a href="{{ asset('storage/'.$pinjaman->disbursement_receipt_path) }}" data-toggle="lightbox"
+                <a href="{{ asset($pinjaman->disbursement_receipt_path) }}" data-toggle="lightbox"
                     data-title="Tanda Bukti Transfer - {{$pinjaman->code}}" data-gallery="gallery">
-                    <img src="{{ asset('storage/'.$pinjaman->disbursement_receipt_path) }}" class="img-fluid mb-2"
+                    <img src="{{ asset($pinjaman->disbursement_receipt_path) }}" class="img-fluid mb-2"
                         alt="white sample" />
                 </a>
             </div>

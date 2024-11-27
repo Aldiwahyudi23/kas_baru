@@ -26,8 +26,8 @@
                 <tr>
                     <td>{{$no}} </td>
                     <td>
-                        <img class="profile-user-img img-fluid img-circle"
-                            src="{{ asset('storage/' . $data->profile_photo_path) }}" alt="User profile picture">
+                        <img class="profile-user-img img-fluid img-circle" src="{{ asset( $data->profile_photo_path) }}"
+                            alt="User profile picture">
                     </td>
                     <td>{{$data->name}} </td>
                     <td>{{$data->email}} </td>

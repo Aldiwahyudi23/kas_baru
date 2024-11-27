@@ -57,7 +57,8 @@
         <div class="card">
             <div class="card-header p-2">
                 <ul class="nav nav-pills">
-                    <li class="nav-item"><a class="nav-link active" href="#descrip" data-toggle="tab">Keterangan</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="#descrip" data-toggle="tab">Keterangan</a>
+                    </li>
                     <li class="nav-item"><a class="nav-link" href="#snk" data-toggle="tab">konfirmasi</a></li>
                     <li class="nav-item"><a class="nav-link" href="#timeline" data-toggle="tab">Aktivitas</a></li>
                     <li class="nav-item"><a class="nav-link" href="#settings" data-toggle="tab">Tanda Bukti</a></li>
@@ -69,7 +70,7 @@
                         <!-- Post -->
                         <div class="post">
                             <div class="user-block">
-                                <img class="img-circle img-bordered-sm" src="{{'storage/'.$dataEx->ketua->foto}}" alt="user image">
+                                <img class="img-circle img-bordered-sm" src="{{$dataEx->ketua->foto}}" alt="user image">
                                 <span class="username">
                                     <a href="#">{{$dataEx->ketua->name}}</a>
                                     <a href="#" class="float-right btn-tool"><i class="fas fa-times"></i></a>
@@ -101,7 +102,8 @@
                                 <div class="timeline-item">
                                     <span class="time"><i class="far fa-clock"></i> 5 mins ago</span>
 
-                                    <h3 class="timeline-header border-0"><a href="#">Di Input Oleh</a> {{$dataEx->created_at}}
+                                    <h3 class="timeline-header border-0"><a href="#">Di Input Oleh</a>
+                                        {{$dataEx->created_at}}
                                     </h3>
                                 </div>
                             </div>
@@ -134,7 +136,8 @@
                                 <div class="timeline-item">
                                     <span class="time"><i class="far fa-clock"></i> 5 mins ago</span>
 
-                                    <h3 class="timeline-header border-0"><a href="#">Di Konfirmasi Oleh</a> {{$dataEx->ketua->name}}
+                                    <h3 class="timeline-header border-0"><a href="#">Di Konfirmasi Oleh</a>
+                                        {{$dataEx->ketua->name}}
                                     </h3>
                                 </div>
                             </div>
@@ -144,7 +147,9 @@
                                 <div class="timeline-item">
                                     <span class="time"><i class="far fa-clock"></i> 27 mins ago</span>
 
-                                    <h3 class="timeline-header"><a href="#">Di Konfirmasi Oleh</a> {{$dataEx->ketua->name}}</h3>
+                                    <h3 class="timeline-header"><a href="#">Di Konfirmasi Oleh</a>
+                                        {{$dataEx->ketua->name}}
+                                    </h3>
 
                                     <div class="timeline-body">
                                         Tanggal di Konfirmasi : {{$dataEx->approved_date}} <br>
@@ -157,7 +162,8 @@
                                         @elseif($dataEx->status === 'process')
                                         <span class="badge badge-secondary">Process</span>
                                         @else
-                                        <span class="badge badge-light">Unknown</span> <!-- default if status is undefined -->
+                                        <span class="badge badge-light">Unknown</span>
+                                        <!-- default if status is undefined -->
                                         @endif
                                     </div>
                                 </div>
@@ -184,7 +190,8 @@
                             <!-- timeline time label -->
                             <div class="time-label">
                                 <span class="bg-danger">
-                                    {{ $data->created_at->format('Y-m-d') }} <!-- Format sesuai kebutuhan -->
+                                    {{ $data->created_at->format('Y-m-d') }}
+                                    <!-- Format sesuai kebutuhan -->
                                 </span>
                             </div>
                             <!-- Update previousDate ke tanggal saat ini -->
@@ -198,9 +205,12 @@
                                 <i class="fas fa-envelope bg-primary"></i>
 
                                 <div class="timeline-item">
-                                    <span class="time"><i class="far fa-clock"></i> {{ $data->created_at->format('H:i') }}</span>
+                                    <span class="time"><i class="far fa-clock"></i>
+                                        {{ $data->created_at->format('H:i') }}</span>
 
-                                    <h3 class="timeline-header">{{ $data->admin->name ?? 'Unknown User' }} {{ $data->action }}</h3>
+                                    <h3 class="timeline-header">{{ $data->admin->name ?? 'Unknown User' }}
+                                        {{ $data->action }}
+                                    </h3>
 
                                     <div class="timeline-body">
                                         {!! $data->details !!}
@@ -221,8 +231,9 @@
 
                     <div class="tab-pane" id="settings">
                         <div class="col-sm-12">
-                            <a href="{{asset('storage/'.$dataEx->receipt_path)}}" data-toggle="lightbox" data-title="Tanda Bukti" data-gallery="gallery">
-                                <img src="{{asset('storage/'.$dataEx->receipt_path)}}" class="img-fluid mb-12" alt="Tanda Bukti" />
+                            <a href="{{asset($dataEx->receipt_path)}}" data-toggle="lightbox" data-title="Tanda Bukti"
+                                data-gallery="gallery">
+                                <img src="{{asset($dataEx->receipt_path)}}" class="img-fluid mb-12" alt="Tanda Bukti" />
                             </a>
                         </div>
                     </div>
@@ -330,8 +341,10 @@
                         if (response.success) {
                             // Update tabel secara real-time
                             const row = $(`button[data-id="${programId}"]`).closest('tr');
-                            row.find('td:eq(1)').text(result.value.label_program); // Update Label
-                            row.find('td:eq(2)').text(result.value.catatan_program); // Update Catatan
+                            row.find('td:eq(1)').text(result.value
+                                .label_program); // Update Label
+                            row.find('td:eq(2)').text(result.value
+                                .catatan_program); // Update Catatan
 
                             // Tampilkan alert SweetAlert jika berhasil
                             Swal.fire(
@@ -348,7 +361,8 @@
                         }
                     },
                     error: function(xhr, status, error) {
-                        let errorMessage = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Terjadi kesalahan saat mengupdate data!';
+                        let errorMessage = xhr.responseJSON && xhr.responseJSON.message ? xhr
+                            .responseJSON.message : 'Terjadi kesalahan saat mengupdate data!';
                         Swal.fire({
                             icon: 'error',
                             title: 'Oops...',

@@ -112,9 +112,9 @@
             <!-- Thumbnail Tanda Bukti Transfer -->
             @if ($kas_payment->payment_method == "transfer")
             <div class="form-group col-6 col-sm-2 justify-between">
-                <a href="{{ asset('storage/'.$kas_payment->transfer_receipt_path) }}" data-toggle="lightbox"
+                <a href="{{ asset($kas_payment->transfer_receipt_path) }}" data-toggle="lightbox"
                     data-title="Tanda Bukti Transfer - {{$kas_payment->code}}" data-gallery="gallery">
-                    <img src="{{ asset('storage/'.$kas_payment->transfer_receipt_path) }}" class="img-fluid mb-2"
+                    <img src="{{ asset($kas_payment->transfer_receipt_path) }}" class="img-fluid mb-2"
                         alt="white sample" />
                 </a>
             </div>
