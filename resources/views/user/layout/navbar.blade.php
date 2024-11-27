@@ -3,11 +3,20 @@
                 <li class="nav-item">
                     <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
                 </li>
-                <li class="nav-item d-none d-sm-inline-block">
+                <li class="nav-item d-none d-sm-inline-block active">
                     <a href="#" class="nav-link">Home</a>
                 </li>
                 <li class="nav-item d-none d-sm-inline-block">
-                    <a href="{{route('tentang.index')}}" class="nav-link">Tentang</a>
+                    <a href="{{route('kas.index')}}" class="nav-link">Bayar</a>
+                </li>
+                <li class="nav-item d-none d-sm-inline-block">
+                    <a href="{{route('tentang.index')}}" class="nav-link">profile</a>
+                </li>
+                <li class="nav-item d-none d-sm-inline-block">
+                    <a href="{{route('pinjaman.index')}}" class="nav-link">Bayar</a>
+                </li>
+                <li class="nav-item d-none d-sm-inline-block">
+                    <a href="{{route('pinjaman.index')}}" class="nav-link">Setting</a>
                 </li>
             </ul>
 
