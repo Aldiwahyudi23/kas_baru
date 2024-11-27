@@ -174,13 +174,20 @@ class LoanController extends Controller
             $data->approved_date = $request->approved_date;
             $data->disbursed_date = $request->disbursed_date;
             // Cek apakah file profile_picture di-upload
+            // if ($request->hasFile('disbursement_receipt_path')) {
+            //     $file = $request->file('disbursement_receipt_path');
+            //     $path = $file->store(
+            //         'kas/pengeluaran/pinjam',
+            //         'public'
+            //     ); // Simpan gambar ke direktori public
+            //     $data->disbursement_receipt_path = $path;
+            // }
+
             if ($request->hasFile('disbursement_receipt_path')) {
                 $file = $request->file('disbursement_receipt_path');
-                $path = $file->store(
-                    'kas/pengeluaran/pinjam',
-                    'public'
-                ); // Simpan gambar ke direktori public
-                $data->disbursement_receipt_path = $path;
+                $filename = 'Kas-' . time() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('img/kas/pengeluaran/pinjaman'), $filename);  // Simpan gambar ke folder public/img/kas/pengeluaran
+                $data->disbursement_receipt_path = "img/kas/pengeluaran/pinjaman/$filename";  // Simpan path gambar ke database
             }
 
             $data->save();
@@ -315,13 +322,20 @@ class LoanController extends Controller
             $data->disbursed_date = $request->disbursed_date;
         }
         // Cek apakah file profile_picture di-upload
+        // if ($request->hasFile('disbursement_receipt_path')) {
+        //     $file = $request->file('disbursement_receipt_path');
+        //     $path = $file->store(
+        //         'kas/pengeluaran/pinjam',
+        //         'public'
+        //     ); // Simpan gambar ke direktori public
+        //     $data->disbursement_receipt_path = $path;
+        // }
+
         if ($request->hasFile('disbursement_receipt_path')) {
             $file = $request->file('disbursement_receipt_path');
-            $path = $file->store(
-                'kas/pengeluaran/pinjam',
-                'public'
-            ); // Simpan gambar ke direktori public
-            $data->disbursement_receipt_path = $path;
+            $filename = 'Kas-' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('img/kas/pengeluaran/pinjaman'), $filename);  // Simpan gambar ke folder public/img/kas/pengeluaran
+            $data->disbursement_receipt_path = "img/kas/pengeluaran/pinjaman/$filename";  // Simpan path gambar ke database
         }
 
         $data->update();

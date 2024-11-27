@@ -31,7 +31,10 @@
                         <label for="transfer_receipt_path">Upload Bukti Transfer</label>
                         <span class="text-danger">*</span></label>
                         <input type="file" name="transfer_receipt_path" id="transfer_receipt_path" accept="image/*"
-                            class="form-control col-12 @error('transfer_receipt_path') is-invalid @enderror">
+                            class="form-control col-12 @error('transfer_receipt_path') is-invalid @enderror"
+                            onchange="preview('.tampil-gambar', this.files[0])">
+                        <br>
+                        <div class="tampil-gambar"></div>
                         @error('transfer_receipt_path')
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -60,11 +63,11 @@
                 @section('script')
 
                 <script>
-                    // Function to toggle the visibility of the transfer receipt input based on selected payment method
-                    function toggleTransferReceipt() {
-                        var paymentMethod = document.getElementById('payment_method').value;
-                        var transferReceipt = document.getElementById('transfer_receipt');
-                        transferReceipt.style.display = (paymentMethod === 'transfer') ? 'block' : 'none';
-                    }
+// Function to toggle the visibility of the transfer receipt input based on selected payment method
+function toggleTransferReceipt() {
+    var paymentMethod = document.getElementById('payment_method').value;
+    var transferReceipt = document.getElementById('transfer_receipt');
+    transferReceipt.style.display = (paymentMethod === 'transfer') ? 'block' : 'none';
+}
                 </script>
                 @endsection

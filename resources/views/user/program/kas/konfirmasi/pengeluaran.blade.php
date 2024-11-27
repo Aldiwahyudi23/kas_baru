@@ -169,7 +169,10 @@
             <div class="form-group">
                 <label for="receipt_path">Upload Tanda Bukti <span class="text-danger">*</span></label>
                 <input type="file" name="receipt_path" id="receipt_path" value="{{old('receipt_path')}}"
-                    class="form-control col-12 @error('foto') is-invalid @enderror" required>
+                    class="form-control col-12 @error('foto') is-invalid @enderror" required
+                    onchange="preview('.tampil-gambar', this.files[0])">
+                <br>
+                <div class="tampil-gambar"></div>
             </div>
 
             <div class="form-group">

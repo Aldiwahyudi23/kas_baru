@@ -131,11 +131,9 @@ class PemasukanController extends Controller
             // Cek apakah file profile_picture di-upload
             if ($request->hasFile('transfer_receipt_path')) {
                 $file = $request->file('transfer_receipt_path');
-                $path = $file->store(
-                    'kas/pemasukan',
-                    'public'
-                ); // Simpan gambar ke direktori public
-                $data->transfer_receipt_path = $path;
+                $filename = 'Kas-' . time() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('img/kas/pemasukan'), $filename);  // Simpan gambar ke folder public/img/kas/pemasukan
+                $data->transfer_receipt_path = "img/kas/pemasukan/$filename";  // Simpan path gambar ke database
             }
 
             $data->save();
@@ -232,7 +230,7 @@ class PemasukanController extends Controller
 
             // Jik nitifikasi di aktifkan return yang ini di hapus
             DB::commit();
-            return back()->with('success', 'Data tersimpan, Notifikasi berhasil dikirim ke Warga dan Pengurus!');
+            return back()->with('success', 'Data tersimpan, Notifikasi tidak ada !');
         } catch (\Exception $e) {
             DB::rollback();
             return redirect()->back()->with('error', 'Terjadi kesalahan saat pembayaran.' . $e->getMessage());
@@ -290,13 +288,20 @@ class PemasukanController extends Controller
         $data->payment_method = $request->payment_method;
         $data->description = $request->description;
         // Cek apakah file profile_picture di-upload
+        // if ($request->hasFile('transfer_receipt_path')) {
+        //     $file = $request->file('transfer_receipt_path');
+        //     $path = $file->store(
+        //         'kas/pemasukan',
+        //         'public'
+        //     ); // Simpan gambar ke direktori public
+        //     $data->transfer_receipt_path = $path;
+        // }
+
         if ($request->hasFile('transfer_receipt_path')) {
             $file = $request->file('transfer_receipt_path');
-            $path = $file->store(
-                'kas/pemasukan',
-                'public'
-            ); // Simpan gambar ke direktori public
-            $data->transfer_receipt_path = $path;
+            $filename = 'Kas-' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('img/kas/pemasukan'), $filename);  // Simpan gambar ke folder public/img/kas/pemasukan
+            $data->transfer_receipt_path = "img/kas/pemasukan/$filename";  // Simpan path gambar ke database
         }
 
         $data->update();
@@ -324,14 +329,23 @@ class PemasukanController extends Controller
         $data->amount = $request->amount;
         $data->payment_method = $request->payment_method;
         $data->description = $request->description;
+        // ====Sementara di Nonaktifkan di hosting smylink tidak di ijinkan
         // Cek apakah file profile_picture di-upload
+        // if ($request->hasFile('transfer_receipt_path')) {
+        //     $file = $request->file('transfer_receipt_path');
+        //     $path = $file->store(
+        //         'kas/pemasukan',
+        //         'public'
+        //     ); // Simpan gambar ke direktori public
+        //     $data->transfer_receipt_path = $path;
+        // }
+
+        // Jika ada file gambar, simpan gambar
         if ($request->hasFile('transfer_receipt_path')) {
             $file = $request->file('transfer_receipt_path');
-            $path = $file->store(
-                'kas/pemasukan',
-                'public'
-            ); // Simpan gambar ke direktori public
-            $data->transfer_receipt_path = $path;
+            $filename = 'Kas-' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('img/kas/pemasukan'), $filename);  // Simpan gambar ke folder public/img/kas/pemasukan
+            $data->transfer_receipt_path = "img/kas/pemasukan/$filename";  // Simpan path gambar ke database
         }
 
         $data->update();
@@ -475,7 +489,7 @@ class PemasukanController extends Controller
                     // Hitung alokasi dana berdasarkan catatan_anggaran sebagai persentase
                     $allocatedAmount = $request->amount * ($anggaran->catatan_anggaran / 100);
                     $saldo_anggaran = new AnggaranSaldo();
-                    $saldo_anggaran->saldo_id = $saldo->data_warga_id; //mengambil id dari model saldo di atas
+                    $saldo_anggaran->saldo_id = $saldo->id; //mengambil id dari model saldo di atas
                     $saldo_anggaran->type = $anggaran->anggaran->name;
                     $saldo_anggaran->percentage = $anggaran->catatan_anggaran;
                     $saldo_anggaran->amount = $allocatedAmount;

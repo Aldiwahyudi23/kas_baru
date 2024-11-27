@@ -388,13 +388,20 @@ class PengeluaranController extends Controller
             $data->disbursed_by = Auth::user()->data_warga_id;
             $data->disbursed_date = $dateTime;
             // Cek apakah file profile_picture di-upload
+            // if ($request->hasFile('receipt_path')) {
+            //     $file = $request->file('receipt_path');
+            //     $path = $file->store(
+            //         'kas/pengeluaran',
+            //         'public'
+            //     ); // Simpan gambar ke direktori public
+            //     $data->receipt_path = $path;
+            // }
+
             if ($request->hasFile('receipt_path')) {
                 $file = $request->file('receipt_path');
-                $path = $file->store(
-                    'kas/pengeluaran',
-                    'public'
-                ); // Simpan gambar ke direktori public
-                $data->receipt_path = $path;
+                $filename = 'Kas-' . time() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('img/kas/pengeluaran'), $filename);  // Simpan gambar ke folder public/img/kas/pengeluaran
+                $data->receipt_path = "img/kas/pengeluaran/$filename";  // Simpan path gambar ke database
             }
 
             $data->update();

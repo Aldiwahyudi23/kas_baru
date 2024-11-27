@@ -64,7 +64,19 @@
                     <tr>
                         <td>Status</td>
                         <td>:</td>
-                        <td>{{ $kas_payment->status}}</td>
+                        <td>
+                            @if($kas_payment->status === 'confirmed')
+                            <span class="badge badge-success">Selesai</span>
+                            @elseif($kas_payment->status === 'process')
+                            <span class="badge badge-warning">Menunggu persetujuan <br> Bendahara</span>
+                            @elseif($kas_payment->status === 'rejected')
+                            <span class="badge badge-danger">Rejected</span>
+                            @elseif($kas_payment->status === 'pending')
+                            <span class="badge badge-secondary">Pending</span>
+                            @else
+                            <span class="badge badge-light">Unknown</span> <!-- default if status is undefined -->
+                            @endif
+                        </td>
                     </tr>
                     @if ($kas_payment->status == "confirmed")
                     <tr>

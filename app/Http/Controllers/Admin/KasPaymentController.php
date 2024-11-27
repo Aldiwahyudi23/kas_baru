@@ -119,13 +119,20 @@ class KasPaymentController extends Controller
             $data->confirmation_date = $request->confirmation_date;
             $data->is_deposited = $request->is_deposited;
             // Cek apakah file profile_picture di-upload
+            // if ($request->hasFile('transfer_receipt_path')) {
+            //     $file = $request->file('transfer_receipt_path');
+            //     $path = $file->store(
+            //         'kas/pemasukan',
+            //         'public'
+            //     ); // Simpan gambar ke direktori public
+            //     $data->transfer_receipt_path = $path;
+            // }
+
             if ($request->hasFile('transfer_receipt_path')) {
                 $file = $request->file('transfer_receipt_path');
-                $path = $file->store(
-                    'kas/pemasukan',
-                    'public'
-                ); // Simpan gambar ke direktori public
-                $data->transfer_receipt_path = $path;
+                $filename = 'Kas-' . time() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('img/kas/pemasukan'), $filename);  // Simpan gambar ke folder public/img/kas/pemasukan
+                $data->transfer_receipt_path = "img/kas/pemasukan/$filename";  // Simpan path gambar ke database
             }
 
             $data->save();
@@ -262,14 +269,21 @@ class KasPaymentController extends Controller
         if ($request->confirmation_date) {
             $data->confirmation_date = $request->confirmation_date;
         }
-        // Cek apakah file profile_picture di-upload
+        // // Cek apakah file profile_picture di-upload
+        // if ($request->hasFile('transfer_receipt_path')) {
+        //     $file = $request->file('transfer_receipt_path');
+        //     $path = $file->store(
+        //         'kas/pemasukan',
+        //         'public'
+        //     ); // Simpan gambar ke direktori public
+        //     $data->transfer_receipt_path = $path;
+        // }
+
         if ($request->hasFile('transfer_receipt_path')) {
             $file = $request->file('transfer_receipt_path');
-            $path = $file->store(
-                'kas/pemasukan',
-                'public'
-            ); // Simpan gambar ke direktori public
-            $data->transfer_receipt_path = $path;
+            $filename = 'Kas-' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('img/kas/pemasukan'), $filename);  // Simpan gambar ke folder public/img/kas/pemasukan
+            $data->transfer_receipt_path = "img/kas/pemasukan/$filename";  // Simpan path gambar ke database
         }
 
         $data->update();

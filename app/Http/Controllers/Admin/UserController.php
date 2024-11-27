@@ -115,13 +115,20 @@ class UserController extends Controller
             }
 
             // Cek apakah file profile_picture di-upload
+            // if ($request->hasFile('foto')) {
+            //     $file = $request->file('foto');
+            //     $path = $file->store(
+            //         'foto',
+            //         'public'
+            //     ); // Simpan gambar ke direktori public
+            //     $data->profile_photo_path = $path;
+            // }
+
             if ($request->hasFile('foto')) {
                 $file = $request->file('foto');
-                $path = $file->store(
-                    'foto',
-                    'public'
-                ); // Simpan gambar ke direktori public
-                $data->profile_photo_path = $path;
+                $filename = 'user-' . time() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('img/user'), $filename);  // Simpan gambar ke folder public/img/user
+                $data->profile_photo_path = "img/user/$filename";  // Simpan path gambar ke database
             }
 
             $data->update();

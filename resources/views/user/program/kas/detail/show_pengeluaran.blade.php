@@ -80,22 +80,22 @@
                         <tr>
                             <td>Di Konfirmasi Oleh</td>
                             <td>:</td>
-                            <td>{{ $pengeluaran->ketua->name}}</td>
+                            <td>{{ isset($pengeluaran->ketua->name) ? $pengeluaran->ketua->name : 'Proses...' }}</td>
                         </tr>
                         <tr>
                             <td>Tanggal di Konfirmasi</td>
                             <td>:</td>
-                            <td>{{ $pengeluaran->approved_date}}</td>
+                            <td>{{ isset($pengeluaran->approved_date) ? $pengeluaran->approved_date : 'Proses...'}}</td>
                         </tr>
                         <tr>
                             <td>Pencaian</td>
                             <td>:</td>
-                            <td>{{ $pengeluaran->bendahara->name}}</td>
+                            <td>{{ isset($pengeluaran->bendahara->name) ? $pengeluaran->bendahara->name : 'Proses...'}}</td>
                         </tr>
                         <tr>
                             <td>Tanggal di cairkan</td>
                             <td>:</td>
-                            <td>{{ $pengeluaran->disbursed_date}}</td>
+                            <td>{{ isset($pengeluaran->disbursed_date) ? $pengeluaran->disbursed_date : 'Proses...'}}</td>
                         </tr>
                     </tbody>
                 </table>

@@ -175,7 +175,10 @@
                 <label for="disbursement_receipt_path">Upload Tanda Bukti <span class="text-danger">*</span></label>
                 <input type="file" name="disbursement_receipt_path" id="disbursement_receipt_path"
                     value="{{old('disbursement_receipt_path')}}"
-                    class="form-control col-12 @error('foto') is-invalid @enderror" required>
+                    class="form-control col-12 @error('foto') is-invalid @enderror"
+                    onchange="preview('.tampil-bukti', this.files[0])" required>
+                <br>
+                <div class="tampil-bukti"></div>
             </div>
 
             <div class="form-group">

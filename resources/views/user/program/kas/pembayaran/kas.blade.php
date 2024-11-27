@@ -31,7 +31,7 @@
                         aria-labelledby="custom-tabs-four-home-tab">
                         @if ($cek_kasPayment >= 1)
                         {!! $layout_form->kas_proses !!}
-
+                        <br>
                         <a class="btn btn-info btn-sm"
                             href="{{route('kas.edit',Crypt::encrypt($pembayaran_proses->id))}}">
                             <i class="fas fa-pencil-alt">
@@ -51,6 +51,7 @@
                             <img src="{{asset('storage/'.$layout_form->icon_kas)}}" alt=""
                                 class="img-fluid mb-10 justify-between" width="50%">
                         </center>
+
                         @include('user.program.kas.form.kas')
                         @endif
                     </div>

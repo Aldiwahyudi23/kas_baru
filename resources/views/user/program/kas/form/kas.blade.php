@@ -30,10 +30,13 @@
                         <label for="transfer_receipt_path">Upload Bukti Transfer</label>
                         <span class="text-danger">*</span></label>
                         <input type="file" name="transfer_receipt_path" id="transfer_receipt_path" accept="image/*"
-                            class="form-control col-12 @error('transfer_receipt_path') is-invalid @enderror">
+                            class="form-control col-12 @error('transfer_receipt_path') is-invalid @enderror"
+                            onchange="preview('.tampil-gambar', this.files[0])">
                         @error('transfer_receipt_path')
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
+                        <br>
+                        <div class="tampil-gambar"></div>
                     </div>
 
                     <div class="form-group">

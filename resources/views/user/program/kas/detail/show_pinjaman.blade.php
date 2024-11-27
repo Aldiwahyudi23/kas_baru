@@ -74,13 +74,14 @@
                                 @if($pinjaman->status === 'Acknowledged')
                                 <span class="badge badge-success">Selesai</span>
                                 @elseif($pinjaman->status === 'pending')
-                                <span class="badge badge-warning">Pending</span>
+                                <span class="badge badge-warning">Menunggu persetujuan Ketua</span>
                                 @elseif($pinjaman->status === 'rejected')
                                 <span class="badge badge-danger">Rejected</span>
                                 @elseif($pinjaman->status === 'approved_by_chairman')
-                                <span class="badge badge-secondary">Menunggu persetujuan Ketua</span>
+                                <span class="badge badge-secondary">Proses Pencairan oleh Bendahara</span>
                                 @elseif($pinjaman->status === 'disbursed_by_treasurer')
-                                <span class="badge badge-secondary">Dalam Proses Pencairan</span>
+                                <span class="badge badge-secondary">Sudah di cairkan, Menunggu konfirmasi bahwa uang telah
+                                    di terima </span>
                                 @else
                                 <span class="badge badge-light">Unknown</span> <!-- default if status is undefined -->
                                 @endif
@@ -90,22 +91,22 @@
                         <tr>
                             <td>Di Konfirmasi Oleh</td>
                             <td>:</td>
-                            <td>{{ $pinjaman->ketua->name}}</td>
+                            <td>{{ isset($pinjaman->ketua->name) ? $pinjaman->ketua->name : 'Proses...' }}</td>
                         </tr>
                         <tr>
                             <td>Tanggal di Konfirmasi</td>
                             <td>:</td>
-                            <td>{{ $pinjaman->approved_date}}</td>
+                            <td>{{ isset($pinjaman->approved_date) ? $pinjaman->approved_date : 'Proses...'}}</td>
                         </tr>
                         <tr>
                             <td>Pencaian</td>
                             <td>:</td>
-                            <td>{{ $pinjaman->bendahara->name}}</td>
+                            <td>{{ isset($pinjaman->bendahara->name) ? $pinjaman->bendahara->name : 'Proses...'}}</td>
                         </tr>
                         <tr>
                             <td>Tanggal di cairkan</td>
                             <td>:</td>
-                            <td>{{ $pinjaman->disbursed_date}}</td>
+                            <td>{{ isset($pinjaman->disbursed_date) ? $pinjaman->disbursed_date : 'Proses...'}}</td>
                         </tr>
                     </tbody>
                 </table>

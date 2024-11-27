@@ -81,10 +81,18 @@ class CompanyInformationController extends Controller
         $companyInfo->email = $request->email;
 
         // Meng-upload dan menyimpan logo jika ada file yang diupload
+        // if ($request->hasFile('logo')) {
+        //     $logoPath = $request->file('logo')->store('logos', 'public');
+        //     $companyInfo->logo = $logoPath;
+        // }
+
         if ($request->hasFile('logo')) {
-            $logoPath = $request->file('logo')->store('logos', 'public');
-            $companyInfo->logo = $logoPath;
+            $file = $request->file('logo');
+            $filename = 'logo-' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('img/company'), $filename);  // Simpan gambar ke folder public/img/company
+            $companyInfo->logo = "img/company/$filename";  // Simpan path gambar ke database
         }
+
 
         $companyInfo->save();
 

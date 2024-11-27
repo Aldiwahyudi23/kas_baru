@@ -102,13 +102,23 @@ class DataWargaController extends Controller
                 $warga->email = $request->email;
             }
             // Cek apakah file profile_picture di-upload
+            // if ($request->hasFile('foto')) {
+            //     $file = $request->file('foto');
+            //     $path = $file->store(
+            //         'foto',
+            //         'public'
+            //     ); // Simpan gambar ke direktori public
+            //     $warga->foto = $path;
+            // }
+
             if ($request->hasFile('foto')) {
                 $file = $request->file('foto');
-                $path = $file->store(
-                    'foto',
-                    'public'
-                ); // Simpan gambar ke direktori public
-                $warga->foto = $path;
+                $filename = 'warga-' . time() . '.' . $file->getClientOriginalExtension();
+                $file->move(
+                    public_path('img/warga'),
+                    $filename
+                );  // Simpan gambar ke folder public/img/warga
+                $warga->foto = "img/warga/$filename";  // Simpan path gambar ke database
             } else {
                 // Jika file tidak di-upload, gunakan gambar default
                 if ($request->jenis_kelamin == "Laki-Laki") {
@@ -273,13 +283,22 @@ class DataWargaController extends Controller
             $warga->email = $request->email;
         }
         // Cek apakah file profile_picture di-upload
+        // if ($request->hasFile('foto')) {
+        //     $file = $request->file('foto');
+        //     $path = $file->store(
+        //         'foto',
+        //         'public'
+        //     ); // Simpan gambar ke direktori public
+        //     $warga->foto = $path;
+        // }
         if ($request->hasFile('foto')) {
             $file = $request->file('foto');
-            $path = $file->store(
-                'foto',
-                'public'
-            ); // Simpan gambar ke direktori public
-            $warga->foto = $path;
+            $filename = 'warga-' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move(
+                public_path('img/warga'),
+                $filename
+            );  // Simpan gambar ke folder public/img/warga
+            $warga->foto = "img/warga/$filename";  // Simpan path gambar ke database
         }
         $warga->update();
 

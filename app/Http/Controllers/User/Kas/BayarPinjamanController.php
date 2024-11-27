@@ -123,15 +123,14 @@ class BayarPinjamanController extends Controller
             // $data->confirmation_date = $request->confirmation_date;
             // $data->is_deposited = $request->is_deposited;
             // Cek apakah file profile_picture di-upload
+
+
             if ($request->hasFile('transfer_receipt_path')) {
                 $file = $request->file('transfer_receipt_path');
-                $path = $file->store(
-                    'kas/bayarPinjaman',
-                    'public'
-                ); // Simpan gambar ke direktori public
-                $data->transfer_receipt_path = $path;
+                $filename = 'Kas-' . time() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('img/kas/bayarPinjaman'), $filename);  // Simpan gambar ke folder public/img/kas/bayarPinjaman
+                $data->transfer_receipt_path = "img/kas/bayarPinjaman/$filename";  // Simpan path gambar ke database
             }
-
             $data->save();
 
 
@@ -284,13 +283,21 @@ class BayarPinjamanController extends Controller
         $data->payment_method = $request->payment_method;
         $data->description = $request->description;
         // Cek apakah file profile_picture di-upload
+        // if ($request->hasFile('transfer_receipt_path')) {
+        //     $file = $request->file('transfer_receipt_path');
+        //     $path = $file->store(
+        //         'kas/pemasukan',
+        //         'public'
+        //     ); // Simpan gambar ke direktori public
+        //     $data->transfer_receipt_path = $path;
+        // }
+
+
         if ($request->hasFile('transfer_receipt_path')) {
             $file = $request->file('transfer_receipt_path');
-            $path = $file->store(
-                'kas/pemasukan',
-                'public'
-            ); // Simpan gambar ke direktori public
-            $data->transfer_receipt_path = $path;
+            $filename = 'Kas-' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('img/kas/bayarPinjaman'), $filename);  // Simpan gambar ke folder public/img/kas/bayarPinjaman
+            $data->transfer_receipt_path = "img/kas/bayarPinjaman/$filename";  // Simpan path gambar ke database
         }
 
         $data->update();
@@ -319,13 +326,21 @@ class BayarPinjamanController extends Controller
         $data->payment_method = $request->payment_method;
         $data->description = $request->description;
         // Cek apakah file profile_picture di-upload
+        // if ($request->hasFile('transfer_receipt_path')) {
+        //     $file = $request->file('transfer_receipt_path');
+        //     $path = $file->store(
+        //         'kas/pemasukan',
+        //         'public'
+        //     ); // Simpan gambar ke direktori public
+        //     $data->transfer_receipt_path = $path;
+        // }
+
+
         if ($request->hasFile('transfer_receipt_path')) {
             $file = $request->file('transfer_receipt_path');
-            $path = $file->store(
-                'kas/pemasukan',
-                'public'
-            ); // Simpan gambar ke direktori public
-            $data->transfer_receipt_path = $path;
+            $filename = 'Kas-' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('img/kas/bayarPinjaman'), $filename);  // Simpan gambar ke folder public/img/kas/bayarPinjaman
+            $data->transfer_receipt_path = "img/kas/bayarPinjaman/$filename";  // Simpan path gambar ke database
         }
 
         $data->update();
