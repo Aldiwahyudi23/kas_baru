@@ -75,10 +75,10 @@
                         <td>Status</td>
                         <td>:</td>
                         <td>
-                            @if($bayarPinjaman->status === 'Acknowledged')
+                            @if($bayarPinjaman->status === 'confirmed')
                             <span class="badge badge-success">Dikonfirmasi</span>
                             @elseif($bayarPinjaman->status === 'process')
-                            <span class="badge badge-warning">Menunggu Dikonfirmasi Bendahara</span>
+                            <span class="badge badge-warning">Menunggu Dikonfirmasi <br> Bendahara</span>
                             @elseif($bayarPinjaman->status === 'rejected')
                             <span class="badge badge-danger">Rejected</span>
                             @elseif($bayarPinjaman->status === 'pending')

@@ -121,6 +121,7 @@
             @endif
         </div>
         @if ($kas_payment->status != "confirmed")
+        @if(Auth::user()->role->name == "Bendahara" || Auth::user()->role->name == "Wakil Bendahara" || Auth::user()->role->name == "Sekretaris" || Auth::user()->role->name == "Wakil Sekretaris" || Auth::user()->role->name == "Ketua" || Auth::user()->role->name == "Wakil Ketua")
         <form action="{{ route('kas.confirm',Crypt::encrypt($kas_payment->id)) }}" method="POST"
             enctype="multipart/form-data" id="adminForm">
             @method('PATCH')
@@ -153,6 +154,7 @@
             <!-- Button Submit -->
             <button type="submit" class="btn btn-success" id="submitBtns">Konfirmasi</button>
         </form>
+        @endif
         @endif
     </div>
     <!-- /.card-body -->

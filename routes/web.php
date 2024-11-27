@@ -159,4 +159,6 @@ Route::middleware([
     Route::get('/edit/bayar-pinjaman/{id}', [BayarPinjamanController::class, 'editPengurus'])->name('bayar-pinjaman.editPengurus');
     Route::patch('/edit/bayar-pinjaman/{id}', [BayarPinjamanController::class, 'updatePengurus'])->name('bayar-pinjaman.updatePengurus');
     Route::delete('/hapus/bayar-pinjaman/{id}', [BayarPinjamanController::class, 'destroyPengurus'])->name('bayar-pinjaman.destroyPengurus');
+
+
 });

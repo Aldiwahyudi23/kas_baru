@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use SebastianBergmann\Type\NullType;
 
 class PinjamanController extends Controller
 {
@@ -77,6 +78,10 @@ class PinjamanController extends Controller
 
         $saldo_akhir_request =  AnggaranSaldo::where('type', $dataAnggaran->name)->latest()->first(); //mengambil data yang terakhir berdasarkan type anggaran
 
+        if (!$saldo_akhir_request || !$saldo_akhir_request->saldo) {
+            // Jika tidak ada data saldo atau saldo kosong, redirect dengan pesan error
+            return redirect()->back()->with('error', 'Saldo tidak tersedia atau tidak ada nilai untuk anggaran ini.');
+        }
         if ($saldo_akhir_request->saldo <  $request->amount) {
             return redirect()->back()->with('error', 'Saldo untuk ' . $dataAnggaran->name . ' Kurang dari pengajuan.');
         }

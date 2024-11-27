@@ -37,10 +37,10 @@
                     <td>{{$data->data_warga->name}}</td>
                     <td>{{$data->amount}}</td>
                     <td>
-                        @if($data->status === 'Acknowledged')
+                        @if($data->status === 'confirmed')
                         <span class="badge badge-success">Dikonfirmasi</span>
                         @elseif($data->status === 'process')
-                        <span class="badge badge-warning">Menunggu Dikonfirmasi Bendahara</span>
+                        <span class="badge badge-warning">Menunggu Dikonfirmasi <br> Bendahara</span>
                         @elseif($data->status === 'rejected')
                         <span class="badge badge-danger">Rejected</span>
                         @elseif($data->status === 'pending')

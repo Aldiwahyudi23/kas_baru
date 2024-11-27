@@ -372,7 +372,11 @@ class BayarPinjamanController extends Controller
     {
         $id = Crypt::decrypt($id);
         $pinjaman = Loan::findOrFail($id);
-        return view('user.program.kas.pembayaran.bayarPinjaman', compact('pinjaman'));
+        $bayarPinjaman = loanRepayment::where('loan_id',$id)->get();
+        $layout_form = LayoutsForm::first();
+        $cek_pembayaran = loanRepayment::where('loan_id',$id)->where('status', '!=', 'confirmed')->first();
+
+        return view('user.program.kas.pembayaran.bayarPinjaman', compact('pinjaman', 'cek_pembayaran', 'layout_form', 'bayarPinjaman'));
     }
 
     public function pengajuan()
@@ -464,8 +468,15 @@ class BayarPinjamanController extends Controller
             // }
 
             $data->update();
+
+            // $loan = Loan::findOrFail($data->loan_id);
+            // $cek_sisa = $loan->remaining_balance - $request->amount;
+            // $cek_sisa = $loan->overpayment_balance + $cek_sisa;
+            // $loan->status = "selesai";
+
             // -------------------------------------------------
-            if ($request->status == 'confirmed') {
+
+            if ($request->amount == 'confirmed') {
                 $saldo_terbaru = Saldo::latest()->first();
                 $saldo = new Saldo();
                 $saldo->code = $data->code;

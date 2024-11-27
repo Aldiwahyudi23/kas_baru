@@ -88,11 +88,41 @@
                 </p>
             </div>
         </div>
+        <hr>
+
+
+
+        <div class="card card-primary card-outline">
+            <div class="card-body box-profile">
+
+                <h3 class="profile-username text-center">Bayar Pinjaman</h3>
+                <p class="text-muted text-center">{{$pinjaman->code}}</p>
+
+                <ul class="list-group list-group-unbordered mb-3">
+                    @foreach ($bayarPinjaman as $data)
+                    <li class="list-group-item">
+                        <b>{{$data->created_at}}</b> <a class="float-right">Rp. {{number_format( $data->amount, 0, ',', '.')}}</a>
+                    </li>
+                    @endforeach
+                </ul>
+
+               
+            </div>
+            <!-- /.card-body -->
+        </div>
+
+
         @if (in_array($pinjaman->status, ['Acknowledged', 'In Repayment']))
         <!-- untuk ketua -->
         @if(in_array(Auth::user()->role->name, ['Ketua','Wakil Ketua','Bendahara','Wakil Bendahara','Sekretaris','Wakil
         Sekretaris']) || Auth::user()->data_warga_id == $pinjaman->data_warga_id)
+
+        @if (isset($cek_pembayaran))
+        <hr>
+        {!!$layout_form->b_pinjam_proses!!}
+        @else
         @include('user.program.kas.form.bayarPinjaman')
+        @endif
 
         @endif
         @endif
