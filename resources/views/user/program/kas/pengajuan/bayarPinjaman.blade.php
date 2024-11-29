@@ -33,9 +33,6 @@
                 @foreach ($bayarPinjaman_proses as $data )
                 <tr onclick="window.location='{{ route('bayar-pinjaman.show.confirm',Crypt::encrypt($data->id)) }}'"
                     style="cursor: pointer;">
-                    <td>{{$data->code}}</td>
-                    <td>{{$data->data_warga->name}}</td>
-                    <td>Rp {{number_format($data->amount,0,',','.')}}</td>
                     <td>
                         @if($data->status === 'confirmed')
                         <span class="badge badge-success">Dikonfirmasi</span>
@@ -49,6 +46,10 @@
                         <span class="badge badge-light">Unknown</span> <!-- default if status is undefined -->
                         @endif
                     </td>
+                    <td>{{$data->code}}</td>
+                    <td>{{$data->data_warga->name}}</td>
+                    <td>Rp {{number_format($data->amount,0,',','.')}}</td>
+
                 </tr>
                 @endforeach
 

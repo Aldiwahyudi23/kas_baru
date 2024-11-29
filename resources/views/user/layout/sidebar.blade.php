@@ -34,12 +34,7 @@
                 </p>
             </a>
             <ul class="nav nav-treeview">
-                <li class="nav-item">
-                    <a href="{{route('kas.index')}}" class="nav-link">
-                        <i class="far fa-circle nav-icon"></i>
-                        <p>Bayar Kas</p>
-                    </a>
-                </li>
+
                 <li class="nav-item">
                     <a href="{{route('kas.pengajuan')}}" class="nav-link">
                         <i class="far fa-circle nav-icon"></i>
@@ -56,12 +51,6 @@
                     <a href="{{route('pengeluaran.pengajuan')}}" class="nav-link">
                         <i class="far fa-circle nav-icon"></i>
                         <p>Pengajuan Pengeluaran</p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{route('pinjaman.index')}}" class="nav-link">
-                        <i class="far fa-circle nav-icon"></i>
-                        <p>pinjaman</p>
                     </a>
                 </li>
                 <li class="nav-item">

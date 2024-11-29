@@ -50,7 +50,7 @@
                         @endif
                     </td>
                     <td>{{$data->warga->name}}</td>
-                    <td>{{number_format($data->loan_amount,0,',','.')}}</td>
+                    <td>Rp {{number_format($data->loan_amount,0,',','.')}}</td>
                     <td>{{$data->code}}</td>
 
                 </tr>

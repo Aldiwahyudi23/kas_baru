@@ -381,8 +381,16 @@ class BayarPinjamanController extends Controller
             ->first();
         // Tanggal pembuatan pinjaman terbaru
         $loanCreationDate = Carbon::parse($pinjaman->created_at);
-        // Tanggal pembayaran terakhir
-        $lastPaymentDate = Carbon::parse($lastRepayment->payment_date);
+        // Tanggal pembayaran terakhir (cek apakah $lastRepayment ada)
+        if ($lastRepayment) {
+            $lastPaymentDate = Carbon::parse($lastRepayment->payment_date);
+            // Cek jika selisih antara pembayaran terakhir dan pengajuan baru kurang dari sebulan
+        } else {
+            // Jika tidak ada data pembayaran, beri nilai default atau abaikan logika tertentu
+            $lastPaymentDate = null; // Bisa diganti dengan default sesuai kebutuhan
+            // Logika alternatif jika pembayaran terakhir tidak ada
+            // Misalnya, lanjutkan pengajuan pinjaman
+        }
         // Cek jika selisih antara pembayaran terakhir dan pengajuan baru kurang dari sebulan
         $waktuPembayaran = $loanCreationDate->diffInDays($lastPaymentDate);
         // mengecek untuk data yang telah di atau runtuk pembayaran yang tanpa lebih
