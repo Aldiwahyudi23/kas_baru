@@ -70,9 +70,10 @@
                         <!-- Post -->
                         <div class="post">
                             <div class="user-block">
-                                <img class="img-circle img-bordered-sm" src="{{$loan->ketua->foto}}" alt="user image">
+                                <img class="img-circle img-bordered-sm" src="{{$loan->ketua->foto ?? null}}"
+                                    alt="user image">
                                 <span class="username">
-                                    <a href="#">{{$loan->ketua->name}}</a>
+                                    <a href="#">{{$loan->ketua->name ?? null}}</a>
                                     <a href="#" class="float-right btn-tool"><i class="fas fa-times"></i></a>
                                 </span>
                                 <span class="description">{{$loan->status}} - 7:30 PM today</span>
@@ -137,7 +138,7 @@
                                     <span class="time"><i class="far fa-clock"></i> 5 mins ago</span>
 
                                     <h3 class="timeline-header border-0"><a href="#">Di Konfirmasi Oleh</a>
-                                        {{$loan->ketua->name}}
+                                        {{$loan->ketua->name ?? null}}
                                     </h3>
                                 </div>
                             </div>
@@ -148,7 +149,7 @@
                                     <span class="time"><i class="far fa-clock"></i> 27 mins ago</span>
 
                                     <h3 class="timeline-header"><a href="#">Di Konfirmasi Oleh</a>
-                                        {{$loan->ketua->name}}
+                                        {{$loan->ketua->name ?? null}}
                                     </h3>
 
                                     <div class="timeline-body">

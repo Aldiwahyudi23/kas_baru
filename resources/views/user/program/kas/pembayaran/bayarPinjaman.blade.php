@@ -28,8 +28,8 @@
     </div>
     <!-- /.card-header -->
     <div class="card-body">
-        <div class="card-body table-responsive p-0">
-            <table class="table table-hover text-nowrap">
+        <div class="card-body  p-0">
+            <table class="table table-hover text-nowrap table-responsive">
                 <tbody>
                     <tr>
                         <td>Kode</td>
@@ -61,7 +61,7 @@
                         <td>:</td>
                         <td>Rp. {{number_format( $pinjaman->remaining_balance, 0, ',', '.')}}</td>
                     </tr>
-                    @if ($waktuPembayaran > $waktuDitentukan)
+                    @if ($pinjaman->overpayment_balance > 0 || $waktuPembayaran > $waktuDitentukan)
                     <tr>
                         <td>Lebih</td>
                         <td>:</td>
@@ -126,21 +126,24 @@
             @foreach ($bayarPinjaman as $data)
             <li class="list-group-item"
                 onclick="window.location.href='{{ route('bayar-pinjaman.show',Crypt::encrypt($data->id)) }}'">
-                <b>{{ $data->created_at }}</b>
-                @if($data->status === 'confirmed')
-                <span class="badge badge-success">Dikonfirmasi</span>
-                @elseif($data->status === 'process')
-                <span class="badge badge-warning">Menunggu Dikonfirmasi <br> Bendahara</span>
-                @elseif($data->status === 'rejected')
-                <span class="badge badge-danger">Rejected</span>
-                @elseif($data->status === 'pending')
-                <span class="badge badge-secondary">Pending</span>
-                @else
-                <span class="badge badge-light">Unknown</span> <!-- default if status is undefined -->
-                @endif
+                <b>{{ $data->created_at }}
+                    <br>
 
-                <p class="float-right">Rp.
-                    {{ number_format($data->amount, 0, ',', '.') }}
+
+                    @if($data->status === 'confirmed')
+                    <span class="badge badge-success">Dikonfirmasi</span>
+                    @elseif($data->status === 'process')
+                    <span class="badge badge-warning">Menunggu Dikonfirmasi <br> Bendahara</span>
+                    @elseif($data->status === 'rejected')
+                    <span class="badge badge-danger">Rejected</span>
+                    @elseif($data->status === 'pending')
+                    <span class="badge badge-secondary">Pending</span>
+                    @else
+                    <span class="badge badge-light">Unknown</span> <!-- default if status is undefined -->
+                    @endif
+                </b>
+                <p class="float-right">
+                    Rp.{{ number_format($data->amount, 0, ',', '.') }}
                 </p>
             </li>
             @endforeach

@@ -22,7 +22,7 @@
     <div class="card-header">
         <h3 class="card-title">{{$pengeluaran->anggaran->name}} ( {{$pengeluaran->code}} )</h3>
         <div class="card-tools">
-
+            @if ($pengeluaran->status == "approved_by_chairman")
             <a class="btn btn-tool" href="{{route('pengeluaran.edit',Crypt::encrypt($pengeluaran->id))}}">
                 <i class="fas fa-pencil-alt">
                 </i>
@@ -32,6 +32,7 @@
                 <i class="fas fa-trash">
                 </i>
             </a>
+            @endif
             <button type="button" class="btn btn-tool" data-card-widget="collapse">
                 <i class="fas fa-minus"></i>
             </button>

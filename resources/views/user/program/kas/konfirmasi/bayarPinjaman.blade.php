@@ -22,15 +22,18 @@
     <div class="card-header">
         <h3 class="card-title">{{$bayarPinjaman->data_warga->name}} ( {{$bayarPinjaman->code}} )</h3>
         <div class="card-tools">
-            <a class="btn btn-tool" href="{{route('kas.editPengurus',Crypt::encrypt($bayarPinjaman->id))}}">
+            @if ($bayarPinjaman->status == "process")
+            <a class="btn btn-tool" href="{{route('bayar-pinjaman.editPengurus',Crypt::encrypt($bayarPinjaman->id))}}">
                 <i class="fas fa-pencil-alt">
                 </i>
             </a>
-            <a class="btn btn-tool" href="{{route('kas.destroyPengurus',Crypt::encrypt($bayarPinjaman->id))}}"
+            <a class="btn btn-tool"
+                href="{{route('bayar-pinjaman.destroyPengurus',Crypt::encrypt($bayarPinjaman->id))}}"
                 data-confirm-delete="true">
                 <i class="fas fa-trash">
                 </i>
             </a>
+            @endif
             <button type="button" class="btn btn-tool" data-card-widget="collapse">
                 <i class="fas fa-minus"></i>
             </button>

@@ -73,10 +73,15 @@ class PengeluaranController extends Controller
         } else {
             $saldo_akhir_request =  AnggaranSaldo::where('type', $dataAnggaran->name)->latest()->first(); //mengambil data yang terakhir berdasarkan type anggaran
         }
-
         if ($saldo_akhir_request->saldo <  $request->amount) {
             return redirect()->back()->with('error', 'Saldo untuk ' . $dataAnggaran->name . ' Kurang dari pengajuan.');
         }
+        // cek apakah ada pengajuan yang stsus nya masih proses
+        $cek_pengajuan = CashExpenditures::where('anggaran_id', $request->anggaran_id)->where('status', '!=', 'Acknowledged')->count();
+        if ($cek_pengajuan > 0) {
+            return redirect()->back()->with('error', 'Pengajuan pengeluaran sudah ada data yang masuk');
+        }
+
 
         DB::beginTransaction();
 
@@ -189,6 +194,10 @@ class PengeluaranController extends Controller
     public function edit(string $id)
     {
         $id = Crypt::decrypt($id);
+        $data = CashExpenditures::findOrFail($id);
+        if (in_array($data->status, ['Acknowledged', 'disbursed_by_treasurer'])) {
+            return redirect()->back()->with('error', 'Pengajuan Pinjaman tidak dapat di hapus sudah dalam status' . $data->status);
+        }
         $anggaran = Anggaran::all();
         // Ambil status CashExpenditures untuk setiap anggaran
         foreach ($anggaran as $item) {
@@ -224,6 +233,23 @@ class PengeluaranController extends Controller
             ]
         );
 
+        $cek = CashExpenditures::findOrFail($id);
+
+        if (in_array($cek->status, ['Acknowledged', 'disbursed_by_treasurer'])) {
+            return redirect()->back()->with('error', 'Pengajuan Pinjaman tidak dapat di edit sudah dalam status ' . $cek->status);
+        }
+        $dataAnggaran = Anggaran::Find($request->anggaran_id);
+        // Cek apakah Saldo cukup berdasarkan anggaran
+        if ($dataAnggaran->name === "Dana Usaha" || $dataAnggaran->name === "Dana Acara" || $dataAnggaran->name === "Dana Kas") {
+            $saldo_akhir_request =  AnggaranSaldo::where('type', 'Dana Kas')->latest()->first(); //mengambil data yang terakhir berdasarkan type anggaran
+        } else {
+            $saldo_akhir_request =  AnggaranSaldo::where('type', $dataAnggaran->name)->latest()->first(); //mengambil data yang terakhir berdasarkan type anggaran
+        }
+
+        if ($saldo_akhir_request->saldo <  $request->amount) {
+            return redirect()->back()->with('error', 'Saldo untuk ' . $dataAnggaran->name . ' Kurang dari pengajuan.');
+        }
+
         $data = CashExpenditures::findOrFail($id);
         $data->anggaran_id = $request->anggaran_id;
         $data->amount = $request->amount;
@@ -241,8 +267,10 @@ class PengeluaranController extends Controller
     {
         $id = Crypt::decrypt($id);
         $data = CashExpenditures::find($id);
+        if (in_array($data->status, ['Acknowledged', 'disbursed_by_treasurer'])) {
+            return redirect()->back()->with('error', 'Pengajuan Pinjaman tidak dapat di hapus sudah dalam status ' . $data->status);
+        }
         $data->delete();
-
         return redirect()->route('pengeluaran.pengajuan')->with('success', 'Pembayaran sudah di hapus');
     }
 

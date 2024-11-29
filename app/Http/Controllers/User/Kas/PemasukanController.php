@@ -93,7 +93,7 @@ class PemasukanController extends Controller
             return redirect()->back()->with('error',  'Nominal yang di masukan kurang dari kesepakatan, ( ' . $programItems->catatan_program . ' )');
         }
         // Mengecek apakah sudah ada pengajuan kas yang sedang diproses
-        $cek_kasPayment = KasPayment::where('status', 'process')->where('data_warga_id',Auth::user()->data_warga_id)->count();
+        $cek_kasPayment = KasPayment::where('status', 'process')->where('data_warga_id', Auth::user()->data_warga_id)->count();
         if ($cek_kasPayment >= 1) {
             return redirect()->back()->with('error', 'Pengajuan gagal dikirim. Sudah ada pengajuan kas yang sedang diproses.');
         }
@@ -254,12 +254,18 @@ class PemasukanController extends Controller
     {
         $id = Crypt::decrypt($id);
         $kas_payment = KasPayment::findOrFail($id);
+        if ($kas_payment->status != "process") {
+            return redirect()->back()->with('error', 'Pengajuan tidak bisa di update karena sudah dalam status ' . $kas_payment->status);
+        }
         return view('user.program.kas.edit.kas', compact('kas_payment'));
     }
     public function editPengurus(string $id)
     {
         $id = Crypt::decrypt($id);
         $kas_payment = KasPayment::findOrFail($id);
+        if ($kas_payment->status != "process") {
+            return redirect()->back()->with('error', 'Pengajuan tidak bisa di update karena sudah dalam status ' . $kas_payment->status);
+        }
         return view('user.program.kas.edit.pengurus.kas', compact('kas_payment'));
     }
 
@@ -281,7 +287,10 @@ class PemasukanController extends Controller
                 'description.required' => 'Keterangan Harus di isi',
             ]
         );
-
+        $cek_kas = KasPayment::findOrFail($id);
+        if ($cek_kas->status != "process") {
+            return redirect()->back()->with('error', 'Pengajuan tidak bisa di update karena sudah dalam status ' . $cek_kas->status);
+        }
         $data = KasPayment::findOrFail($id);
         $data->data_warga_id = $request->data_warga_id;
         $data->amount = $request->amount;
@@ -323,7 +332,10 @@ class PemasukanController extends Controller
                 'description.required' => 'Keterangan Harus di isi',
             ]
         );
-
+        $cek_kas = KasPayment::findOrFail($id);
+        if ($cek_kas->status != "process") {
+            return redirect()->back()->with('error', 'Pengajuan tidak bisa di update karena sudah dalam status ' . $cek_kas->status);
+        }
         $data = KasPayment::findOrFail($id);
         $data->data_warga_id = $request->data_warga_id;
         $data->amount = $request->amount;
@@ -360,17 +372,25 @@ class PemasukanController extends Controller
     {
         $id = Crypt::decrypt($id);
         $data = KasPayment::find($id);
-        $data->delete();
+        if ($data->status != "process") {
+            return redirect()->back()->with('error', 'Pengajuan tidak bisa di hapus karena sudah dalam status ' . $data->status);
+        } else {
+            $data->delete();
 
-        return redirect()->back()->with('success', 'Pembayaran sudah di hapus');
+            return redirect()->back()->with('success', 'Pembayaran sudah di hapus');
+        }
     }
     public function destroyPengurus(string $id)
     {
         $id = Crypt::decrypt($id);
         $data = KasPayment::find($id);
-        $data->delete();
+        if ($data->status != "process") {
+            return redirect()->back()->with('error', 'Pengajuan tidak bisa di hapus karena sudah dalam status ' . $data->status);
+        } else {
+            $data->delete();
 
-        return redirect()->route('kas.pengajuan')->with('success', 'Pembayaran sudah di hapus');
+            return redirect()->route('kas.pengajuan')->with('success', 'Pembayaran sudah di hapus');
+        }
     }
 
     public function pengajuan()

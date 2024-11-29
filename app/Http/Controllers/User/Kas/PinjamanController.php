@@ -161,13 +161,14 @@ class PinjamanController extends Controller
             $existingDescription = $request->input('description', '');
 
             // Tambahkan data sesuai metode pembayaran
-            $newDescription = "Alasan : " . $existingDescription . "\n";
+            $newDescription = "<b>Alasan</b> : " . $existingDescription;
             if ($request->payment_method === 'transfer') {
-                $newDescription .= "Nama Bank/Ewallet : {$request->bank_name}\n";
-                $newDescription .= "No Rekening/Ewallet : {$request->account_number}\n";
-                $newDescription .= "Atas Nama: {$request->account_name}\n";
+                $newDescription .= "<p><b> Transfer </b> <br>";
+                $newDescription .= "Nama Bank/Ewallet : {$request->bank_name} <br>";
+                $newDescription .= "No Rekening/Ewallet : {$request->account_number}<br>";
+                $newDescription .= "Atas Nama  : {$request->account_name} </Nama>";
             } elseif ($request->payment_method === 'cash') {
-                $newDescription .= "Pengambilan : {$request->cash_notes}\n";
+                $newDescription .= "<p><b>Pengambilan</b>  : <br> {$request->cash_notes}";
             }
 
 
@@ -353,7 +354,7 @@ class PinjamanController extends Controller
     {
         $id = Crypt::decrypt($id);
         $cek_data = Loan::findOrFail($id);
-        if ($cek_data->status != ['pending', 'approved_by_chairman']) {
+        if (!in_array($cek_data->status, ['pending', 'approved_by_chairman'])) {
             return redirect()->back()->with('error', 'Pengajuan tidak bisa di update karena sudah dalam status ' . $cek_data->status);
         }
         $pinjaman = Loan::findOrFail($id);
@@ -365,13 +366,34 @@ class PinjamanController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $id = Crypt::decryptString($id);
+        $id = Crypt::decrypt($id);
         $request->validate([
             'data_warga_id' => 'required',
             'amount' => 'required',
             'description' => 'required',
 
         ]);
+
+        $dataAnggaran = Anggaran::where('name', 'Dana Pinjam')->first();
+        // Cek apakah Saldo cukup berdasarkan anggaran
+
+        $saldo_akhir_request =  AnggaranSaldo::where('type', $dataAnggaran->name)->latest()->first(); //mengambil data yang terakhir berdasarkan type anggaran
+
+        if (!$saldo_akhir_request || !$saldo_akhir_request->saldo) {
+            // Jika tidak ada data saldo atau saldo kosong, redirect dengan pesan error
+            return redirect()->back()->with('error', 'Saldo tidak tersedia atau tidak ada nilai untuk anggaran ini.');
+        }
+        if ($saldo_akhir_request->saldo <  $request->amount) {
+            return redirect()->back()->with('error', 'Saldo untuk ' . $dataAnggaran->name . ' Kurang dari pengajuan.');
+        }
+        // -------------------------------------------
+
+        // cek untuk nominal Max sesuai kesepakatan
+        $nominal_max = AnggaranSetting::where('anggaran_id', $dataAnggaran->id)->where('label_anggaran', 'Alokasi Anggaran Max')->first();
+        if ($request->amount > $nominal_max->catatan_anggaran) {
+            return back()->with('error', 'Nominal yang di ajukan melebihi batas max yang telah di sepakati');
+        }
+
         $cek_data = Loan::findOrFail($id);
         if ($cek_data->status != "pending") {
             return redirect()->back()->with('error', 'Pengajuan tidak bisa di update karena sudah dalam status ' . $cek_data->status);
@@ -379,6 +401,7 @@ class PinjamanController extends Controller
 
         $data = Loan::findOrFail($id);
         $data->loan_amount = $request->amount;
+        $data->remaining_balance = $request->amount;
         $data->data_warga_id = $request->data_warga_id;
         $data->description = $request->description;
 
@@ -389,7 +412,7 @@ class PinjamanController extends Controller
     public function updatePengurus(Request $request, string $id)
     {
 
-        $id = Crypt::decryptString($id);
+        $id = Crypt::decrypt($id);
         $request->validate([
             'data_warga_id' => 'required',
             'amount' => 'required',
@@ -397,19 +420,41 @@ class PinjamanController extends Controller
 
         ]);
 
+        $dataAnggaran = Anggaran::where('name', 'Dana Pinjam')->first();
+        // Cek apakah Saldo cukup berdasarkan anggaran
+
+        $saldo_akhir_request =  AnggaranSaldo::where('type', $dataAnggaran->name)->latest()->first(); //mengambil data yang terakhir berdasarkan type anggaran
+
+        if (!$saldo_akhir_request || !$saldo_akhir_request->saldo) {
+            // Jika tidak ada data saldo atau saldo kosong, redirect dengan pesan error
+            return redirect()->back()->with('error', 'Saldo tidak tersedia atau tidak ada nilai untuk anggaran ini.');
+        }
+        if ($saldo_akhir_request->saldo <  $request->amount) {
+            return redirect()->back()->with('error', 'Saldo untuk ' . $dataAnggaran->name . ' Kurang dari pengajuan.');
+        }
+        // -------------------------------------------
+
+        // cek untuk nominal Max sesuai kesepakatan
+        $nominal_max = AnggaranSetting::where('anggaran_id', $dataAnggaran->id)->where('label_anggaran', 'Alokasi Anggaran Max')->first();
+        if ($request->amount > $nominal_max->catatan_anggaran) {
+            return back()->with('error', 'Nominal yang di ajukan melebihi batas max yang telah di sepakati');
+        }
+
+
         $cek_data = Loan::findOrFail($id);
-        if ($cek_data->status != ['pending', 'approved_by_chairman']) {
+        if (!in_array($cek_data->status, ['pending', 'approved_by_chairman'])) {
             return redirect()->back()->with('error', 'Pengajuan tidak bisa di update karena sudah dalam status ' . $cek_data->status);
         }
 
         $data = Loan::findOrFail($id);
         $data->loan_amount = $request->amount;
+        $data->remaining_balance = $request->amount;
         $data->data_warga_id = $request->data_warga_id;
         $data->description = $request->description;
 
         $data->update();
 
-        return redirect()->route('pinjaman.show.confirm')->with('success', 'Pengajuan Pinjaman sudah di edit');
+        return redirect()->route('pinjaman.show.confirm', Crypt::encrypt($id))->with('success', 'Pengajuan Pinjaman sudah di edit');
     }
 
     /**
@@ -420,7 +465,7 @@ class PinjamanController extends Controller
 
         $id = Crypt::decrypt($id);
         $data = Loan::find($id);
-        if ($data->status == ['pending', 'approved_by_chairman']) {
+        if (in_array($data->status, ['pending', 'approved_by_chairman'])) {
             $data->delete();
             return redirect()->back()->with('success', 'Pengajuan Pinjaman sudah di hapus');
         } else {
@@ -431,7 +476,7 @@ class PinjamanController extends Controller
     {
         $id = Crypt::decrypt($id);
         $data = Loan::find($id);
-        if ($data->status == ['pending', 'approved_by_chairman']) {
+        if (in_array($data->status, ['pending', 'approved_by_chairman'])) {
             $data->delete();
             return redirect()->route('pinjaman.pengajuan')->with('success', 'Pengajuan Pinjaman sudah di hapus');
         } else {

@@ -22,16 +22,17 @@
     <div class="card-header">
         <h3 class="card-title">{{$pinjaman->anggaran->name}} ( {{$pinjaman->code}} )</h3>
         <div class="card-tools">
-
-            <a class="btn btn-tool" href="{{route('pinjaman.edit',Crypt::encrypt($pinjaman->id))}}">
+            @if (in_array($pinjaman->status, ['pending', 'approved_by_chairman']))
+            <a class="btn btn-tool" href="{{route('pinjaman.editPengurus',Crypt::encrypt($pinjaman->id))}}">
                 <i class="fas fa-pencil-alt">
                 </i>
             </a>
-            <a class="btn btn-tool" href="{{route('pinjaman.destroy',Crypt::encrypt($pinjaman->id))}}"
+            <a class="btn btn-tool" href="{{route('pinjaman.destroyPengurus',Crypt::encrypt($pinjaman->id))}}"
                 data-confirm-delete="true">
                 <i class="fas fa-trash">
                 </i>
             </a>
+            @endif
             <button type="button" class="btn btn-tool" data-card-widget="collapse">
                 <i class="fas fa-minus"></i>
             </button>

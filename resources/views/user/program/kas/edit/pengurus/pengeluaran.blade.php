@@ -52,7 +52,7 @@
                  <div class="form-group">
                      <label for="amount">Jumlah Anggaran <span class="text-danger">*</span></label>
                      <input type="text" name="amount_display" id="amount_display"
-                         value="{{ old('amount',$pengeluaran->amount) ? number_format(old('amount',$pengeluaran->amount), 2, ',', '.') : '' }}"
+                         value="{{ old('amount',$pengeluaran->amount) ? number_format(old('amount',$pengeluaran->amount), 0, ',', '.') : '' }}"
                          class="form-control col-12 @error('amount') is-invalid @enderror"
                          placeholder="Masukkan nominal yang diajukan" oninput="formatIndonesian(this)">
                      <input type="hidden" name="amount" id="amount" value="{{ old('amount',$pengeluaran->amount) }}">

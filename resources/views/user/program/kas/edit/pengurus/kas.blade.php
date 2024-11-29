@@ -15,6 +15,8 @@
                      <i class="fas fa-times"></i>
                  </button>
              </div>
+             <br>
+             <p class="text-muted">{{$kas_payment->data_warga->name}}</p>
          </div>
          <!-- /.card-header -->
          <div class="card-body">
@@ -27,7 +29,7 @@
                  <div class="form-group">
                      <label for="amount">Jumlah Pembayaran <span class="text-danger">*</span></label>
                      <input type="text" name="amount_display" id="amount_display"
-                         value="{{ old('amount',$kas_payment->amount) ? number_format(old('amount',$kas_payment->amount), 2, ',', '.') : '' }}"
+                         value="{{ old('amount',$kas_payment->amount) ? number_format(old('amount',$kas_payment->amount), 0, ',', '.') : '' }}"
                          class="form-control col-12 @error('amount') is-invalid @enderror"
                          placeholder="Masukkan nominal yang diajukan" oninput="formatIndonesian(this)">
                      <input type="hidden" name="amount" id="amount" value="{{ old('amount',$kas_payment->amount) }}">
@@ -53,21 +55,19 @@
                  <div class="form-group" id="transfer_receipt"
                      style="display: {{ old('payment_method',$kas_payment->payment_method) == 'transfer' ? 'block' : 'none' }};">
                      <label for="transfer_receipt_path">Upload Bukti Transfer</label>
-                     <span class="text-danger">*</span></label>
                      <input type="file" name="transfer_receipt_path" id="transfer_receipt_path" accept="image/*"
-                         class="form-control col-12 @error('transfer_receipt_path') is-invalid @enderror">
-                     @error('transfer_receipt_path')
-                     <div class="invalid-feedback">{{ $message }}</div>
-                     @enderror
-                 </div>
-
-                 <!-- Thumbnail Tanda Bukti Transfer -->
-                 <div class="form-group col-6 col-sm-2">
-                     <a href="{{ asset($kas_payment->transfer_receipt_path) }}" data-toggle="lightbox"
-                         data-title="Tanda Bukti Transfer - {{$kas_payment->code}}" data-gallery="gallery">
-                         <img src="{{ asset($kas_payment->transfer_receipt_path) }}" class="img-fluid mb-2"
-                             alt="white sample" />
-                     </a>
+                         value="{{old('payment_method',$kas_payment->payment_method)}}"
+                         class="form-control col-12 @error('transfer_receipt_path') is-invalid @enderror"
+                         onchange="preview('.tampil-gambar', this.files[0])">
+                     <div class="tampil-gambar mt-3">
+                         @if (isset($kas_payment->transfer_receipt_path))
+                         <a href="{{ asset( $kas_payment->transfer_receipt_path) }}" data-toggle="lightbox"
+                             data-title="Tanda Bukti Transfer - {{$kas_payment->code}}" data-gallery="gallery">
+                             <img src="{{ asset($kas_payment->transfer_receipt_path) }}" class="img-fluid mb-2"
+                                 alt="white sample" width="100px" />
+                         </a>
+                         @endif
+                     </div>
                  </div>
 
                  <div class="form-group">

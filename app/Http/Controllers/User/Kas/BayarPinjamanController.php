@@ -238,6 +238,11 @@ class BayarPinjamanController extends Controller
      */
     public function show(string $id)
     {
+        //Untuk konfirmasi delete
+        $title = 'Delete !';
+        $text = "Apakah benar anda mau hapus data ini?";
+        confirmDelete($title, $text);
+
         $id = Crypt::decrypt($id);
         $bayarPinjaman = loanRepayment::findOrFail($id);
 
@@ -250,14 +255,20 @@ class BayarPinjamanController extends Controller
     public function edit(string $id)
     {
         $id = Crypt::decrypt($id);
-        $kas_payment = loanRepayment::findOrFail($id);
-        return view('user.program.kas.edit.kas', compact('kas_payment'));
+        $bayarPinjaman = loanRepayment::findOrFail($id);
+        if ($bayarPinjaman->status != "process") {
+            return redirect()->back()->with('error', 'Pengajuan tidak bisa di update karena sudah dalam status ' . $bayarPinjaman->status);
+        }
+        return view('user.program.kas.edit.bayarPinjaman', compact('bayarPinjaman'));
     }
     public function editPengurus(string $id)
     {
         $id = Crypt::decrypt($id);
-        $kas_payment = loanRepayment::findOrFail($id);
-        return view('user.program.kas.edit.pengurus.kas', compact('kas_payment'));
+        $bayarPinjaman = loanRepayment::findOrFail($id);
+        if ($bayarPinjaman->status != "process") {
+            return redirect()->back()->with('error', 'Pengajuan tidak bisa di update karena sudah dalam status ' . $bayarPinjaman->status);
+        }
+        return view('user.program.kas.edit.pengurus.bayarPinjaman', compact('bayarPinjaman'));
     }
 
     /**
@@ -278,6 +289,10 @@ class BayarPinjamanController extends Controller
                 'description.required' => 'Keterangan Harus di isi',
             ]
         );
+        $bayarPinjaman = loanRepayment::findOrFail($id);
+        if ($bayarPinjaman->status != "process") {
+            return redirect()->back()->with('error', 'Pengajuan tidak bisa di update karena sudah dalam status ' . $bayarPinjaman->status);
+        }
 
         $data = loanRepayment::findOrFail($id);
         $data->data_warga_id = $request->data_warga_id;
@@ -304,7 +319,7 @@ class BayarPinjamanController extends Controller
 
         $data->update();
 
-        return redirect()->back()->with('success', 'Berhasil di rubah');
+        return redirect()->route('bayar-pinjaman.show', Crypt::encrypt($id))->with('success', 'Berhasil di rubah');
     }
     public function updatePengurus(Request $request, string $id)
     {
@@ -321,22 +336,16 @@ class BayarPinjamanController extends Controller
                 'description.required' => 'Keterangan Harus di isi',
             ]
         );
+        $bayarPinjaman = loanRepayment::findOrFail($id);
+        if ($bayarPinjaman->status != "process") {
+            return redirect()->back()->with('error', 'Pengajuan tidak bisa di update karena sudah dalam status ' . $bayarPinjaman->status);
+        }
 
         $data = loanRepayment::findOrFail($id);
         $data->data_warga_id = $request->data_warga_id;
         $data->amount = $request->amount;
         $data->payment_method = $request->payment_method;
         $data->description = $request->description;
-        // Cek apakah file profile_picture di-upload
-        // if ($request->hasFile('transfer_receipt_path')) {
-        //     $file = $request->file('transfer_receipt_path');
-        //     $path = $file->store(
-        //         'kas/pemasukan',
-        //         'public'
-        //     ); // Simpan gambar ke direktori public
-        //     $data->transfer_receipt_path = $path;
-        // }
-
 
         if ($request->hasFile('transfer_receipt_path')) {
             $file = $request->file('transfer_receipt_path');
@@ -347,7 +356,7 @@ class BayarPinjamanController extends Controller
 
         $data->update();
 
-        return redirect()->route('kas.show.confirm', Crypt::encrypt($id))->with('success', 'Berhasil di rubah');
+        return redirect()->route('bayar-pinjaman.show.confirm', Crypt::encrypt($id))->with('success', 'Berhasil di rubah');
     }
 
     /**
@@ -357,17 +366,25 @@ class BayarPinjamanController extends Controller
     {
         $id = Crypt::decrypt($id);
         $data = loanRepayment::find($id);
-        $data->delete();
+        if ($data->status != "process") {
+            return redirect()->back()->with('error', 'Pengajuan tidak bisa di update karena sudah dalam status ' . $data->status);
+        } else {
+            $data->delete();
 
-        return redirect()->back()->with('success', 'Pembayaran sudah di hapus');
+            return redirect()->route('bayar-pinjaman.pembayaran', Crypt::encrypt($data->loan_id))->with('success', 'Pembayaran sudah di hapus');
+        }
     }
     public function destroyPengurus(string $id)
     {
         $id = Crypt::decrypt($id);
         $data = loanRepayment::find($id);
-        $data->delete();
+        if ($data->status != "process") {
+            return redirect()->back()->with('error', 'Pengajuan tidak bisa di update karena sudah dalam status ' . $data->status);
+        } else {
+            $data->delete();
 
-        return redirect()->route('kas.pengajuan')->with('success', 'Pembayaran sudah di hapus');
+            return redirect()->route('bayar-pinjaman.pengajuan')->with('success', 'Pembayaran sudah di hapus');
+        }
     }
 
     public function pembayaran(string $id)

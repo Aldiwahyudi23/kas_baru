@@ -26,7 +26,7 @@
                  <div class="form-group">
                      <label for="amount">Jumlah Pembayaran <span class="text-danger">*</span></label>
                      <input type="text" name="amount_display" id="amount_display"
-                         value="{{ old('amount',$pinjaman->loan_amount) ? number_format(old('amount',$pinjaman->loan_amount), 2, ',', '.') : '' }}"
+                         value="{{ old('amount',$pinjaman->loan_amount) ? number_format(old('amount',$pinjaman->loan_amount), 0, ',', '.') : '' }}"
                          class="form-control col-12 @error('amount') is-invalid @enderror"
                          placeholder="Masukkan nominal yang diajukan" oninput="formatIndonesian(this)">
                      <input type="hidden" name="amount" id="amount" value="{{ old('amount',$pinjaman->loan_amount) }}">
@@ -36,8 +36,9 @@
                  <div class="form-group">
                      <label for="description" class="col-sm-12 col-form-label">Alasan
                          <span class="text-danger">*</span></label>
-                     <textarea class="form-control col-12 @error('description') is-invalid @enderror" name="description"
-                         id="description">{{ old('description',$pinjaman->description) }}</textarea>
+                     <textarea
+                         class="summernote-textarea form-control col-12 @error('description') is-invalid @enderror"
+                         name="description" id="description">{{ old('description',$pinjaman->description) }}</textarea>
                  </div>
                  <input type="hidden" name="data_warga_id" value="{{$pinjaman->data_warga_id}}">
                  <!-- Button Submit -->

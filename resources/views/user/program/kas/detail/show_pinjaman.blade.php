@@ -66,11 +66,12 @@
                         <td>:</td>
                         <td>Rp. {{number_format( $pinjaman->remaining_balance, 0, ',', '.')}}</td>
                     </tr>
-                    @if ($waktuPembayaran > 30)
+                    @if ($pinjaman->overpayment_balance > 0 || $waktuPembayaran > $waktuDitentukan)
                     <tr>
                         <td>Lebih</td>
                         <td>:</td>
-                        @if ($pinjaman->overpayment_balance == 0) <td>Pembayaran lebih dari {{$waktuDitentukan}} hari,
+                        @if ($pinjaman->overpayment_balance == 0)
+                        <td>Pembayaran lebih dari {{$waktuDitentukan}} hari,
                             sesuai kesepakatan
                             !!!</td>
                         @else

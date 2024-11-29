@@ -2,16 +2,7 @@
 
 <div class="card">
     <div class="card-header">
-        <h3 class="card-title">Data Program</h3>
-    </div>
-    <!-- /.card-header -->
-    <!-- Komponen Tabel -->
-    @livewire('pengeluaran.tabel-pengeluaran')
-    <!-- /.card-body -->
-</div>
-<div class="card">
-    <div class="card-header">
-        <h3 class="card-title">Data Program</h3>
+        <h3 class="card-title">Data Semua Pengeluaran</h3>
     </div>
     <!-- /.card-header -->
     <div class="card-body">
@@ -37,18 +28,18 @@
                     <td>{{$data->code}} </td>
                     <td>{{$data->created_at}} </td>
                     <td>{{$data->anggaran->name}} </td>
-                    <td>{{$data->amount}} </td>
+                    <td>Rp {{number_format($data->amount,0,',','.')}} </td>
                     <td>
                         @if($data->status === 'Acknowledged')
-                        <span class="badge badge-success">Acknowledged</span>
+                        <span class="badge badge-success">Selesai</span>
                         @elseif($data->status === 'pending')
                         <span class="badge badge-warning">Pending</span>
                         @elseif($data->status === 'rejected')
                         <span class="badge badge-danger">Rejected</span>
                         @elseif($data->status === 'approved_by_chairman')
-                        <span class="badge badge-secondary">approved_by_chairman</span>
+                        <span class="badge badge-secondary">Menunggu persetujuan Ketua</span>
                         @elseif($data->status === 'disbursed_by_treasurer')
-                        <span class="badge badge-secondary">disbursed_by_treasurer</span>
+                        <span class="badge badge-secondary">Dalam Proses Pencairan</span>
                         @else
                         <span class="badge badge-light">Unknown</span> <!-- default if status is undefined -->
                         @endif

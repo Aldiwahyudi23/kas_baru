@@ -2,6 +2,12 @@
 
 @section('content')
 
+<div class="alert alert-info alert-dismissible">
+    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+    <!-- <h5><i class="icon fas fa-info"></i> Alert!</h5> -->
+    Halaman ini di tunjukan kepada sekretaris untuk penginputan, berikan keterangan jelas dan detail agar tidak ada
+    salah paham dan dari keterangan ini akan menjadi Laporan
+</div>
 <!-- ./row -->
 <div class="row">
     <div class="col-12 col-sm-6">
