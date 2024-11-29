@@ -371,6 +371,11 @@ class PengeluaranController extends Controller
             $saldo_akhir_request =  AnggaranSaldo::where('type', $dataAnggaran->name)->latest()->first(); //mengambil data yang terakhir berdasarkan type anggaran
         }
 
+        if (!$saldo_akhir_request || !$saldo_akhir_request->saldo) {
+            // Jika tidak ada data saldo atau saldo kosong, redirect dengan pesan error
+            return redirect()->back()->with('error', 'Saldo tidak tersedia atau tidak ada nilai untuk anggaran ini.');
+        }
+
         if ($saldo_akhir_request->saldo <  $request->amount) {
             return redirect()->back()->with('error', 'Saldo untuk ' . $dataAnggaran->name . ' Kurang dari pengajuan.');
         }
@@ -419,30 +424,18 @@ class PengeluaranController extends Controller
             $saldo->save();
             // -------------------------------------------
 
-            // 1. Ambil semua anggaran dengan label "persentase"
-            $anggaranItems = AnggaranSetting::where('label_anggaran', 'persentase')->get();
-            foreach ($anggaranItems as $anggaran) {
-                $anggaran_saldo_terakhir =  AnggaranSaldo::where('type', $anggaran->anggaran->name)->latest()->first(); //mengambil data yang terakhir berdasarkan type anggaran
-                // Hitung alokasi dana berdasarkan catatan_anggaran sebagai persentase
-                $percenAmount = ($request->amount / $saldo_akhir_request->saldo) * 100;
-                $saldo_anggaran = new AnggaranSaldo();
+            // Hitung alokasi dana berdasarkan catatan_anggaran sebagai persentase
+            $percenAmount = ($request->amount / $saldo_akhir_request->saldo) * 100;
+            $saldo_anggaran = new AnggaranSaldo();
 
-                if ($anggaran->anggaran->name === $saldo_akhir_request->type) {
-                    $saldo_anggaran->type = $dataAnggaran->name;
-                    $saldo_anggaran->percentage = $percenAmount;
-                    $saldo_anggaran->amount = '-' . $request->amount;
-                    $saldo_anggaran->saldo = $saldo_akhir_request->saldo - $request->amount;
-                } else {
-                    $saldo_anggaran->type = $anggaran_saldo_terakhir->type;
-                    $saldo_anggaran->percentage = $anggaran_saldo_terakhir->percentage;
-                    $saldo_anggaran->amount = $anggaran_saldo_terakhir->amount;
-                    $saldo_anggaran->saldo = $anggaran_saldo_terakhir->saldo;
-                }
-                $saldo_anggaran->saldo_id = $saldo->id; //mengambil id dari model saldo di atas
-                $saldo_anggaran->cash_saldo = $anggaran_saldo_terakhir->cash_saldo - $request->amount;
+            $saldo_anggaran->type = $dataAnggaran->name;
+            $saldo_anggaran->percentage = $percenAmount;
+            $saldo_anggaran->amount = '-' . $request->amount;
+            $saldo_anggaran->saldo = $saldo_akhir_request->saldo - $request->amount;
+            $saldo_anggaran->saldo_id = $saldo->id; //mengambil id dari model saldo di atas
 
-                $saldo_anggaran->save();
-            }
+            $saldo_anggaran->save();
+
 
             // // Mengambil data warga yang mengikuti program "Kas Keluarga"
             // $access_program_kas = AccessProgram::whereHas('program', function ($query) {

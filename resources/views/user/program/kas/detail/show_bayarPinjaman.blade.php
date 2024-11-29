@@ -2,24 +2,24 @@
 
 @section('content')
 
-@if ($pengeluaran->status != "Acknowledged")
+@if ($bayarPinjaman->status == "process")
 <div class="alert alert-warning alert-dismissible">
     <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
     <h5><i class="icon fas fa-exclamation-triangle"></i> Proses !</h5>
-    Anggaran masih dalam proses oleh pengurus
+    Mohon menunggu konfirmasi dari pengurus. Jika ada pertanyaan, silakan hubungi pengurus melalui kontak resmi.
 </div>
 @endif
-@if ($pengeluaran->status == "Acknowledged")
+@if ($bayarPinjaman->status == "confirmed")
 <div class="alert alert-success alert-dismissible">
     <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
     <h5><i class="icon fas fa-check"></i> Terkonfirmasi</h5>
-    Data Anggaran sudah selesai, di Konfirmasi dan telah di keluarkan sesuai data di bawah
+    Data pembayaran Pinjaman sudah di konfirmasi, dan sudah masuk ke data.
 </div>
 @endif
 <!-- SELECT2 EXAMPLE -->
 <div class="card card-default">
     <div class="card-header">
-        <h3 class="card-title">{{$pengeluaran->sekretaris->name}} ( {{$pengeluaran->code}} )</h3>
+        <h3 class="card-title">{{$bayarPinjaman->data_warga->name}} ( {{$bayarPinjaman->code}} )</h3>
         <div class="card-tools">
             <button type="button" class="btn btn-tool" data-card-widget="collapse">
                 <i class="fas fa-minus"></i>
@@ -28,91 +28,84 @@
     </div>
     <!-- /.card-header -->
     <div class="card-body">
-        <div class="card-body p-0">
+        <div class="card-body  p-0">
             <table class="table table-hover text-nowrap table-responsive">
                 <tbody>
                     <tr>
                         <td>Kode</td>
                         <td>:</td>
-                        <td>{{$pengeluaran->code}}</td>
+                        <td>{{$bayarPinjaman->code}}</td>
                     </tr>
                     <tr>
                         <td>Tanggal Pengajuan</td>
                         <td>:</td>
-                        <td>{{$pengeluaran->created_at}}</td>
+                        <td>{{$bayarPinjaman->payment_date}}</td>
                     </tr>
                     <tr>
-                        <td>Nama Anggaran</td>
+                        <td>Nama Anggota</td>
                         <td>:</td>
-                        <td>{{$pengeluaran->anggaran->name}}</td>
+                        <td>{{$bayarPinjaman->data_warga->name}}</td>
                     </tr>
                     <tr>
                         <td>Di Input oleh</td>
                         <td>:</td>
-                        <td>{{$pengeluaran->sekretaris->name}}</td>
+                        <td>{{$bayarPinjaman->submitted->name}}</td>
                     </tr>
                     <tr>
                         <td>Nominal</td>
                         <td>:</td>
-                        <td>Rp. {{number_format( $pengeluaran->amount, 0, ',', '.')}}</td>
+                        <td>Rp. {{number_format( $bayarPinjaman->amount, 0, ',', '.')}}</td>
+                    </tr>
+                    <tr>
+                        <td>Pembayaran</td>
+                        <td>:</td>
+                        <td>{{ $bayarPinjaman->payment_method}}</td>
                     </tr>
                     <tr>
                         <td>Status</td>
                         <td>:</td>
                         <td>
-                            @if($pengeluaran->status === 'Acknowledged')
+                            @if($bayarPinjaman->status === 'confirmed')
                             <span class="badge badge-success">Selesai</span>
-                            @elseif($pengeluaran->status === 'pending')
-                            <span class="badge badge-warning">Pending</span>
-                            @elseif($pengeluaran->status === 'rejected')
+                            @elseif($bayarPinjaman->status === 'process')
+                            <span class="badge badge-warning">Menunggu persetujuan <br> Bendahara</span>
+                            @elseif($bayarPinjaman->status === 'rejected')
                             <span class="badge badge-danger">Rejected</span>
-                            @elseif($pengeluaran->status === 'approved_by_chairman')
-                            <span class="badge badge-secondary">Menunggu persetujuan Ketua</span>
-                            @elseif($pengeluaran->status === 'disbursed_by_treasurer')
-                            <span class="badge badge-secondary">Dalam Proses Pencairan</span>
+                            @elseif($bayarPinjaman->status === 'pending')
+                            <span class="badge badge-secondary">Pending</span>
                             @else
                             <span class="badge badge-light">Unknown</span> <!-- default if status is undefined -->
                             @endif
                         </td>
                     </tr>
-
+                    @if ($bayarPinjaman->status == "confirmed")
                     <tr>
                         <td>Di Konfirmasi Oleh</td>
                         <td>:</td>
-                        <td>{{ isset($pengeluaran->ketua->name) ? $pengeluaran->ketua->name : 'Proses...' }}</td>
+                        <td>{{ $bayarPinjaman->confirmed->name}}</td>
                     </tr>
                     <tr>
                         <td>Tanggal di Konfirmasi</td>
                         <td>:</td>
-                        <td>{{ isset($pengeluaran->approved_date) ? $pengeluaran->approved_date : 'Proses...'}}</td>
+                        <td>{{ $bayarPinjaman->confirmation_date}}</td>
                     </tr>
-                    <tr>
-                        <td>Pencairan</td>
-                        <td>:</td>
-                        <td>{{ isset($pengeluaran->bendahara->name) ? $pengeluaran->bendahara->name : 'Proses...'}}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Tanggal di cairkan</td>
-                        <td>:</td>
-                        <td>{{ isset($pengeluaran->disbursed_date) ? $pengeluaran->disbursed_date : 'Proses...'}}
-                        </td>
-                    </tr>
+                    @endif
                 </tbody>
             </table>
             <div class="card-footer">
                 <p>
                     Keterangan : <br>
-                    {!!$pengeluaran->description!!}
+                    {{$bayarPinjaman->description}}
                 </p>
             </div>
             <br>
-
-            @if (isset($pengeluaran->receipt_path))
+            <!-- Thumbnail Tanda Bukti Transfer -->
+            @if ($bayarPinjaman->payment_method == "transfer")
             <div class="form-group col-6 col-sm-2 justify-between">
-                <a href="{{ asset($pengeluaran->receipt_path) }}" data-toggle="lightbox"
-                    data-title="Tanda Bukti Transfer - {{$pengeluaran->code}}" data-gallery="gallery">
-                    <img src="{{ asset($pengeluaran->receipt_path) }}" class="img-fluid mb-2" alt="white sample" />
+                <a href="{{ asset($bayarPinjaman->transfer_receipt_path) }}" data-toggle="lightbox"
+                    data-title="Tanda Bukti Transfer - {{$bayarPinjaman->code}}" data-gallery="gallery">
+                    <img src="{{ asset($bayarPinjaman->transfer_receipt_path) }}" class="img-fluid mb-2"
+                        alt="white sample" />
                 </a>
             </div>
             @endif
@@ -123,10 +116,9 @@
         <p>
             Catatan : <br>
             - Data sudah di konfirmasi, cek kembali setiap data<br>
-            - Data sudah di keluarkan<br>
-            - Data ini menjadi laporan yang sangat penting<br>
+            - Data ini menjadi laporan <br>
         </p>
-        <p><i> Semoga bermanfaat untuk kita semua</i></p>
+        <p><i> Satu Ikat kita Kuat</i></p>
     </div>
 </div>
 <!-- /.card -->

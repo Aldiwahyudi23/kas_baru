@@ -20,7 +20,7 @@
     </div>
     <!-- /.card-header -->
     <div class="card-body">
-        <table id="example2" class="table table-bordered table-hover">
+        <table id="example2" class="table table-bordered table-hover table-responsive">
             <thead>
                 <tr>
                     <th>Kode</th>
@@ -35,7 +35,7 @@
                     style="cursor: pointer;">
                     <td>{{$data->code}}</td>
                     <td>{{$data->data_warga->name}}</td>
-                    <td>{{$data->amount}}</td>
+                    <td>Rp{{number_format($data->amount,0,',','.')}}</td>
                     <td>
                         @if($data->status === 'confirmed')
                         <span class="badge badge-success">Selesai</span>

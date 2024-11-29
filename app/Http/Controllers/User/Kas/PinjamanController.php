@@ -98,46 +98,47 @@ class PinjamanController extends Controller
         $latestLoan = Loan::where('data_warga_id', $request->data_warga_id)
             ->latest()
             ->first();
+
         // Cek jika sudah ada pengajuan pinjaman sebelumnya
         if ($latestLoan) {
-            // Jika status belum lunas atau bukan 'paid in full', beri alert
-            if ($latestLoan->status !== 'paid in full') {
+            // Jika status belum lunas atau bukan 'Paid in Full', beri alert
+            if ($latestLoan->status !== 'Paid in Full') {
                 return back()->with('error', 'Pengajuan pinjaman tidak dapat dilanjutkan. Status pengajuan terakhir masih: ' . $latestLoan->status);
             }
 
             // Cek pembayaran terakhir di LoanRepayment untuk pinjaman ini
-            $lastRepayment = loanRepayment::where('loan_id', $latestLoan->id)
+            $lastRepayment = LoanRepayment::where('loan_id', $latestLoan->id)
                 ->latest('payment_date')
                 ->first();
 
             if ($lastRepayment) {
+                // Tanggal pembuatan pinjaman terbaru
                 $loanCreationDate = Carbon::parse($latestLoan->created_at);
+                // Tanggal pembayaran terakhir
                 $lastPaymentDate = Carbon::parse($lastRepayment->payment_date);
 
-                // Cek jika pinjaman selesai dalam waktu kurang dari satu bulan
-                if ($lastPaymentDate->diffInDays($loanCreationDate) < 30) {
-                    // Cek apakah satu minggu sudah berlalu sejak pembayaran terakhir
-                    if ($lastPaymentDate->addWeek()->isFuture()) {
-                        return back()->with('error', 'Pengajuan baru tidak dapat dilakukan. Harap tunggu satu minggu sejak pembayaran selesai pada ' . $lastRepayment->payment_date->format('d-m-Y'));
-                    }
-                } else if ($lastPaymentDate->addWeeks(2)->isFuture()) {
-                    return back()->with(
-                        'error',
-                        'Pengajuan baru tidak dapat dilakukan. Harap tunggu dua minggu sejak pembayaran terakhir pada ' . $lastRepayment->payment_date->format('d-m-Y')
-                    );
-                }
-            } else {
-                // Jika tidak ada riwayat pembayaran, maka ambil waktu pengajuan pinjaman
-                $loanCreationDate = Carbon::parse($latestLoan->created_at);
+                // Ambil data pengaturan waktu tunggu
+                $kurangSebulan = AnggaranSetting::where('label_anggaran', 'Lunas kurang sebulan (Minggu)')
+                    ->where('anggaran_id', $dataAnggaran->id)
+                    ->first();
+                $pembayaranTanpaLebih = AnggaranSetting::where('label_anggaran', 'Pembayaran tanpa lebih (hari)')
+                    ->where('anggaran_id', $dataAnggaran->id)
+                    ->first();
+                $weeksToAdd = intval($kurangSebulan->catatan_anggaran);
+                $tanpaLebih = intval($pembayaranTanpaLebih->catatan_anggaran);
 
-                if ($latestLoan->status == 'paid in full') {
-                    // Cek waktu satu minggu sejak tanggal pengajuan pinjaman terakhir
-                    if ($loanCreationDate->addWeek()->isFuture()) {
-                        return back()->with('error', 'Pengajuan baru tidak dapat dilakukan. Harap tunggu satu minggu sejak pengajuan terakhir pada ' . $loanCreationDate->format('d-m-Y'));
-                    }
+                // Hitung tanggal pengajuan berikutnya berdasarkan aturan waktu tunggu
+                $nextEligibleDate = $lastPaymentDate->copy()->addWeeks($weeksToAdd);
+
+                // Cek jika selisih antara pembayaran terakhir dan pengajuan baru kurang dari sebulan
+                $daysDifference = $loanCreationDate->diffInDays($lastPaymentDate);
+
+                if ($daysDifference < $tanpaLebih && now()->lessThan($nextEligibleDate)) {
+                    return back()->with('error', 'Pengajuan baru tidak dapat dilakukan. Coba lagi pada tanggal ' . $nextEligibleDate->format('d-m-Y'));
                 }
             }
         }
+
 
         DB::beginTransaction();
 
@@ -307,7 +308,25 @@ class PinjamanController extends Controller
 
         $id = Crypt::decrypt($id);
         $pinjaman = Loan::findOrFail($id);
-        return view('user.program.kas.detail.show_pinjaman', compact('pinjaman'));
+        $bayarPinjaman = loanRepayment::where('loan_id', $pinjaman->id)->get();
+        // Ambil tanggal pembayaran terakhir
+        $lastRepayment = LoanRepayment::where('loan_id', $pinjaman->id)
+            ->latest('payment_date')
+            ->first();
+        // Tanggal pembuatan pinjaman terbaru
+        $loanCreationDate = Carbon::parse($pinjaman->created_at);
+        // Tanggal pembayaran terakhir
+        $lastPaymentDate = Carbon::parse($lastRepayment->payment_date);
+        // Cek jika selisih antara pembayaran terakhir dan pengajuan baru kurang dari sebulan
+        $waktuPembayaran = $loanCreationDate->diffInDays($lastPaymentDate);
+        // mengecek untuk data yang telah di atau runtuk pembayaran yang tanpa lebih
+        $pembayaranTanpaLebih = AnggaranSetting::where('label_anggaran', 'Pembayaran tanpa lebih (hari)')
+            ->where('anggaran_id', $pinjaman->anggaran_id)
+            ->first();
+        $tanpaLebih = intval($pembayaranTanpaLebih->catatan_anggaran);
+        $waktuDitentukan = $tanpaLebih;
+
+        return view('user.program.kas.detail.show_pinjaman', compact('pinjaman', 'bayarPinjaman', 'waktuPembayaran', 'waktuDitentukan'));
     }
 
     /**
@@ -806,10 +825,6 @@ class PinjamanController extends Controller
     {
         $id = Crypt::decrypt($id);
 
-        $dataAnggaran = Anggaran::where('name', 'Dana Pinjam')->first();
-        // Cek apakah Saldo cukup berdasarkan anggaran
-        $saldo_akhir_request =  AnggaranSaldo::where('type', $dataAnggaran->name)->latest()->first(); //mengambil data yang terakhir berdasarkan type anggaran
-
         DB::beginTransaction();
 
         try {
@@ -835,30 +850,22 @@ class PinjamanController extends Controller
             $saldo->save();
             // -------------------------------------------
 
-            // 1. Ambil semua anggaran dengan label "persentase"
-            $anggaranItems = AnggaranSetting::where('label_anggaran', 'persentase')->get();
-            foreach ($anggaranItems as $anggaran) {
-                $anggaran_saldo_terakhir =  AnggaranSaldo::where('type', $anggaran->anggaran->name)->latest()->first(); //mengambil data yang terakhir berdasarkan type anggaran
-                // Hitung alokasi dana berdasarkan catatan_anggaran sebagai persentase
-                $percenAmount = ($data->amount / $saldo_akhir_request->saldo) * 100;
-                $saldo_anggaran = new AnggaranSaldo();
+            $dataAnggaran = Anggaran::where('name', 'Dana Pinjam')->first();
+            // Cek apakah Saldo cukup berdasarkan anggaran
+            $saldo_akhir_request =  AnggaranSaldo::where('type', $dataAnggaran->name)->latest()->first(); //mengambil data yang terakhir berdasarkan type anggaran
 
-                if ($anggaran->anggaran->name === $saldo_akhir_request->type) {
-                    $saldo_anggaran->type = $dataAnggaran->name;
-                    $saldo_anggaran->percentage = $percenAmount;
-                    $saldo_anggaran->amount = '-' . $data->loan_amount;
-                    $saldo_anggaran->saldo = $saldo_akhir_request->saldo - $data->amount;
-                } else {
-                    $saldo_anggaran->type = $anggaran_saldo_terakhir->type;
-                    $saldo_anggaran->percentage = $anggaran_saldo_terakhir->percentage;
-                    $saldo_anggaran->amount = $anggaran_saldo_terakhir->amount;
-                    $saldo_anggaran->saldo = $anggaran_saldo_terakhir->saldo;
-                }
-                $saldo_anggaran->saldo_id = $saldo->id; //mengambil id dari model saldo di atas
-                $saldo_anggaran->cash_saldo = $anggaran_saldo_terakhir->cash_saldo - $data->amount;
+            // Hitung alokasi dana berdasarkan catatan_anggaran sebagai persentase
+            $percenAmount = ($data->loan_amount / $saldo_akhir_request->saldo) * 100;
+            $saldo_anggaran = new AnggaranSaldo();
 
-                $saldo_anggaran->save();
-            }
+            $saldo_anggaran->type = $dataAnggaran->name;
+            $saldo_anggaran->percentage = $percenAmount;
+            $saldo_anggaran->amount = '-' . $data->loan_amount;
+            $saldo_anggaran->saldo = $saldo_akhir_request->saldo - $data->loan_amount;
+            $saldo_anggaran->saldo_id = $saldo->id; //mengambil id dari model saldo di atas
+
+            $saldo_anggaran->save();
+
 
             // // Mengambil data pengaju (pengguna yang menginput)
             // $pengaju = DataWarga::find(Auth::user()->data_warga_id);

@@ -93,7 +93,7 @@ class PemasukanController extends Controller
             return redirect()->back()->with('error',  'Nominal yang di masukan kurang dari kesepakatan, ( ' . $programItems->catatan_program . ' )');
         }
         // Mengecek apakah sudah ada pengajuan kas yang sedang diproses
-        $cek_kasPayment = KasPayment::where('status', 'process')->count();
+        $cek_kasPayment = KasPayment::where('status', 'process')->where('data_warga_id',Auth::user()->data_warga_id)->count();
         if ($cek_kasPayment >= 1) {
             return redirect()->back()->with('error', 'Pengajuan gagal dikirim. Sudah ada pengajuan kas yang sedang diproses.');
         }
@@ -494,7 +494,6 @@ class PemasukanController extends Controller
                     $saldo_anggaran->percentage = $anggaran->catatan_anggaran;
                     $saldo_anggaran->amount = $allocatedAmount;
                     $saldo_anggaran->saldo = ($anggaran_saldo_terakhir->saldo ?? 0) + $allocatedAmount;
-                    $saldo_anggaran->cash_saldo = ($anggaran_saldo_terakhir->cash_saldo ?? 0) + $request->amount;
 
                     $saldo_anggaran->save();
                 }

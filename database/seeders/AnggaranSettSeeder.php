@@ -50,6 +50,24 @@ class AnggaranSettSeeder extends Seeder
                 'catatan_anggaran' => '3',
 
             ],
+            [
+                'anggaran_id' => '3',
+                'label_anggaran' => 'Max Pinjaman ke 2 (Minggu)',
+                'catatan_anggaran' => '6',
+
+            ],
+            [
+                'anggaran_id' => '3',
+                'label_anggaran' => 'Lunas kurang sebulan (Minggu)',
+                'catatan_anggaran' => '1',
+
+            ],
+            [
+                'anggaran_id' => '3',
+                'label_anggaran' => 'Pembayaran tanpa lebih (hari)',
+                'catatan_anggaran' => '30',
+
+            ],
         ]);
     }
 }

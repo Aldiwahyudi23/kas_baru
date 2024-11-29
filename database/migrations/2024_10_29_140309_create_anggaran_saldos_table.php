@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('anggaran_saldos', function (Blueprint $table) {
             $table->id();
             $table->foreignId('saldo_id')->constrained('saldos')->onDelete('cascade'); // Referensi pinjaman
-            $table->decimal('cash_saldo', 12, 2);
             $table->string('type');
             $table->decimal('percentage', 5, 2);
             $table->decimal('amount');

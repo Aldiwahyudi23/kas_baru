@@ -9,7 +9,7 @@ class AnggaranSaldo extends Model
 {
     use HasFactory;
 
-    public function saldo()
+    public function saldos()
     {
         return $this->belongsTo(Saldo::class, 'saldo_id');
     }

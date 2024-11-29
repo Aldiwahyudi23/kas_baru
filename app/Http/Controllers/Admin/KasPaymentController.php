@@ -167,7 +167,6 @@ class KasPaymentController extends Controller
                 $saldo_anggaran->percentage = $anggaran->catatan_anggaran;
                 $saldo_anggaran->amount = $allocatedAmount;
                 $saldo_anggaran->saldo = ($anggaran_saldo_terakhir->saldo ?? 0) + $allocatedAmount;
-                $saldo_anggaran->cash_saldo = ($anggaran_saldo_terakhir->cash_saldo ?? 0) + $request->amount;
 
                 $saldo_anggaran->save();
             }

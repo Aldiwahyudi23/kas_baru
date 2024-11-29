@@ -35,8 +35,7 @@
                         @error('transfer_receipt_path')
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
-                        <br>
-                        <div class="tampil-gambar"></div>
+                        <div class="tampil-gambar mt-3"></div>
                     </div>
 
                     <div class="form-group">

@@ -225,7 +225,6 @@ class LoanController extends Controller
                     $saldo_anggaran->saldo = $anggaran_saldo_terakhir->saldo;
                 }
                 $saldo_anggaran->saldo_id = $saldo->id; //mengambil id dari model saldo di atas
-                $saldo_anggaran->cash_saldo = $anggaran_saldo_terakhir->cash_saldo - $request->loan_amount;
 
                 $saldo_anggaran->save();
             }

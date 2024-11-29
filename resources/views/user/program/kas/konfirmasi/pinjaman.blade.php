@@ -39,8 +39,8 @@
     </div>
     <!-- /.card-header -->
     <div class="card-body">
-        <div class="card-body table-responsive p-0">
-            <table class="table table-hover text-nowrap">
+        <div class="card-body  p-0">
+            <table class="table table-hover text-nowrap table-responsive">
                 <tbody>
                     <tr>
                         <td>Kode</td>
@@ -85,7 +85,8 @@
                             @elseif($pinjaman->status === 'approved_by_chairman')
                             <span class="badge badge-secondary">Proses Pencairan oleh Bendahara</span>
                             @elseif($pinjaman->status === 'disbursed_by_treasurer')
-                            <span class="badge badge-secondary">Sudah di cairkan, Menunggu konfirmasi bahwa uang telah
+                            <span class="badge badge-secondary">Sudah di cairkan, <br> Menunggu konfirmasi bahwa uang
+                                telah
                                 di terima </span>
                             @else
                             <span class="badge badge-light">Unknown</span> <!-- default if status is undefined -->
@@ -136,9 +137,10 @@
             </div>
             @endif
         </div>
-        @if ($pinjaman->status != "Acknowledged")
+        @if (in_array($pinjaman->status , ['pending','approved_by_chairman','disbursed_by_treasurer']))
         <!-- untuk ketua -->
         @if(Auth::user()->role->name == "Ketua" || Auth::user()->role->name == "Wakil Ketua")
+        <!-- Ketua bisa mengkonfimrasi ketika status hanya peding -->
         @if ($pinjaman->status == "pending")
         <form action="{{ route('pinjaman.approved',Crypt::encrypt($pinjaman->id)) }}" method="POST"
             enctype="multipart/form-data" id="adminForm">
@@ -150,6 +152,7 @@
             <!-- Button Submit -->
             <button type="submit" class="btn btn-success" id="submitBtns">Setujui</button>
         </form>
+        <!-- dan jika sudah mengkonfirmasi muncul muncul ini  -->
         @else
         <div class="alert alert-success alert-dismissible">
             <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
@@ -177,7 +180,7 @@
                     value="{{old('disbursement_receipt_path')}}"
                     class="form-control col-12 @error('disbursement_receipt_path') is-invalid @enderror"
                     onchange="preview('.tampil-bukti', this.files[0])" required>
-                
+
                 <div class="tampil-bukti mt-3"></div>
             </div>
 
@@ -193,7 +196,7 @@
             <button type="submit" class="btn btn-success" id="submitBtns">Upload Tanda Bukti</button>
         </form>
         <!-- JIka masih belum di setujui ketua tampilkan ini  -->
-        @else
+        @elseif ($pinjaman->status == "pending")
         <div class="alert alert-warning alert-dismissible">
             <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
             <h5><i class="icon fas fa-exclamation-triangle"></i> Menunggu persetujuan Ketua </h5>

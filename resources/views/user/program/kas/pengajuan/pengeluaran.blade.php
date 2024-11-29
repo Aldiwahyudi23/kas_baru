@@ -20,7 +20,7 @@
     </div>
     <!-- /.card-header -->
     <div class="card-body">
-        <table id="example2" class="table table-bordered table-hover">
+        <table id="example2" class="table table-bordered table-hover table-responsive">
             <thead>
                 <tr>
                     <th>Status</th>
@@ -49,7 +49,7 @@
                         @endif
                     </td>
                     <td>{{$data->anggaran->name}}</td>
-                    <td>{{$data->amount}}</td>
+                    <td>{{number_format($data->amount,0,',','.')}}</td>
                     <td>{{$data->code}}</td>
 
                 </tr>

@@ -12,7 +12,6 @@
                 <tr>
                     <th>No</th>
                     <th>Kode</th>
-                    <th>Saldo Kas</th>
                     <th>Nama Anggaran</th>
                     <th>Persentase</th>
                     <th>Nominal</th>
@@ -28,8 +27,7 @@
                 <?php $no++; ?>
                 <tr>
                     <td>{{$no}} </td>
-                    <td>{{$data->saldo_id}} </td>
-                    <td>Rp {{number_format($data->cash_saldo, 2, ',','.')}} </td>
+                    <td>{{$data->saldos->code}} </td>
                     <td>{{$data->type}} </td>
                     <td>{{$data->percentage}} </td>
                     <td>Rp {{number_format($data->amount, 2, ',','.')}} </td>

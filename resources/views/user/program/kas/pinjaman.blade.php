@@ -102,14 +102,19 @@
                                     <i class="far fa-clock bg-gray"></i>
                                     <div class="timeline-item">
                                         <div class="timeline-body">
+
                                             @if($pinjaman_proses->first()->status === 'Acknowledged')
-                                            <span class="badge badge-success">Selesai</span>
+                                            <span class="badge badge-success">Uang sudah diterima</span>
                                             @elseif($pinjaman_proses->first()->status === 'pending')
                                             <span class="badge badge-warning">Menunggu persetujuan Ketua</span>
                                             @elseif($pinjaman_proses->first()->status === 'rejected')
                                             <span class="badge badge-danger">Rejected</span>
                                             @elseif($pinjaman_proses->first()->status === 'approved_by_chairman')
                                             <span class="badge badge-secondary">Proses Pencairan oleh Bendahara</span>
+                                            @elseif($pinjaman_proses->first()->status === 'In Repayment')
+                                            <span class="badge badge-success">Proses Cicil</span>
+                                            @elseif($pinjaman_proses->first()->status === 'Paid in Full')
+                                            <span class="badge badge-success">Selesai / Lunas</span>
                                             @elseif($pinjaman_proses->first()->status === 'disbursed_by_treasurer')
                                             <span class="badge badge-primary">Sudah di cairkan </span>
                                             <p>
@@ -134,8 +139,8 @@
                                                     Uang sudah di
                                                     terima</button>
                                             </form>
-                                            @endif
                                         </div>
+                                        @endif
                                     </div>
                                 </div>
                             </div>

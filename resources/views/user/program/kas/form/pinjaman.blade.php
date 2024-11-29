@@ -3,7 +3,7 @@
 
                     <!-- Jumlah Pembayaran -->
                     <div class="form-group">
-                        <label for="amount">Jumlah Pembayaran <span class="text-danger">*</span></label>
+                        <label for="amount">Jumlah Pinjaman <span class="text-danger">*</span></label>
                         <input type="text" name="amount_display" id="amount_display"
                             value="{{ old('amount') ? number_format(old('amount'), 2, ',', '.') : '' }}"
                             class="form-control col-12 @error('amount') is-invalid @enderror"

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User\Kas;
 
 use App\Http\Controllers\Controller;
+use App\Models\Anggaran;
 use App\Models\AnggaranSaldo;
 use App\Models\AnggaranSetting;
 use App\Models\LayoutsForm;
@@ -238,8 +239,9 @@ class BayarPinjamanController extends Controller
     public function show(string $id)
     {
         $id = Crypt::decrypt($id);
-        $kas_payment = loanRepayment::findOrFail($id);
-        return view('user.program.kas.detail.show_kas', compact('kas_payment'));
+        $bayarPinjaman = loanRepayment::findOrFail($id);
+
+        return view('user.program.kas.detail.show_bayarPinjaman', compact('bayarPinjaman'));
     }
 
     /**
@@ -372,11 +374,28 @@ class BayarPinjamanController extends Controller
     {
         $id = Crypt::decrypt($id);
         $pinjaman = Loan::findOrFail($id);
-        $bayarPinjaman = loanRepayment::where('loan_id',$id)->get();
-        $layout_form = LayoutsForm::first();
-        $cek_pembayaran = loanRepayment::where('loan_id',$id)->where('status', '!=', 'confirmed')->first();
+        $bayarPinjaman = loanRepayment::where('loan_id', $id)->get();
+        // Ambil tanggal pembayaran terakhir
+        $lastRepayment = LoanRepayment::where('loan_id', $pinjaman->id)
+            ->latest('payment_date')
+            ->first();
+        // Tanggal pembuatan pinjaman terbaru
+        $loanCreationDate = Carbon::parse($pinjaman->created_at);
+        // Tanggal pembayaran terakhir
+        $lastPaymentDate = Carbon::parse($lastRepayment->payment_date);
+        // Cek jika selisih antara pembayaran terakhir dan pengajuan baru kurang dari sebulan
+        $waktuPembayaran = $loanCreationDate->diffInDays($lastPaymentDate);
+        // mengecek untuk data yang telah di atau runtuk pembayaran yang tanpa lebih
+        $pembayaranTanpaLebih = AnggaranSetting::where('label_anggaran', 'Pembayaran tanpa lebih (hari)')
+            ->where('anggaran_id', $pinjaman->anggaran_id)
+            ->first();
+        $tanpaLebih = intval($pembayaranTanpaLebih->catatan_anggaran);
+        $waktuDitentukan = $tanpaLebih;
 
-        return view('user.program.kas.pembayaran.bayarPinjaman', compact('pinjaman', 'cek_pembayaran', 'layout_form', 'bayarPinjaman'));
+        $layout_form = LayoutsForm::first();
+        $cek_pembayaran = loanRepayment::where('loan_id', $id)->where('status', '!=', 'confirmed')->first();
+
+        return view('user.program.kas.pembayaran.bayarPinjaman', compact('pinjaman', 'cek_pembayaran', 'layout_form', 'bayarPinjaman', 'waktuPembayaran', 'waktuDitentukan'));
     }
 
     public function pengajuan()
@@ -412,18 +431,9 @@ class BayarPinjamanController extends Controller
             'status' => 'required',
             'is_deposited' => 'required',
         ]);
-        // 1. Ambil semua anggaran dengan label "persentase"
-        $anggaranItems = AnggaranSetting::where('label_anggaran', 'persentase');
-        // 2. Hitung total persentase
-        $totalPercentage = $anggaranItems->sum('catatan_anggaran');
-
-        // 3. Jika total persentase melebihi 100%, batalkan proses dan tampilkan pesan error
-        if ($totalPercentage > 100) {
-            return redirect()->back()->with('error', 'Total persentase alokasi ' . $totalPercentage . ' melebihi 100%. Harap perbaiki nilai persentase anggaran.');
-        }
-        if ($totalPercentage < 100) {
-            return redirect()->back()->with('error',  'Total persentase alokasi ' . $totalPercentage . ' kurang dari 100%. Harap perbaiki nilai persentase anggaran.');
-        }
+        $dataAnggaran = Anggaran::where('name', 'Dana Pinjam')->first();
+        // Cek apakah Saldo cukup berdasarkan anggaran
+        $saldo_akhir_request =  AnggaranSaldo::where('type', 'Dana Pinjam')->latest()->first(); //mengambil data yang terakhir berdasarkan type anggaran
 
         // jika pilihan status nya pending maka berhenti sampai sini
         if ($request->status == "pending") {
@@ -449,7 +459,6 @@ class BayarPinjamanController extends Controller
             $data = loanRepayment::findOrFail($id);
             $data->data_warga_id = $request->data_warga_id;
             $data->amount = $request->amount;
-            // $data->payment_date = $request->payment_date;
             $data->payment_method = $request->payment_method;
             $data->description = $request->description;
             $data->submitted_by = $request->submitted_by;
@@ -457,147 +466,192 @@ class BayarPinjamanController extends Controller
             $data->status = $request->status;
             $data->confirmation_date = $dateTime;
             $data->is_deposited = $request->is_deposited;
-            // Cek apakah file profile_picture di-upload
-            // if ($request->hasFile('transfer_receipt_path')) {
-            //     $file = $request->file('transfer_receipt_path');
-            //     $path = $file->store(
-            //         'kas/pemasukan',
-            //         'public'
-            //     ); // Simpan gambar ke direktori public
-            //     $data->transfer_receipt_path = $path;
-            // }
 
             $data->update();
 
-            // $loan = Loan::findOrFail($data->loan_id);
-            // $cek_sisa = $loan->remaining_balance - $request->amount;
-            // $cek_sisa = $loan->overpayment_balance + $cek_sisa;
-            // $loan->status = "selesai";
+            // ----------------------------------------
+            $loan = Loan::findOrFail($data->loan_id); // Ambil data loan berdasarkan ID
+            // Hitung sisa saldo setelah pembayaran
+            $cek_sisa = $loan->remaining_balance - $request->amount;
+            // Ambil tanggal pembayaran terakhir
+            $lastRepayment = LoanRepayment::where('loan_id', $loan->id)
+                ->latest('payment_date')
+                ->first();
+            // Tanggal pembuatan pinjaman terbaru
+            $loanCreationDate = Carbon::parse($loan->created_at);
+            // Tanggal pembayaran terakhir
+            $lastPaymentDate = Carbon::parse($lastRepayment->payment_date);
+            // Cek jika selisih antara pembayaran terakhir dan pengajuan baru kurang dari sebulan
+            $daysDifference = $loanCreationDate->diffInDays($lastPaymentDate);
+            // mengecek untuk data yang telah di atau runtuk pembayaran yang tanpa lebih
+            $pembayaranTanpaLebih = AnggaranSetting::where('label_anggaran', 'Pembayaran tanpa lebih (hari)')
+                ->where('anggaran_id', $loan->anggaran_id)
+                ->first();
+            $tanpaLebih = intval($pembayaranTanpaLebih->catatan_anggaran);
+            $waktuDitentukan = $tanpaLebih;
+
+            if ($cek_sisa < 0) {
+                // Jika pembayaran melebihi saldo yang tersisa
+                $loan->overpayment_balance += abs($cek_sisa); // Tambahkan ke overpayment
+                $loan->remaining_balance = 0; // Set remaining balance ke 0
+                $loan->status = 'paid in full'; // Ubah status menjadi paid in full
+            } elseif ($cek_sisa == 0) {
+                // Jika saldo pas habis setelah pembayaran
+                $loan->remaining_balance = 0;
+                if ($daysDifference < $waktuDitentukan) {
+                    $loan->status = 'paid in full'; // Ubah status menjadi paid in full
+                } else {
+                    $loan->status = 'In Repayment'; // Ubah status menjadi paid in full
+                }
+            } else {
+                // Jika saldo masih tersisa setelah pembayaran
+                $loan->remaining_balance = $cek_sisa;
+                $loan->status = 'In Repayment'; // Ubah status menjadi paid in full
+            }
+
+            // Simpan perubahan pada loan
+            $loan->update();
 
             // -------------------------------------------------
 
-            if ($request->amount == 'confirmed') {
-                $saldo_terbaru = Saldo::latest()->first();
-                $saldo = new Saldo();
-                $saldo->code = $data->code;
-                $saldo->amount = $data->amount;
-                if ($request->payment_method === "transfer") {
-                    $atm = ($saldo_terbaru->atm_balance ?? 0) + $data->amount;
-                    $out = ($saldo_terbaru->cash_outside ?? 0);
-                } else if ($request->payment_method === "cash") {
-                    $atm = ($saldo_terbaru->atm_balance ?? 0);
-                    $out = ($saldo_terbaru->cash_outside ?? 0) + $data->amount;
-                };
-                $saldo->atm_balance = $atm;
-                $saldo->total_balance = ($saldo_terbaru->total_balance ?? 0) + $data->amount;
-                $saldo->ending_balance = ($saldo_terbaru->total_balance ?? 0);
-                $saldo->cash_outside = $out;
+            $saldo_terbaru = Saldo::latest()->first();
+            $saldo = new Saldo();
+            $saldo->code = $data->code;
+            $saldo->amount = $data->amount;
+            if ($request->payment_method === "transfer") {
+                $atm = ($saldo_terbaru->atm_balance ?? 0) + $data->amount;
+                $out = ($saldo_terbaru->cash_outside ?? 0);
+            } else if ($request->payment_method === "cash") {
+                $atm = ($saldo_terbaru->atm_balance ?? 0);
+                $out = ($saldo_terbaru->cash_outside ?? 0) + $data->amount;
+            };
+            $saldo->atm_balance = $atm;
+            $saldo->total_balance = ($saldo_terbaru->total_balance ?? 0) + $data->amount;
+            $saldo->ending_balance = ($saldo_terbaru->total_balance ?? 0);
+            $saldo->cash_outside = $out;
 
-                $saldo->save();
-                // -------------------------------------------
+            $saldo->save();
 
+            // -------------------------------------------
+            $dataAnggaran = Anggaran::where('name', 'Dana Pinjam')->first();
+            // Cek apakah Saldo cukup berdasarkan anggaran
+            $saldo_akhir_request =  AnggaranSaldo::where('type', $dataAnggaran->name)->latest()->first(); //mengambil data yang terakhir berdasarkan type anggaran
 
-                foreach ($anggaranItems->get() as $anggaran) {
-                    $anggaran_saldo_terakhir =  AnggaranSaldo::where('type', $anggaran->anggaran->name)->latest()->first(); //mengambil data yang terakhir berdasarkan type anggaran
-                    // Hitung alokasi dana berdasarkan catatan_anggaran sebagai persentase
-                    $allocatedAmount = $request->amount * ($anggaran->catatan_anggaran / 100);
-                    $saldo_anggaran = new AnggaranSaldo();
-                    $saldo_anggaran->saldo_id = $saldo->id; //mengambil id dari model saldo di atas
-                    $saldo_anggaran->type = $anggaran->anggaran->name;
-                    $saldo_anggaran->percentage = $anggaran->catatan_anggaran;
-                    $saldo_anggaran->amount = $allocatedAmount;
-                    $saldo_anggaran->saldo = ($anggaran_saldo_terakhir->saldo ?? 0) + $allocatedAmount;
-                    $saldo_anggaran->cash_saldo = ($anggaran_saldo_terakhir->cash_saldo ?? 0) + $request->amount;
-
-                    $saldo_anggaran->save();
-                }
-
-                // // Mengambil data pengaju (pengguna yang menginput)
-                // $pengaju = DataWarga::find($request->submitted_by);
-
-                // // Data Warga
-                // $data_warga = DataWarga::find($request->data_warga_id);
-                // $phoneNumberWarga = $data_warga->no_hp;
-
-                // // Pesan untuk Warga
-                // $messageWarga = "*Pembayaran Kas Terkonfirmasi*\n";
-                // $messageWarga .= "Selamat {$data_warga->name}, pembayaran kas Anda telah berhasil dikonfirmasi oleh " . Auth::user()->name . " \n\n";
-                // $messageWarga .= "Berikut adalah detail pembayaran Anda:\n";
-                // $messageWarga .= "- *Kode*: {$request->code}\n";
-                // $messageWarga .= "- *Tanggal Pembayaran*: {$data->payment_date}\n";
-                // $messageWarga .= "- *Nama*: {$data_warga->name}\n";
-                // $messageWarga .= "- *Di Input Oleh*: {$pengaju->name}\n";
-                // $messageWarga .= "- *Nominal*: Rp" . number_format($request->amount, 0, ',', '.') . "\n";
-                // $messageWarga .= "- *Keterangan*: {$request->description}\n\n";
-                // $messageWarga .= "Terima kasih telah memenuhi kewajiban pembayaran kas. Jika Anda memiliki pertanyaan lebih lanjut, silakan hubungi pengurus melalui kontak resmi.\n\n";
-                // $messageWarga .= "*Semoga hari Anda menyenangkan!*\n\n";
-                // $messageWarga .= "*Salam hangat,*\n";
-                // $messageWarga .= "*Pengurus Kas Keluarga*";
-
-                // // mengirim ke email 
-                // $recipientEmail = $data_warga->email;
-                // $recipientName = $data_warga->name;
-                // // Ganti tanda bintang dengan HTML <strong>
-                // $bodyMessage = preg_replace('/\*(.*?)\*/', '<b>$1</b>', $messageWarga);
-                // $status = $data->status;
-                // $actionUrl = 'https://keluargamahaya.com/detail';
-
-                // // Mengambil nomor telepon Ketua Untuk Laporan
-                // $ketua = User::whereHas('role', function ($query) {
-                //     $query->where('name', 'Ketua');
-                // })->with('dataWarga')->first();
-
-                // $phoneNumberPengurus = $ketua->dataWarga->no_hp ?? null;
-
-                // // Pesan untuk Ketua
-                // $messageKetua = "*Laporan Pembayaran Kas Terkonfirmasi*\n";
-                // $messageKetua .= "Halo {$ketua->dataWarga->name}\n\n";
-                // $messageKetua .= "Berikut adalah laporan pembayaran kas yang telah berhasil dikonfirmasi oleh  " . Auth::user()->name . " \n\n";
-                // $messageKetua .= "- *Kode*: {$request->code}\n";
-                // $messageKetua .= "- *Tanggal Pembayaran*: {$data->payment_date}\n";
-                // $messageKetua .= "- *Nama Warga*: {$data_warga->name}\n";
-                // $messageKetua .= "- *Di Input Oleh*: {$pengaju->name}\n";
-                // $messageKetua .= "- *Nominal*: Rp" . number_format($request->amount, 0, ',', '.') . "\n";
-                // $messageKetua .= "- *Keterangan*: {$request->description}\n\n";
-                // $messageKetua .= "Pembayaran ini telah diproses dan dikonfirmasi oleh pengurus.\n\n";
-                // $messageKetua .= "*Salam hormat,*\n";
-                // $messageKetua .= "*Sistem Kas Keluarga*";
-
-
-                // // URL gambar dari direktori storage
-                // $imageUrl = asset('storage/kas/pengeluaran/ymKJ8SbQ7NLrLAhjAAKMNfOFHCK8O70HiqEiiIPE.jpg');
-
-                // $recipientEmailPengurus = $ketua->dataWarga->email;
-                // $recipientNamePengurus = $ketua->dataWarga->name;
-                // // Data untuk email pengurus
-                // $bodyMessagePengurus = preg_replace('/\*(.*?)\*/', '<b>$1</b>', $messageKetua);
-                // $actionUrlPengurus = 'https://keluargamahaya.com/detail';
-
-                // // Mengirim notifikasi email ke anggota
-                // Mail::to($recipientEmail)->send(new Notification($recipientName, $bodyMessage, $status, $actionUrl));
-
-                // // Mengirim email bendahara
-                // Mail::to($recipientEmailPengurus)->send(new Notification($recipientNamePengurus, $bodyMessagePengurus, $status, $actionUrlPengurus));
-
-                // // Mengirim pesan ke Warga
-                // $responseWarga = $this->fonnteService->sendWhatsAppMessage($phoneNumberWarga, $messageWarga, $imageUrl);
-
-                // // Mengirim pesan ke Pengurus
-                // $responsePengurus = $this->fonnteService->sendWhatsAppMessage($phoneNumberPengurus, $messageKetua, $imageUrl);
-
-                // DB::commit();
-                // // Cek hasil pengiriman
-                // if (
-                //     (isset($responseWarga['status']) && $responseWarga['status'] == 'success') &&
-                //     (isset($responsePengurus['status']) && $responsePengurus['status'] == 'success')
-                // ) {
-                //     return back()->with('success', 'Data tersimpan, Notifikasi berhasil dikirim ke Warga dan Pengurus!');
-                // }
-
-                // return back()->with('error', 'Data tersimpan, Gagal mengirim notifikasi');
+            if ($cek_sisa < 0) {
+                $jumlah = $data->amount - abs($cek_sisa);
             } else {
-                return redirect()->back()->with('info', 'Pembayaran kas belum masuk data');
+                $jumlah = $data->amount;
             }
+
+            // Hitung alokasi dana berdasarkan catatan_anggaran sebagai persentase
+            $percenAmount = ($jumlah / $loan->loan_amount) * 100;
+            $saldo_anggaran = new AnggaranSaldo();
+            $saldo_anggaran->type = $dataAnggaran->name;
+            $saldo_anggaran->percentage = $percenAmount;
+            $saldo_anggaran->amount =  $jumlah;
+            $saldo_anggaran->saldo = $saldo_akhir_request->saldo + $jumlah;
+            $saldo_anggaran->saldo_id = $saldo->id; //mengambil id dari model saldo di atas
+            $saldo_anggaran->save();
+
+            // Jika ada overpayment, masukkan ke Dana Kas
+            $percenAmount = (abs($cek_sisa) / $loan->loan_amount) * 100;
+            $saldo_akhir_kas =  AnggaranSaldo::where('type', 'Dana Kas')->latest()->first(); //mengambil data yang terakhir berdasarkan type anggaran
+            if ($cek_sisa < 0) {
+                $saldoAnggaranKas = new AnggaranSaldo();
+                $saldoAnggaranKas->type = 'Dana Kas';
+                $saldoAnggaranKas->percentage = $percenAmount;
+                $saldoAnggaranKas->amount += abs($cek_sisa); // Masukkan nominal overpayment
+                $saldoAnggaranKas->saldo = $saldo_akhir_kas->saldon + abs($cek_sisa);
+                $saldoAnggaranKas->saldo_id = $saldo->id; // ID saldo dari model Saldo
+                $saldoAnggaranKas->save();
+            }
+
+
+
+            // // Mengambil data pengaju (pengguna yang menginput)
+            // $pengaju = DataWarga::find($request->submitted_by);
+
+            // // Data Warga
+            // $data_warga = DataWarga::find($request->data_warga_id);
+            // $phoneNumberWarga = $data_warga->no_hp;
+
+            // // Pesan untuk Warga
+            // $messageWarga = "*Pembayaran Kas Terkonfirmasi*\n";
+            // $messageWarga .= "Selamat {$data_warga->name}, pembayaran kas Anda telah berhasil dikonfirmasi oleh " . Auth::user()->name . " \n\n";
+            // $messageWarga .= "Berikut adalah detail pembayaran Anda:\n";
+            // $messageWarga .= "- *Kode*: {$request->code}\n";
+            // $messageWarga .= "- *Tanggal Pembayaran*: {$data->payment_date}\n";
+            // $messageWarga .= "- *Nama*: {$data_warga->name}\n";
+            // $messageWarga .= "- *Di Input Oleh*: {$pengaju->name}\n";
+            // $messageWarga .= "- *Nominal*: Rp" . number_format($request->amount, 0, ',', '.') . "\n";
+            // $messageWarga .= "- *Keterangan*: {$request->description}\n\n";
+            // $messageWarga .= "Terima kasih telah memenuhi kewajiban pembayaran kas. Jika Anda memiliki pertanyaan lebih lanjut, silakan hubungi pengurus melalui kontak resmi.\n\n";
+            // $messageWarga .= "*Semoga hari Anda menyenangkan!*\n\n";
+            // $messageWarga .= "*Salam hangat,*\n";
+            // $messageWarga .= "*Pengurus Kas Keluarga*";
+
+            // // mengirim ke email 
+            // $recipientEmail = $data_warga->email;
+            // $recipientName = $data_warga->name;
+            // // Ganti tanda bintang dengan HTML <strong>
+            // $bodyMessage = preg_replace('/\*(.*?)\*/', '<b>$1</b>', $messageWarga);
+            // $status = $data->status;
+            // $actionUrl = 'https://keluargamahaya.com/detail';
+
+            // // Mengambil nomor telepon Ketua Untuk Laporan
+            // $ketua = User::whereHas('role', function ($query) {
+            //     $query->where('name', 'Ketua');
+            // })->with('dataWarga')->first();
+
+            // $phoneNumberPengurus = $ketua->dataWarga->no_hp ?? null;
+
+            // // Pesan untuk Ketua
+            // $messageKetua = "*Laporan Pembayaran Kas Terkonfirmasi*\n";
+            // $messageKetua .= "Halo {$ketua->dataWarga->name}\n\n";
+            // $messageKetua .= "Berikut adalah laporan pembayaran kas yang telah berhasil dikonfirmasi oleh  " . Auth::user()->name . " \n\n";
+            // $messageKetua .= "- *Kode*: {$request->code}\n";
+            // $messageKetua .= "- *Tanggal Pembayaran*: {$data->payment_date}\n";
+            // $messageKetua .= "- *Nama Warga*: {$data_warga->name}\n";
+            // $messageKetua .= "- *Di Input Oleh*: {$pengaju->name}\n";
+            // $messageKetua .= "- *Nominal*: Rp" . number_format($request->amount, 0, ',', '.') . "\n";
+            // $messageKetua .= "- *Keterangan*: {$request->description}\n\n";
+            // $messageKetua .= "Pembayaran ini telah diproses dan dikonfirmasi oleh pengurus.\n\n";
+            // $messageKetua .= "*Salam hormat,*\n";
+            // $messageKetua .= "*Sistem Kas Keluarga*";
+
+
+            // // URL gambar dari direktori storage
+            // $imageUrl = asset('storage/kas/pengeluaran/ymKJ8SbQ7NLrLAhjAAKMNfOFHCK8O70HiqEiiIPE.jpg');
+
+            // $recipientEmailPengurus = $ketua->dataWarga->email;
+            // $recipientNamePengurus = $ketua->dataWarga->name;
+            // // Data untuk email pengurus
+            // $bodyMessagePengurus = preg_replace('/\*(.*?)\*/', '<b>$1</b>', $messageKetua);
+            // $actionUrlPengurus = 'https://keluargamahaya.com/detail';
+
+            // // Mengirim notifikasi email ke anggota
+            // Mail::to($recipientEmail)->send(new Notification($recipientName, $bodyMessage, $status, $actionUrl));
+
+            // // Mengirim email bendahara
+            // Mail::to($recipientEmailPengurus)->send(new Notification($recipientNamePengurus, $bodyMessagePengurus, $status, $actionUrlPengurus));
+
+            // // Mengirim pesan ke Warga
+            // $responseWarga = $this->fonnteService->sendWhatsAppMessage($phoneNumberWarga, $messageWarga, $imageUrl);
+
+            // // Mengirim pesan ke Pengurus
+            // $responsePengurus = $this->fonnteService->sendWhatsAppMessage($phoneNumberPengurus, $messageKetua, $imageUrl);
+
+            // DB::commit();
+            // // Cek hasil pengiriman
+            // if (
+            //     (isset($responseWarga['status']) && $responseWarga['status'] == 'success') &&
+            //     (isset($responsePengurus['status']) && $responsePengurus['status'] == 'success')
+            // ) {
+            //     return back()->with('success', 'Data tersimpan, Notifikasi berhasil dikirim ke Warga dan Pengurus!');
+            // }
+
+            // return back()->with('error', 'Data tersimpan, Gagal mengirim notifikasi');
+
             DB::commit();
 
             return redirect()->back()->with('success', 'Pembayaran kas berhasil');
