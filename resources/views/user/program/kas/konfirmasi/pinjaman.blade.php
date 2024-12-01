@@ -78,13 +78,17 @@
                         <td>:</td>
                         <td>
                             @if($pinjaman->status === 'Acknowledged')
-                            <span class="badge badge-success">Selesai</span>
+                            <span class="badge badge-success">Uang sudah diterima</span>
                             @elseif($pinjaman->status === 'pending')
                             <span class="badge badge-warning">Menunggu persetujuan Ketua</span>
                             @elseif($pinjaman->status === 'rejected')
                             <span class="badge badge-danger">Rejected</span>
                             @elseif($pinjaman->status === 'approved_by_chairman')
                             <span class="badge badge-secondary">Proses Pencairan oleh Bendahara</span>
+                            @elseif($pinjaman->status === 'In Repayment')
+                            <span class="badge badge-success">Proses Cicil</span>
+                            @elseif($pinjaman->status === 'Paid in Full')
+                            <span class="badge badge-success">Selesai / Lunas</span>
                             @elseif($pinjaman->status === 'disbursed_by_treasurer')
                             <span class="badge badge-secondary">Sudah di cairkan, <br> Menunggu konfirmasi bahwa uang
                                 telah

@@ -29,4 +29,13 @@ class Loan extends Model
     {
         return $this->belongsTo(DataWarga::class, 'disbursed_by');
     }
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'data_warga_id', 'data_warga_id');
+    }
+
+    public function loan_extension()
+    {
+        return $this->belongsTo(LoanExtension::class);
+    }
 }

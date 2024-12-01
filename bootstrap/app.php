@@ -22,6 +22,8 @@ return Application::configure(basePath: dirname(__DIR__))
             \RealRashid\SweetAlert\ToSweetAlert::class,
             \App\Http\Middleware\CheckActiveStatusAdmin::class,
             \App\Http\Middleware\CheckActiveStatus::class,
+            // Middleware lain
+            \App\Http\Middleware\DeadlineWarningMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

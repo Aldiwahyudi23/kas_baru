@@ -62,7 +62,13 @@
                 <li class="nav-item">
                     <a href="{{route('bayar-pinjaman.pengajuan')}}" class="nav-link">
                         <i class="far fa-circle nav-icon"></i>
-                        <p>Pengajuan Pinajaman</p>
+                        <p>Pengajuan Bayar Pinjaman</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{route('pinjaman-ke-dua.index')}}" class="nav-link">
+                        <i class="far fa-circle nav-icon"></i>
+                        <p>Pengajuan Pinjaman ke 2</p>
                     </a>
                 </li>
             </ul>

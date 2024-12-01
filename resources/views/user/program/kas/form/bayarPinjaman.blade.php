@@ -33,7 +33,7 @@
                         <input type="file" name="transfer_receipt_path" id="transfer_receipt_path" accept="image/*"
                             class="form-control col-12 @error('transfer_receipt_path') is-invalid @enderror"
                             onchange="preview('.tampil-gambar', this.files[0])">
-                        
+
                         <div class="tampil-gambar mt-3"></div>
                         @error('transfer_receipt_path')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -50,7 +50,16 @@
                     <!-- Menagmbil data Loan id -->
                     <input type="hidden" name="loan_id" value="{{$pinjaman->id}}">
                     <!-- Button Submit -->
-                    <button type="submit" class="btn btn-success" id="submitBtns">Bayar Pinjaman</button>
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-success" id="submitBtns">Bayar Pinjaman</button>
+
+                        @if ($hitungWaktu <= 7) <a
+                            href="{{ route('pinjaman-ke-dua.pengajuan', Crypt::encrypt($pinjaman->id)) }}"
+                            class="btn btn-warning">Pinjaman ke 2
+                            </a>
+                            @endif
+                    </div>
+
                 </form>
                 <br>
                 <!-- /.card-body -->
@@ -63,11 +72,11 @@
                 @section('script')
 
                 <script>
-// Function to toggle the visibility of the transfer receipt input based on selected payment method
-function toggleTransferReceipt() {
-    var paymentMethod = document.getElementById('payment_method').value;
-    var transferReceipt = document.getElementById('transfer_receipt');
-    transferReceipt.style.display = (paymentMethod === 'transfer') ? 'block' : 'none';
-}
+                    // Function to toggle the visibility of the transfer receipt input based on selected payment method
+                    function toggleTransferReceipt() {
+                        var paymentMethod = document.getElementById('payment_method').value;
+                        var transferReceipt = document.getElementById('transfer_receipt');
+                        transferReceipt.style.display = (paymentMethod === 'transfer') ? 'block' : 'none';
+                    }
                 </script>
                 @endsection

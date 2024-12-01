@@ -8,6 +8,7 @@ use App\Models\AnggaranSaldo;
 use App\Models\AnggaranSetting;
 use App\Models\LayoutsForm;
 use App\Models\Loan;
+use App\Models\LoanExtension;
 use App\Models\loanRepayment;
 use App\Models\Program;
 use App\Models\Saldo;
@@ -393,7 +394,7 @@ class BayarPinjamanController extends Controller
         $pinjaman = Loan::findOrFail($id);
         $bayarPinjaman = loanRepayment::where('loan_id', $id)->get();
         // Ambil tanggal pembayaran terakhir
-        $lastRepayment = LoanRepayment::where('loan_id', $pinjaman->id)
+        $lastRepayment = LoanRepayment::where('loan_id', $pinjaman->id)->where('status', 'confirmed')
             ->latest('payment_date')
             ->first();
         // Tanggal pembuatan pinjaman terbaru
@@ -404,23 +405,31 @@ class BayarPinjamanController extends Controller
             // Cek jika selisih antara pembayaran terakhir dan pengajuan baru kurang dari sebulan
         } else {
             // Jika tidak ada data pembayaran, beri nilai default atau abaikan logika tertentu
-            $lastPaymentDate = null; // Bisa diganti dengan default sesuai kebutuhan
+            $lastPaymentDate = $loanCreationDate; // Bisa diganti dengan default sesuai kebutuhan
             // Logika alternatif jika pembayaran terakhir tidak ada
             // Misalnya, lanjutkan pengajuan pinjaman
         }
         // Cek jika selisih antara pembayaran terakhir dan pengajuan baru kurang dari sebulan
-        $waktuPembayaran = $loanCreationDate->diffInDays($lastPaymentDate);
+        $waktubayar = $loanCreationDate->diffInDays($lastPaymentDate);
+        $waktuPembayaran =  round($waktubayar);
         // mengecek untuk data yang telah di atau runtuk pembayaran yang tanpa lebih
         $pembayaranTanpaLebih = AnggaranSetting::where('label_anggaran', 'Pembayaran tanpa lebih (hari)')
             ->where('anggaran_id', $pinjaman->anggaran_id)
             ->first();
         $tanpaLebih = intval($pembayaranTanpaLebih->catatan_anggaran);
         $waktuDitentukan = $tanpaLebih;
+        // Menghitung hari pinjaman dari awal pinjaman sampai sekarang
+        $waktuSekarang = Carbon::now();
+        $jatuhTempo = Carbon::parse($pinjaman->deadline_date);
+        $daysElapsed = $waktuSekarang->diffInDays($jatuhTempo, false); //mengambil data yang di hitung hari
+        $hitungWaktu = round($daysElapsed); //membulatkan hasil
+        // mengecek pengajuan ke 2
+        $cek_pengajuan = LoanExtension::where('loan_id', $pinjaman->id)->where('status',  'pending')->latest('created_at')->first();
 
         $layout_form = LayoutsForm::first();
         $cek_pembayaran = loanRepayment::where('loan_id', $id)->where('status', '!=', 'confirmed')->first();
 
-        return view('user.program.kas.pembayaran.bayarPinjaman', compact('pinjaman', 'cek_pembayaran', 'layout_form', 'bayarPinjaman', 'waktuPembayaran', 'waktuDitentukan'));
+        return view('user.program.kas.pembayaran.bayarPinjaman', compact('pinjaman', 'cek_pembayaran', 'layout_form', 'bayarPinjaman', 'waktuPembayaran', 'waktuDitentukan', 'hitungWaktu', 'cek_pengajuan'));
     }
 
     public function pengajuan()

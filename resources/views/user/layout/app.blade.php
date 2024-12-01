@@ -57,10 +57,10 @@
     @livewireStyles
     <!-- Untuk tanda wajib isi bintang merah -->
     <style>
-    .text-danger {
-        color: red;
-        /* Mengatur warna bintang menjadi merah */
-    }
+        .text-danger {
+            color: red;
+            /* Mengatur warna bintang menjadi merah */
+        }
     </style>
 
 </head>
@@ -104,8 +104,15 @@
         <div class="content-wrapper">
             <!-- Content Header (Page header) -->
             <div class="content-header">
-                <!-- Tombol Kembali -->
-                <i class="fas fa-arrow-left" onclick="goBack()"></i>
+                @if(isset($globalWarnings) && count($globalWarnings) > 0)
+                @foreach($globalWarnings as $warning)
+                <div class="alert {{ $warning['alert'] }} alert-dismissible">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    <h5><i class="icon fas {{ $warning['icon'] }}"></i>{{ $warning['type'] }}</h5>
+                    {{ $warning['description'] }}
+                </div>
+                @endforeach
+                @endif
             </div>
             <!-- /.content-header -->
 
@@ -144,9 +151,9 @@
     @livewireScripts
 
     <script>
-    function goBack() {
-        window.history.back(); // Kembali ke halaman sebelumnya
-    }
+        function goBack() {
+            window.history.back(); // Kembali ke halaman sebelumnya
+        }
     </script>
 
 
@@ -206,178 +213,178 @@
     <!-- AdminLTE for demo purposes -->
 
     <script>
-    function preview(selector, temporaryFile, width = 200) {
-        $(selector).empty();
-        $(selector).append(`<img src="${window.URL.createObjectURL(temporaryFile)}" width="${width}">`);
-    }
+        function preview(selector, temporaryFile, width = 200) {
+            $(selector).empty();
+            $(selector).append(`<img src="${window.URL.createObjectURL(temporaryFile)}" width="${width}">`);
+        }
     </script>
     <!-- Untuk class textarea -->
     <script>
-    $(function() {
-        // Summernote untuk semua textarea dengan class 'summernote-textarea'
-        $('.summernote-textarea').summernote();
+        $(function() {
+            // Summernote untuk semua textarea dengan class 'summernote-textarea'
+            $('.summernote-textarea').summernote();
 
-        // CodeMirror untuk semua textarea dengan class 'codemirror'
-        $('textarea.codemirror').each(function() {
-            CodeMirror.fromTextArea(this, {
-                mode: "htmlmixed",
-                theme: "monokai"
+            // CodeMirror untuk semua textarea dengan class 'codemirror'
+            $('textarea.codemirror').each(function() {
+                CodeMirror.fromTextArea(this, {
+                    mode: "htmlmixed",
+                    theme: "monokai"
+                });
             });
         });
-    });
     </script>
 
     <!-- Untuk class tabel -->
     <script>
-    $(function() {
-        $(".datatable").each(function() {
-            $(this).DataTable({
-                "responsive": true,
-                "lengthChange": false,
-                "autoWidth": false,
-                "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
-            }).buttons().container().appendTo($(this).closest('.dataTables_wrapper').find(
-                '.col-md-6:eq(0)'));
+        $(function() {
+            $(".datatable").each(function() {
+                $(this).DataTable({
+                    "responsive": true,
+                    "lengthChange": false,
+                    "autoWidth": false,
+                    "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+                }).buttons().container().appendTo($(this).closest('.dataTables_wrapper').find(
+                    '.col-md-6:eq(0)'));
+            });
+            $(".datatable1").each(function() {
+                $(this).DataTable({
+                    "responsive": true,
+                    "lengthChange": false,
+                    "autoWidth": false,
+                }).buttons().container().appendTo($(this).closest('.dataTables_wrapper').find(
+                    '.col-md-6:eq(0)'));
+            });
         });
-        $(".datatable1").each(function() {
-            $(this).DataTable({
-                "responsive": true,
-                "lengthChange": false,
-                "autoWidth": false,
-            }).buttons().container().appendTo($(this).closest('.dataTables_wrapper').find(
-                '.col-md-6:eq(0)'));
+    </script>
+    <script>
+        $(function() {
+            //Initialize Select2 Elements
+            $('.select2').select2()
+
+            //Initialize Select2 Elements
+            $('.select2bs4').select2({
+                theme: 'bootstrap4'
+            })
+
+            //color picker with addon
+            $('.my-colorpicker2').colorpicker()
+
+            $('.my-colorpicker2').on('colorpickerChange', function(event) {
+                $('.my-colorpicker2 .fa-square').css('color', event.color.toString());
+            })
         });
-    });
-    </script>
-    <script>
-    $(function() {
-        //Initialize Select2 Elements
-        $('.select2').select2()
-
-        //Initialize Select2 Elements
-        $('.select2bs4').select2({
-            theme: 'bootstrap4'
-        })
-
-        //color picker with addon
-        $('.my-colorpicker2').colorpicker()
-
-        $('.my-colorpicker2').on('colorpickerChange', function(event) {
-            $('.my-colorpicker2 .fa-square').css('color', event.color.toString());
-        })
-    });
     </script>
 
     <!-- Untuk Semua tombol jika di klik jadi diable -->
     <script>
-    document.getElementById('adminForm').addEventListener('submit', function(event) {
-        // event.preventDefault(); // Hapus atau komentari ini untuk uji coba
+        document.getElementById('adminForm').addEventListener('submit', function(event) {
+            // event.preventDefault(); // Hapus atau komentari ini untuk uji coba
 
-        const submitButton = document.getElementById('submitBtns');
-        submitButton.disabled = true; // Disable tombol
-        submitButton.textContent = 'Loading...'; // Ubah teks tombol
-    });
+            const submitButton = document.getElementById('submitBtns');
+            submitButton.disabled = true; // Disable tombol
+            submitButton.textContent = 'Loading...'; // Ubah teks tombol
+        });
     </script>
     <!-- Untuk Semua tombol jika di klik jadi diable -->
     <script>
-    document.getElementById('adminForm1').addEventListener('submit', function(event) {
-        // event.preventDefault(); // Hapus atau komentari ini untuk uji coba
+        document.getElementById('adminForm1').addEventListener('submit', function(event) {
+            // event.preventDefault(); // Hapus atau komentari ini untuk uji coba
 
-        const submitButton = document.getElementById('submitBtns1');
-        submitButton.disabled = true; // Disable tombol
-        submitButton.textContent = 'Loading...'; // Ubah teks tombol
-    });
+            const submitButton = document.getElementById('submitBtns1');
+            submitButton.disabled = true; // Disable tombol
+            submitButton.textContent = 'Loading...'; // Ubah teks tombol
+        });
     </script>
     <!-- Untuk Semua tombol jika di klik jadi diable -->
     <script>
-    document.getElementById('adminForm2').addEventListener('submit', function(event) {
-        // event.preventDefault(); // Hapus atau komentari ini untuk uji coba
+        document.getElementById('adminForm2').addEventListener('submit', function(event) {
+            // event.preventDefault(); // Hapus atau komentari ini untuk uji coba
 
-        const submitButton = document.getElementById('submitBtns2');
-        submitButton.disabled = true; // Disable tombol
-        submitButton.textContent = 'Loading...'; // Ubah teks tombol
-    });
+            const submitButton = document.getElementById('submitBtns2');
+            submitButton.disabled = true; // Disable tombol
+            submitButton.textContent = 'Loading...'; // Ubah teks tombol
+        });
     </script>
 
     <!-- Untuk Tombol is_aktif agar memproses di latar belakang -->
     <script>
-    function toggleAccess(button) {
-        var url = $(button).data('url');
-        var currentStatus = $(button).data('active'); // Status saat ini
-        var newStatus = currentStatus === 1 ? 0 : 1; // Status baru
+        function toggleAccess(button) {
+            var url = $(button).data('url');
+            var currentStatus = $(button).data('active'); // Status saat ini
+            var newStatus = currentStatus === 1 ? 0 : 1; // Status baru
 
-        $.ajax({
-            url: url,
-            method: 'POST',
-            data: {
-                _token: '{{ csrf_token() }}',
-                is_active: newStatus
-            },
-            success: function(response) {
-                if (response.success) {
-                    // Update data-active dengan status baru
-                    $(button).data('active', response.new_status);
-                    // Update tombol dan statusnya
-                    if (response.new_status == 1) {
-                        $(button).removeClass('btn-danger').addClass('btn-success').text('ON');
+            $.ajax({
+                url: url,
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    is_active: newStatus
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Update data-active dengan status baru
+                        $(button).data('active', response.new_status);
+                        // Update tombol dan statusnya
+                        if (response.new_status == 1) {
+                            $(button).removeClass('btn-danger').addClass('btn-success').text('ON');
+                        } else {
+                            $(button).removeClass('btn-success').addClass('btn-danger').text('OFF');
+                        }
+
+
+                        // SweetAlert success
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: 'Status has been updated successfully!'
+                        });
                     } else {
-                        $(button).removeClass('btn-success').addClass('btn-danger').text('OFF');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Failed to update status!'
+                        });
                     }
-
-
-                    // SweetAlert success
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success',
-                        text: 'Status has been updated successfully!'
-                    });
-                } else {
+                },
+                error: function() {
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
-                        text: 'Failed to update status!'
+                        text: 'Something went wrong!'
                     });
                 }
-            },
-            error: function() {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Something went wrong!'
-                });
-            }
-        });
-    }
+            });
+        }
     </script>
 
     <!-- Untuk Foto -->
     <script>
-    $(function() {
-        $(document).on('click', '[data-toggle="lightbox"]', function(event) {
-            event.preventDefault();
-            $(this).ekkoLightbox({
-                alwaysShowClose: true
+        $(function() {
+            $(document).on('click', '[data-toggle="lightbox"]', function(event) {
+                event.preventDefault();
+                $(this).ekkoLightbox({
+                    alwaysShowClose: true
+                });
             });
-        });
 
-        $('.filter-container').filterizr({
-            gutterPixels: 3
-        });
-        $('.btn[data-filter]').on('click', function() {
-            $('.btn[data-filter]').removeClass('active');
-            $(this).addClass('active');
-        });
-    })
+            $('.filter-container').filterizr({
+                gutterPixels: 3
+            });
+            $('.btn[data-filter]').on('click', function() {
+                $('.btn[data-filter]').removeClass('active');
+                $(this).addClass('active');
+            });
+        })
     </script>
 
     <!-- Untuk memunculkan Input tanda bukti Tf -->
     <script>
-    // Function to toggle the visibility of the transfer receipt input based on selected payment method
-    function toggleTransferReceipt() {
-        var paymentMethod = document.getElementById('payment_method').value;
-        var transferReceipt = document.getElementById('transfer_receipt');
-        transferReceipt.style.display = (paymentMethod === 'transfer') ? 'block' : 'none';
-    }
+        // Function to toggle the visibility of the transfer receipt input based on selected payment method
+        function toggleTransferReceipt() {
+            var paymentMethod = document.getElementById('payment_method').value;
+            var transferReceipt = document.getElementById('transfer_receipt');
+            transferReceipt.style.display = (paymentMethod === 'transfer') ? 'block' : 'none';
+        }
     </script>
 
     <!-- Untuk semua input Amount, Copy code untuk inputnya -->
@@ -395,38 +402,38 @@
         @enderror
     </div> -->
     <script>
-    function formatIndonesian(element) {
-        // Ambil nilai asli tanpa format
-        let rawValue = element.value.replace(/\./g, '').replace(',', '.');
+        function formatIndonesian(element) {
+            // Ambil nilai asli tanpa format
+            let rawValue = element.value.replace(/\./g, '').replace(',', '.');
 
-        // Pastikan hanya angka dan desimal yang valid
-        if (!/^\d*(\.\d{0,2})?$/.test(rawValue)) {
-            rawValue = element.dataset.previousValue || '';
+            // Pastikan hanya angka dan desimal yang valid
+            if (!/^\d*(\.\d{0,2})?$/.test(rawValue)) {
+                rawValue = element.dataset.previousValue || '';
+            }
+
+            // Simpan nilai sebelumnya untuk validasi selanjutnya
+            element.dataset.previousValue = rawValue;
+
+            // Format angka sesuai Indonesia (titik ribuan, koma desimal)
+            const [integer, decimal] = rawValue.split('.');
+            const formattedInteger = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            const formattedValue = decimal !== undefined ?
+                `${formattedInteger},${decimal.slice(0, 2)}` :
+                formattedInteger;
+
+            element.value = formattedValue;
+
+            // Simpan nilai asli (tanpa format) ke input hidden
+            document.getElementById('amount').value = rawValue;
         }
 
-        // Simpan nilai sebelumnya untuk validasi selanjutnya
-        element.dataset.previousValue = rawValue;
-
-        // Format angka sesuai Indonesia (titik ribuan, koma desimal)
-        const [integer, decimal] = rawValue.split('.');
-        const formattedInteger = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-        const formattedValue = decimal !== undefined ?
-            `${formattedInteger},${decimal.slice(0, 2)}` :
-            formattedInteger;
-
-        element.value = formattedValue;
-
-        // Simpan nilai asli (tanpa format) ke input hidden
-        document.getElementById('amount').value = rawValue;
-    }
-
-    // Inisialisasi ulang format saat halaman dimuat (untuk nilai lama)
-    document.addEventListener('DOMContentLoaded', function() {
-        const displayInput = document.getElementById('amount_display');
-        if (displayInput && displayInput.value) {
-            formatIndonesian(displayInput);
-        }
-    });
+        // Inisialisasi ulang format saat halaman dimuat (untuk nilai lama)
+        document.addEventListener('DOMContentLoaded', function() {
+            const displayInput = document.getElementById('amount_display');
+            if (displayInput && displayInput.value) {
+                formatIndonesian(displayInput);
+            }
+        });
     </script>
 
 </body>

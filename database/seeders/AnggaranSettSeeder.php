@@ -68,6 +68,12 @@ class AnggaranSettSeeder extends Seeder
                 'catatan_anggaran' => '30',
 
             ],
+            [
+                'anggaran_id' => '3',
+                'label_anggaran' => 'Uang Kasih Sayang',
+                'catatan_anggaran' => '30000',
+
+            ],
         ]);
     }
 }

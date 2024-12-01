@@ -166,7 +166,7 @@ class PinjamanController extends Controller
                 $newDescription .= "<p><b> Transfer </b> <br>";
                 $newDescription .= "Nama Bank/Ewallet : {$request->bank_name} <br>";
                 $newDescription .= "No Rekening/Ewallet : {$request->account_number}<br>";
-                $newDescription .= "Atas Nama  : {$request->account_name} </Nama>";
+                $newDescription .= "Atas Nama  : {$request->account_name} </p>";
             } elseif ($request->payment_method === 'cash') {
                 $newDescription .= "<p><b>Pengambilan</b>  : <br> {$request->cash_notes}";
             }
@@ -311,7 +311,8 @@ class PinjamanController extends Controller
         $pinjaman = Loan::findOrFail($id);
         $bayarPinjaman = loanRepayment::where('loan_id', $pinjaman->id)->get();
         // Ambil tanggal pembayaran terakhir
-        $lastRepayment = LoanRepayment::where('loan_id', $pinjaman->id)
+        $lastRepayment = LoanRepayment::where('loan_id', $pinjaman->id)->where('status', 'confirmed')
+            ->where('status', 'confirmed')
             ->latest('payment_date')
             ->first();
         // Tanggal pembuatan pinjaman terbaru
@@ -322,19 +323,25 @@ class PinjamanController extends Controller
             // Cek jika selisih antara pembayaran terakhir dan pengajuan baru kurang dari sebulan
         } else {
             // Jika tidak ada data pembayaran, beri nilai default atau abaikan logika tertentu
-            $lastPaymentDate = null; // Bisa diganti dengan default sesuai kebutuhan
+            $lastPaymentDate = $loanCreationDate; // Bisa diganti dengan default sesuai kebutuhan
             // Logika alternatif jika pembayaran terakhir tidak ada
             // Misalnya, lanjutkan pengajuan pinjaman
         }
-        $waktuPembayaran = $loanCreationDate->diffInDays($lastPaymentDate);
+        $waktubayar = $loanCreationDate->diffInDays($lastPaymentDate);
+        $waktuPembayaran =  round($waktubayar);
         // mengecek untuk data yang telah di atau runtuk pembayaran yang tanpa lebih
         $pembayaranTanpaLebih = AnggaranSetting::where('label_anggaran', 'Pembayaran tanpa lebih (hari)')
             ->where('anggaran_id', $pinjaman->anggaran_id)
             ->first();
         $tanpaLebih = intval($pembayaranTanpaLebih->catatan_anggaran);
         $waktuDitentukan = $tanpaLebih;
+        // Menghitung hari pinjaman dari awal pinjaman sampai sekarang
+        $waktuSekarang = Carbon::now();
+        $jatuhTempo = Carbon::parse($pinjaman->deadline_date);
+        $daysElapsed = $waktuSekarang->diffInDays($jatuhTempo, false); //mengambil data yang di hitung hari
+        $hitungWaktu = round($daysElapsed); //membulatkan hasil
 
-        return view('user.program.kas.detail.show_pinjaman', compact('pinjaman', 'bayarPinjaman', 'waktuPembayaran', 'waktuDitentukan'));
+        return view('user.program.kas.detail.show_pinjaman', compact('pinjaman', 'bayarPinjaman', 'waktuPembayaran', 'waktuDitentukan', 'hitungWaktu'));
     }
 
     /**
@@ -745,7 +752,7 @@ class PinjamanController extends Controller
             // Hitung deadline_date berdasarkan disbursed_date + durasi pinjaman
             $deadlineDate = Carbon::parse($dateTime)->addMonths($loanDurationInMonths);
 
-            $keterangan = $data->description . "<hr> <br> Keterangan Bendahara : <br>" . $request->description;
+            $keterangan = $data->description . "<hr> <b> Keterangan Bendahara </b> : <br>" . $request->description;
             $data->description = $keterangan;
 
             $data->loan_amount = $request->amount;

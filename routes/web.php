@@ -24,6 +24,8 @@ use App\Http\Controllers\Admin\SubMenuController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\notificationController;
 use App\Http\Controllers\User\Kas\PengeluaranController;
+use App\Http\Controllers\User\Kas\LoanExtensionController;
+use App\Models\LoanExtension;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->group(
@@ -160,5 +162,9 @@ Route::middleware([
     Route::patch('/edit/bayar-pinjaman/{id}', [BayarPinjamanController::class, 'updatePengurus'])->name('bayar-pinjaman.updatePengurus');
     Route::delete('/hapus/bayar-pinjaman/{id}', [BayarPinjamanController::class, 'destroyPengurus'])->name('bayar-pinjaman.destroyPengurus');
 
-
+    Route::resource('/pinjaman-ke-dua', LoanExtensionController::class);
+    Route::get('/pinjaman-ke-dua/pengajuan/{id}', [LoanExtensionController::class, 'pengajuan'])->name('pinjaman-ke-dua.pengajuan');
+    Route::patch('/pinjaman-ke-dua/pengajuan/reject/{id}', [LoanExtensionController::class, 'rejected'])->name('pinjaman-ke-dua.reject');
+    Route::get('confirm/pinjaman-ke-2/{id}', [LoanExtensionController::class, 'show_confirm'])->name('pinjaman-ke-dua.show.confirm');
+    Route::patch('confirm/pinjaman-ke-2/{id}', [LoanExtensionController::class, 'confirm'])->name('pinjaman-ke-dua.confirm');
 });
