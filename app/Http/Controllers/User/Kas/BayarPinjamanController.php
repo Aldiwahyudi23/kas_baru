@@ -111,6 +111,10 @@ class BayarPinjamanController extends Controller
             $code = 'BP-' . $formattedDate . $formattedTime . str_pad($bayarPinjaman, 1, '0', STR_PAD_LEFT);
             // Format akhir: ADM-DDMMYYHHMMSS1
 
+            // menentukan nilai is_deposite sesuai metode pembayran
+            $deposit = $request->payment_method === 'cash' ? false : true; // Tunai harus disetorkan, transfer otomatis dianggap deposited
+
+
             $data = new loanRepayment();
             $data->code = $code;
             $data->loan_id = $request->loan_id;
@@ -123,7 +127,7 @@ class BayarPinjamanController extends Controller
             // $data->confirmed_by = $request->confirmed_by;
             $data->status = "process";
             // $data->confirmation_date = $request->confirmation_date;
-            // $data->is_deposited = $request->is_deposited;
+            $data->is_deposited = $deposit;
             // Cek apakah file profile_picture di-upload
 
 
@@ -425,11 +429,12 @@ class BayarPinjamanController extends Controller
         $hitungWaktu = round($daysElapsed); //membulatkan hasil
         // mengecek pengajuan ke 2
         $cek_pengajuan = LoanExtension::where('loan_id', $pinjaman->id)->where('status',  'pending')->latest('created_at')->first();
+        $cek_pinjaman_2 = LoanExtension::where('new_loan_id', $pinjaman->id)->where('status',  'approved')->latest('created_at')->first();
 
         $layout_form = LayoutsForm::first();
         $cek_pembayaran = loanRepayment::where('loan_id', $id)->where('status', '!=', 'confirmed')->first();
 
-        return view('user.program.kas.pembayaran.bayarPinjaman', compact('pinjaman', 'cek_pembayaran', 'layout_form', 'bayarPinjaman', 'waktuPembayaran', 'waktuDitentukan', 'hitungWaktu', 'cek_pengajuan'));
+        return view('user.program.kas.pembayaran.bayarPinjaman', compact('pinjaman', 'cek_pembayaran', 'layout_form', 'bayarPinjaman', 'waktuPembayaran', 'waktuDitentukan', 'hitungWaktu', 'cek_pengajuan', 'cek_pinjaman_2'));
     }
 
     public function pengajuan()

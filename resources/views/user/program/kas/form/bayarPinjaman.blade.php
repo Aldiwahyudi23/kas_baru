@@ -53,10 +53,13 @@
                     <div class="d-flex justify-content-between">
                         <button type="submit" class="btn btn-success" id="submitBtns">Bayar Pinjaman</button>
 
-                        @if ($hitungWaktu <= 7) <a
+                        @if ($cek_pinjaman_2)
+                        <!-- Jika ada data pinjaman di data extension maka kosongkan  -->
+                        @else
+                        @if ( $hitungWaktu <= 7 ) <a
                             href="{{ route('pinjaman-ke-dua.pengajuan', Crypt::encrypt($pinjaman->id)) }}"
-                            class="btn btn-warning">Pinjaman ke 2
-                            </a>
+                            class="btn btn-warning">Pinjaman ke 2</a>
+                            @endif
                             @endif
                     </div>
 

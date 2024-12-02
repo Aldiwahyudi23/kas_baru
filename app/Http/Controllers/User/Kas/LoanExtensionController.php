@@ -62,8 +62,14 @@ class LoanExtensionController extends Controller
         $pinjaman = Loan::findOrFail($request->loan_id);
         $cek_pengajuan = LoanExtension::where('loan_id', $pinjaman->id)->where('status', 'pending')->latest('created_at')->first();
         $cek_pembayaran = loanRepayment::where('loan_id', $pinjaman->id)->sum('amount');
+
+        $cek_pinjaman_2 = LoanExtension::where('new_loan_id', $pinjaman->id)->where('status', 'approved')->latest('created_at')->first();
+        if ($cek_pinjaman_2) {
+            return redirect()->back()->with('error', 'Pengajuan Pinjaman ini sudah dalam pinjaman ke 2, tidak bisa mengajukan kembali');
+        }
         // Ambil nilai catatan_anggaran dari tabel anggaran_settings untuk menentukan deadline
-        $anggaranSetting = DB::table('anggaran_settings')
+        $anggaranPinjaman = Anggaran::where('name', 'Dana Pinjam')->first();
+        $anggaranSetting = DB::table('anggaran_settings')->where('anggaran_id', $anggaranPinjaman->id)
             ->where('label_anggaran', 'Uang Kasih Sayang')
             ->first();
         if ($cek_pembayaran < $anggaranSetting->catatan_anggaran) {
@@ -236,9 +242,14 @@ class LoanExtensionController extends Controller
         $pinjaman = Loan::findOrFail($id);
         $cek_pengajuan = LoanExtension::where('loan_id', $pinjaman->id)->where('status', 'pending')->latest('created_at')->first();
         $cek_pembayaran = loanRepayment::where('loan_id', $pinjaman->id)->sum('amount');
-
+        //  mengecek apakah ada data yang sudah di approve 
+        $cek_pinjaman_2 = LoanExtension::where('new_loan_id', $pinjaman->id)->where('status', 'approved')->latest('created_at')->first();
+        if ($cek_pinjaman_2) {
+            return redirect()->back()->with('error', 'Pengajuan Pinjaman ini sudah dalam pinjaman ke 2, tidak bisa mengajukan kembali');
+        }
         // Ambil nilai catatan_anggaran dari tabel anggaran_settings untuk menentukan deadline
-        $anggaranSetting = DB::table('anggaran_settings')
+        $anggaranPinjaman = Anggaran::where('name', 'Dana Pinjam')->first();
+        $anggaranSetting = DB::table('anggaran_settings')->where('anggaran_id', $anggaranPinjaman->id)
             ->where('label_anggaran', 'Uang Kasih Sayang')
             ->first();
         if (!$anggaranSetting) {
@@ -292,7 +303,8 @@ class LoanExtensionController extends Controller
             ]
         );
         // Ambil nilai catatan_anggaran dari tabel anggaran_settings untuk menentukan deadline
-        $kasihSayang = DB::table('anggaran_settings')
+        $anggaranPinjaman = Anggaran::where('name', 'Dana Pinjam')->first();
+        $kasihSayang = DB::table('anggaran_settings')->where('anggaran_id', $anggaranPinjaman->id)
             ->where('label_anggaran', 'Uang Kasih Sayang')
             ->first();
         if (!$kasihSayang) {
@@ -348,7 +360,7 @@ class LoanExtensionController extends Controller
             $pinjaman->anggaran_id = $dataPinjaman->anggaran_id;
             $pinjaman->data_warga_id = $dataPinjaman->data_warga_id;
             $pinjaman->loan_amount = $sisa_nominal;
-            $pinjaman->remaining_balance = 0;
+            $pinjaman->remaining_balance = $sisa_nominal;
             $pinjaman->overpayment_balance = 0;
             $pinjaman->description = $pinjamanKeDua->notes;
             $pinjaman->status = 'disbursed_by_treasurer';

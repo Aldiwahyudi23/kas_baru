@@ -10,7 +10,11 @@ use App\Models\AnggaranSetting;
 use App\Models\CashExpenditures;
 use App\Models\CompanyInformation;
 use App\Models\DataWarga;
+use App\Models\Deposit;
 use App\Models\KasPayment;
+use App\Models\Loan;
+use App\Models\LoanExtension;
+use App\Models\loanRepayment;
 use App\Models\Menu;
 use App\Models\Program;
 use App\Models\ProgramSetting;
@@ -24,7 +28,11 @@ use App\Observers\CompanyInfoAdmin;
 use App\Observers\DataAdminObserver;
 use App\Observers\DataAnggaranAdmin;
 use App\Observers\DataCashExAdmin;
+use App\Observers\DataDeposit;
 use App\Observers\DataKasPaymentAdmin;
+use App\Observers\DataLoanAdmin;
+use App\Observers\DataLoanExtension;
+use App\Observers\DataLoanRepaymen;
 use App\Observers\DataMenuAdmin;
 use App\Observers\DataPekerjaanAdmin;
 use App\Observers\DataProgramAdmin;
@@ -70,7 +78,11 @@ class AppServiceProvider extends ServiceProvider
         Admin::observe(DataAdminObserver::class);
         KasPayment::observe(DataKasPaymentAdmin::class);
         CashExpenditures::observe(DataCashExAdmin::class);
+        Loan::observe(DataLoanAdmin::class);
+        loanRepayment::observe(DataLoanRepaymen::class);
+        LoanExtension::observe(DataLoanExtension::class);
         Saldo::observe(DataSaldoAdmin::class);
         AnggaranSaldo::observe(DataSaldoAnggaran::class);
+        Deposit::observe(DataDeposit::class);
     }
 }

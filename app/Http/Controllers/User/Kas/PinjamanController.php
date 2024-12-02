@@ -10,6 +10,7 @@ use App\Models\AnggaranSetting;
 use App\Models\DataWarga;
 use App\Models\LayoutsForm;
 use App\Models\Loan;
+use App\Models\LoanExtension;
 use App\Models\loanRepayment;
 use App\Models\Saldo;
 use App\Models\User;
@@ -341,7 +342,9 @@ class PinjamanController extends Controller
         $daysElapsed = $waktuSekarang->diffInDays($jatuhTempo, false); //mengambil data yang di hitung hari
         $hitungWaktu = round($daysElapsed); //membulatkan hasil
 
-        return view('user.program.kas.detail.show_pinjaman', compact('pinjaman', 'bayarPinjaman', 'waktuPembayaran', 'waktuDitentukan', 'hitungWaktu'));
+        $pinjamanKeDua = LoanExtension::where('loan_id', $pinjaman->id)->where('status', 'approved')->first();
+
+        return view('user.program.kas.detail.show_pinjaman', compact('pinjaman', 'bayarPinjaman', 'waktuPembayaran', 'waktuDitentukan', 'hitungWaktu', 'pinjamanKeDua'));
     }
 
     /**
@@ -897,35 +900,66 @@ class PinjamanController extends Controller
             $data->update();
             // -------------------------------------
 
-            $saldo_terbaru = Saldo::latest()->first();
-            $saldo = new Saldo();
-            $saldo->code = $data->code;
-            $saldo->amount = '-' . $data->loan_amount;
-            $saldo->atm_balance = $saldo_terbaru->atm_balance - $data->loan_amount;
-            $saldo->total_balance = $saldo_terbaru->total_balance - $data->loan_amount;
-            $saldo->ending_balance = $saldo_terbaru->total_balance;
-            $saldo->cash_outside = $saldo_terbaru->cash_outside;
+            // Cek apakah data ini dalam pinjaman ke 2 atau tunggal
+            $pinjamanKeDua = LoanExtension::where('new_loan_id', $data->id)->where('status', 'approved')->first();
+            if ($pinjamanKeDua) {
 
-            $saldo->save();
-            // -------------------------------------------
+                $anggaranPinjaman = Anggaran::where('name', 'Dana Pinjam')->first();
+                $anggaranKas = Anggaran::where('name', 'Dana Kas')->first();
+                // Cek apakah Saldo cukup berdasarkan anggaran
+                $saldo_akhir_pinjaman =  AnggaranSaldo::where('type', $anggaranPinjaman->name)->latest()->first(); //mengambil data yang terakhir berdasarkan type anggaran
+                $saldo_akhir_kas =  AnggaranSaldo::where('type', $anggaranKas->name)->latest()->first(); //mengambil data yang terakhir berdasarkan type anggaran
+                // mengambil Id Saldo di Pinjaman sebelumnya 
+                $cek_kode = Loan::findOrFail($pinjamanKeDua->loan_id);
+                $cek_id_saldo = Saldo::where('code', $cek_kode->code)->first();
+                // Ambil nilai catatan_anggaran dari tabel anggaran_settings untuk menentukan deadline
+                $kasihSayang = AnggaranSetting::where('anggaran_id', $anggaranPinjaman->id)
+                    ->where('label_anggaran', 'Uang Kasih Sayang')
+                    ->first();
+                $saldo_pinjaman = new AnggaranSaldo();
+                $saldo_pinjaman->type = $anggaranPinjaman->name;
+                $saldo_pinjaman->percentage = 0;
+                $saldo_pinjaman->amount = '-' . $kasihSayang->catatan_anggaran;
+                $saldo_pinjaman->saldo = $saldo_akhir_pinjaman->saldo - $kasihSayang->catatan_anggaran;
+                $saldo_pinjaman->saldo_id = $cek_id_saldo->id; //mengambil id dari model saldo di atas
+                $saldo_pinjaman->save();
 
-            $dataAnggaran = Anggaran::where('name', 'Dana Pinjam')->first();
-            // Cek apakah Saldo cukup berdasarkan anggaran
-            $saldo_akhir_request =  AnggaranSaldo::where('type', $dataAnggaran->name)->latest()->first(); //mengambil data yang terakhir berdasarkan type anggaran
+                $saldo_kas = new AnggaranSaldo();
+                $saldo_kas->type = $anggaranKas->name;
+                $saldo_kas->percentage = 0;
+                $saldo_kas->amount = $kasihSayang->catatan_anggaran;
+                $saldo_kas->saldo = $saldo_akhir_kas->saldo + $kasihSayang->catatan_anggaran;
+                $saldo_kas->saldo_id = $cek_id_saldo->id; //mengambil id dari model saldo di atas
+                $saldo_kas->save();
+            } else {
+                $saldo_terbaru = Saldo::latest()->first();
+                $saldo = new Saldo();
+                $saldo->code = $data->code;
+                $saldo->amount = '-' . $data->loan_amount;
+                $saldo->atm_balance = $saldo_terbaru->atm_balance - $data->loan_amount;
+                $saldo->total_balance = $saldo_terbaru->total_balance - $data->loan_amount;
+                $saldo->ending_balance = $saldo_terbaru->total_balance;
+                $saldo->cash_outside = $saldo_terbaru->cash_outside;
 
-            // Hitung alokasi dana berdasarkan catatan_anggaran sebagai persentase
-            $percenAmount = ($data->loan_amount / $saldo_akhir_request->saldo) * 100;
-            $saldo_anggaran = new AnggaranSaldo();
+                $saldo->save();
+                // -------------------------------------------
 
-            $saldo_anggaran->type = $dataAnggaran->name;
-            $saldo_anggaran->percentage = $percenAmount;
-            $saldo_anggaran->amount = '-' . $data->loan_amount;
-            $saldo_anggaran->saldo = $saldo_akhir_request->saldo - $data->loan_amount;
-            $saldo_anggaran->saldo_id = $saldo->id; //mengambil id dari model saldo di atas
+                $dataAnggaran = Anggaran::where('name', 'Dana Pinjam')->first();
+                // Cek apakah Saldo cukup berdasarkan anggaran
+                $saldo_akhir_request =  AnggaranSaldo::where('type', $dataAnggaran->name)->latest()->first(); //mengambil data yang terakhir berdasarkan type anggaran
 
-            $saldo_anggaran->save();
+                // Hitung alokasi dana berdasarkan catatan_anggaran sebagai persentase
+                $percenAmount = ($data->loan_amount / $saldo_akhir_request->saldo) * 100;
+                $saldo_anggaran = new AnggaranSaldo();
 
+                $saldo_anggaran->type = $dataAnggaran->name;
+                $saldo_anggaran->percentage = $percenAmount;
+                $saldo_anggaran->amount = '-' . $data->loan_amount;
+                $saldo_anggaran->saldo = $saldo_akhir_request->saldo - $data->loan_amount;
+                $saldo_anggaran->saldo_id = $saldo->id; //mengambil id dari model saldo di atas
 
+                $saldo_anggaran->save();
+            }
             // // Mengambil data pengaju (pengguna yang menginput)
             // $pengaju = DataWarga::find(Auth::user()->data_warga_id);
             // // Mengambil nomor telepon Ketua Untuk Laporan

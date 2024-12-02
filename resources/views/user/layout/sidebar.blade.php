@@ -71,13 +71,19 @@
                         <p>Pengajuan Pinjaman ke 2</p>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a href="{{route('setor-tunai.pengajuan')}}" class="nav-link">
+                        <i class="far fa-circle nav-icon"></i>
+                        <p>Pengajuan Setor Tunai</p>
+                    </a>
+                </li>
             </ul>
         </li>
         <li class="nav-item">
-            <a href="pages/widgets.html" class="nav-link">
+            <a href="{{route('setor-tunai.index')}}" class="nav-link">
                 <i class="nav-icon fas fa-th"></i>
                 <p>
-                    Widgets
+                    Setor Tunai
                     <span class="right badge badge-danger">New</span>
                 </p>
             </a>

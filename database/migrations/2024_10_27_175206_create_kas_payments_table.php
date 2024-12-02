@@ -22,6 +22,7 @@ return new class extends Migration
             $table->bigInteger('confirmed_by')->unsigned()->nullable();
             $table->timestamp('confirmation_date')->nullable();
             $table->timestamp('payment_date')->nullable();
+            $table->bigInteger('deposit_id')->unsigned()->nullable();
             $table->boolean('is_deposited')->default(false);
             $table->string('transfer_receipt_path')->nullable(); // Menyimpan path untuk bukti transfer
             $table->longText('description');
@@ -30,6 +31,7 @@ return new class extends Migration
             $table->foreign('data_warga_id')->references('id')->on('data_wargas')->onDelete('cascade');
             $table->foreign('submitted_by')->references('id')->on('data_wargas')->onDelete('set null'); // Menyimpan referensi ke pengguna yang input
             $table->foreign('confirmed_by')->references('id')->on('data_wargas')->onDelete('set null');
+            $table->foreign('deposit_id')->references('id')->on('deposits')->onDelete('set null');
         });
     }
 

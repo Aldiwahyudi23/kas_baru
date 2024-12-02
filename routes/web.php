@@ -23,8 +23,10 @@ use App\Http\Controllers\Admin\SaldoController;
 use App\Http\Controllers\Admin\SubMenuController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\notificationController;
+use App\Http\Controllers\User\Kas\DepositController;
 use App\Http\Controllers\User\Kas\PengeluaranController;
 use App\Http\Controllers\User\Kas\LoanExtensionController;
+use App\Http\Controllers\User\Kas\SetorTunaiController;
 use App\Models\LoanExtension;
 use Illuminate\Support\Facades\Route;
 
@@ -167,4 +169,10 @@ Route::middleware([
     Route::patch('/pinjaman-ke-dua/pengajuan/reject/{id}', [LoanExtensionController::class, 'rejected'])->name('pinjaman-ke-dua.reject');
     Route::get('confirm/pinjaman-ke-2/{id}', [LoanExtensionController::class, 'show_confirm'])->name('pinjaman-ke-dua.show.confirm');
     Route::patch('confirm/pinjaman-ke-2/{id}', [LoanExtensionController::class, 'confirm'])->name('pinjaman-ke-dua.confirm');
+
+    Route::resource('/setor-tunai', SetorTunaiController::class);
+    Route::get('/setor-tunais/pengajuan', [SetorTunaiController::class, 'pengajuan'])->name('setor-tunai.pengajuan');
+    Route::get('/setor-tunais/pengajuan/show/{id}', [SetorTunaiController::class, 'show_confirm'])->name('setor-tunai.show.confirm');
+    Route::patch('/setor-tunais/pengajuan/show/{id}', [SetorTunaiController::class, 'confirm'])->name('setor-tunai.confirm');
+    Route::get('/setor-tunais/detail/reject/{id}', [SetorTunaiController::class, 'detail_reject'])->name('setor-tunai.detail_reject');
 });

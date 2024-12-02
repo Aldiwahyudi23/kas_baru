@@ -25,4 +25,8 @@ class loanRepayment extends Model
     {
         return $this->belongsTo(DataWarga::class, 'confirmed_by');
     }
+    public function deposit()
+    {
+        return $this->belongsTo(Deposit::class, 'deposit_id');
+    }
 }

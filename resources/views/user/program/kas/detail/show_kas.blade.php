@@ -59,7 +59,14 @@
                     <tr>
                         <td>Pembayaran</td>
                         <td>:</td>
-                        <td>{{ $kas_payment->payment_method}}</td>
+                        <td>{{ $kas_payment->payment_method}} <br>
+                            @if ($kas_payment->is_deposited == true)
+                            <span class="badge badge-success"><i class="icon fas fa-check"></i> Done Setor</span>
+                            @elseif($kas_payment->is_deposited == false)
+                            <span class="badge badge-warning"><i class="icon fas fa-exclamation-triangle"></i> Belum di
+                                setor</span>
+                            @endif
+                        </td>
                     </tr>
                     <tr>
                         <td>Status</td>

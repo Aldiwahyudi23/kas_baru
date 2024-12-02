@@ -116,6 +116,9 @@ class PemasukanController extends Controller
             $code = 'KAS-' . $formattedDate . $formattedTime . str_pad($kasCount, 1, '0', STR_PAD_LEFT);
             // Format akhir: ADM-DDMMYYHHMMSS1
 
+            // menentukan nilai is_deposite sesuai metode pembayran
+            $deposit = $request->payment_method === 'cash' ? false : true; // Tunai harus disetorkan, transfer otomatis dianggap deposited
+
             $data = new KasPayment();
             $data->code = $code;
             $data->data_warga_id = $request->data_warga_id;
@@ -126,6 +129,7 @@ class PemasukanController extends Controller
             $data->submitted_by = Auth::user()->data_warga_id;
             // $data->confirmed_by = $request->confirmed_by;
             $data->status = "process";
+            $data->is_deposited = $deposit;
             // $data->confirmation_date = $request->confirmation_date;
             // $data->is_deposited = $request->is_deposited;
             // Cek apakah file profile_picture di-upload

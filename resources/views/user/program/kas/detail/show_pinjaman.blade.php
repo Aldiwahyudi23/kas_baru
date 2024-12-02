@@ -44,6 +44,7 @@
     - Jika belum bisa bayar, setelah sisa 7 hari bisa mengajukan kembali namun harus ada masuk dulu ke pinjaman
     </div>
     @endif
+    @if($pinjaman->status == "Paid in Full")
     <div class="alert alert-success alert-dismissible">
         <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
         <h5><i class="icon fas fa-check"></i>Selesai </h5>
@@ -52,6 +53,7 @@
         dan lancar
         segala rejekinya.
     </div>
+    @endif
     @endif
 
     <!-- SELECT2 EXAMPLE -->
@@ -193,6 +195,7 @@
                 @if (!$bayarPinjaman || $bayarPinjaman->isEmpty())
                 <p class="text-muted text-center">Belum ada pembayaran yang masuk</p>
                 @endif
+                <!-- Jika pembayaran sudah selesai tampilkan ini -->
                 @if ($pinjaman->status == "Paid in Full")
                 <div class="alert alert-success alert-dismissible">
                     <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
@@ -205,6 +208,24 @@
                     Uangnya sudah kita terima <i>semoga bisa di balas oleh yang maha Kuasa</i>.
                     @endif
                 </div>
+                <!-- Pembayaran ini sedang di perpanjang -->
+                @if ($pinjamanKeDua)
+                <div class="alert alert-secondary alert-dismissible">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    Data Pinjaman ini di lanjut pinjaman ke dua, sesuai data di atas yang menunjukan sisa pinjaman masih
+                    Rp {{number_format($pinjaman->remaining_balance,0,',','.')}} di ambil dari sisa pembayaran
+                    sebelumnya. <br>
+                    <b>Alasan :</b>
+                    <br>
+                    {{$pinjamanKeDua->reason}}
+                    <hr>
+                    <a href="{{ route('pinjaman.show',Crypt::encrypt($pinjamanKeDua->new_loan_id)) }}">
+                        <span class="btn btn-info">Lihat Pinjaman ke dua</span>
+                    </a>
+
+                </div>
+                @endif
+
                 @endif
                 <ul class="list-group list-group-unbordered mb-3">
                     @foreach ($bayarPinjaman as $data)
