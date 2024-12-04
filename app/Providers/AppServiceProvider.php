@@ -63,6 +63,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+
+
         Admin::observe(DataAdminObserver::class);
         CompanyInformation::observe(CompanyInfoAdmin::class);
         AllRouteUrl::observe(DataRouteUrlAdmin::class);

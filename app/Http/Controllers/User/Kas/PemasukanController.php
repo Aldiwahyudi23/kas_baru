@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\User\Kas;
 
+use App\Events\SaldoUpdated;
 use App\Http\Controllers\Controller;
 use App\Mail\Notification;
 use App\Models\AnggaranSaldo;
@@ -489,9 +490,9 @@ class PemasukanController extends Controller
             // -------------------------------------------------
             if ($request->status == 'confirmed') {
                 $saldo_terbaru = Saldo::latest()->first();
-                $saldo = new Saldo();
-                $saldo->code = $data->code;
-                $saldo->amount = $data->amount;
+                $saldos = new Saldo();
+                $saldos->code = $data->code;
+                $saldos->amount = $data->amount;
                 if ($request->payment_method === "transfer") {
                     $atm = ($saldo_terbaru->atm_balance ?? 0) + $data->amount;
                     $out = ($saldo_terbaru->cash_outside ?? 0);
@@ -499,12 +500,13 @@ class PemasukanController extends Controller
                     $atm = ($saldo_terbaru->atm_balance ?? 0);
                     $out = ($saldo_terbaru->cash_outside ?? 0) + $data->amount;
                 };
-                $saldo->atm_balance = $atm;
-                $saldo->total_balance = ($saldo_terbaru->total_balance ?? 0) + $data->amount;
-                $saldo->ending_balance = ($saldo_terbaru->total_balance ?? 0);
-                $saldo->cash_outside = $out;
+                $saldos->atm_balance = $atm;
+                $saldos->total_balance = ($saldo_terbaru->total_balance ?? 0) + $data->amount;
+                $saldos->ending_balance = ($saldo_terbaru->total_balance ?? 0);
+                $saldos->cash_outside = $out;
 
-                $saldo->save();
+                $saldos->save();
+
                 // -------------------------------------------
 
 
@@ -513,7 +515,7 @@ class PemasukanController extends Controller
                     // Hitung alokasi dana berdasarkan catatan_anggaran sebagai persentase
                     $allocatedAmount = $request->amount * ($anggaran->catatan_anggaran / 100);
                     $saldo_anggaran = new AnggaranSaldo();
-                    $saldo_anggaran->saldo_id = $saldo->id; //mengambil id dari model saldo di atas
+                    $saldo_anggaran->saldo_id = $saldos->id; //mengambil id dari model saldo di atas
                     $saldo_anggaran->type = $anggaran->anggaran->name;
                     $saldo_anggaran->percentage = $anggaran->catatan_anggaran;
                     $saldo_anggaran->amount = $allocatedAmount;

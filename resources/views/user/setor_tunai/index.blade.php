@@ -26,7 +26,7 @@
                 </ul>
             </div>
             <div class="card-body">
-                <form id="setorTunaiForm" method="POST" action="{{ route('setor-tunai.store') }}"
+                <form id="adminForm" method="POST" action="{{ route('setor-tunai.store') }}"
                     enctype="multipart/form-data">
                     @csrf
                     <div class="tab-content" id="custom-tabs-four-tabContent">

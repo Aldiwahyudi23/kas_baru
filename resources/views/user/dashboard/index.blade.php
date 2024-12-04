@@ -1,33 +1,69 @@
-@extends('admin.layout.app')
+@extends('user.layout.app')
 
 @section('content')
+
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <!-- Content Row -->
+    <div class="row">
+        <!-- Saldo Kas Card -->
+        <div class="col-12 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                @livewire('saldo-dashboard-user')
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu Section -->
+    <div class="row">
+        <!-- Menu Item 1 -->
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card bg-primary text-white shadow">
+                <div class="card-body">
+                    Setor Tunai
+                    <div class="text-white-50 small">Klik untuk mulai</div>
+                </div>
+                <a href="" class="card-footer text-white clearfix small z-1">
+                    <span class="float-left">Lihat Detail</span>
+                    <span class="float-right">
+                        <i class="fas fa-angle-right"></i>
+                    </span>
+                </a>
+            </div>
+        </div>
+        <!-- Menu Item 2 -->
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card bg-success text-white shadow">
+                <div class="card-body">
+                    Cek Laporan
+                    <div class="text-white-50 small">Lihat laporan keuangan</div>
+                </div>
+                <a href="" class="card-footer text-white clearfix small z-1">
+                    <span class="float-left">Lihat Detail</span>
+                    <span class="float-right">
+                        <i class="fas fa-angle-right"></i>
+                    </span>
+                </a>
+            </div>
+        </div>
+        <!-- Tambahkan menu lainnya dengan cara serupa -->
+    </div>
+
+</div>
+
 <!-- Info boxes -->
 <div class="row">
-    <div class="col-12 col-sm-6 col-md-3">
+    <div class="col-3 col-sm-4 col-md-3">
         <div class="info-box">
             <span class="info-box-icon bg-info elevation-1"><i class="fas fa-cog"></i></span>
-
-            <div class="info-box-content">
-                <span class="info-box-text">CPU Traffic</span>
-                <span class="info-box-number">
-                    10
-                    <small>%</small>
-                </span>
-            </div>
-            <!-- /.info-box-content -->
         </div>
         <!-- /.info-box -->
     </div>
     <!-- /.col -->
-    <div class="col-12 col-sm-6 col-md-3">
+    <div class="col-3 col-sm-4 col-md-3">
         <div class="info-box mb-3">
             <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-thumbs-up"></i></span>
 
-            <div class="info-box-content">
-                <span class="info-box-text">Likes</span>
-                <span class="info-box-number">41,410</span>
-            </div>
-            <!-- /.info-box-content -->
         </div>
         <!-- /.info-box -->
     </div>
@@ -36,27 +72,16 @@
     <!-- fix for small devices only -->
     <div class="clearfix hidden-md-up"></div>
 
-    <div class="col-12 col-sm-6 col-md-3">
+    <div class="col-3 col-sm-4 col-md-3">
         <div class="info-box mb-3">
             <span class="info-box-icon bg-success elevation-1"><i class="fas fa-shopping-cart"></i></span>
-
-            <div class="info-box-content">
-                <span class="info-box-text">Sales</span>
-                <span class="info-box-number">760</span>
-            </div>
-            <!-- /.info-box-content -->
         </div>
         <!-- /.info-box -->
     </div>
     <!-- /.col -->
-    <div class="col-12 col-sm-6 col-md-3">
+    <div class="col-3 col-sm-4 col-md-3">
         <div class="info-box mb-3">
             <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-users"></i></span>
-
-            <div class="info-box-content">
-                <span class="info-box-text">New Members</span>
-                <span class="info-box-number">2,000</span>
-            </div>
             <!-- /.info-box-content -->
         </div>
         <!-- /.info-box -->
@@ -166,7 +191,8 @@
                     <!-- /.col -->
                     <div class="col-sm-3 col-6">
                         <div class="description-block border-right">
-                            <span class="description-percentage text-warning"><i class="fas fa-caret-left"></i> 0%</span>
+                            <span class="description-percentage text-warning"><i class="fas fa-caret-left"></i>
+                                0%</span>
                             <h5 class="description-header">$10,390.90</h5>
                             <span class="description-text">TOTAL COST</span>
                         </div>
@@ -184,7 +210,8 @@
                     <!-- /.col -->
                     <div class="col-sm-3 col-6">
                         <div class="description-block">
-                            <span class="description-percentage text-danger"><i class="fas fa-caret-down"></i> 18%</span>
+                            <span class="description-percentage text-danger"><i class="fas fa-caret-down"></i>
+                                18%</span>
                             <h5 class="description-header">1200</h5>
                             <span class="description-text">GOAL COMPLETIONS</span>
                         </div>
@@ -349,7 +376,8 @@
                             <ul class="contacts-list">
                                 <li>
                                     <a href="#">
-                                        <img class="contacts-list-img" src="dist/img/user1-128x128.jpg" alt="User Avatar">
+                                        <img class="contacts-list-img" src="dist/img/user1-128x128.jpg"
+                                            alt="User Avatar">
 
                                         <div class="contacts-list-info">
                                             <span class="contacts-list-name">
@@ -364,7 +392,8 @@
                                 <!-- End Contact Item -->
                                 <li>
                                     <a href="#">
-                                        <img class="contacts-list-img" src="dist/img/user7-128x128.jpg" alt="User Avatar">
+                                        <img class="contacts-list-img" src="dist/img/user7-128x128.jpg"
+                                            alt="User Avatar">
 
                                         <div class="contacts-list-info">
                                             <span class="contacts-list-name">
@@ -379,7 +408,8 @@
                                 <!-- End Contact Item -->
                                 <li>
                                     <a href="#">
-                                        <img class="contacts-list-img" src="dist/img/user3-128x128.jpg" alt="User Avatar">
+                                        <img class="contacts-list-img" src="dist/img/user3-128x128.jpg"
+                                            alt="User Avatar">
 
                                         <div class="contacts-list-info">
                                             <span class="contacts-list-name">
@@ -394,7 +424,8 @@
                                 <!-- End Contact Item -->
                                 <li>
                                     <a href="#">
-                                        <img class="contacts-list-img" src="dist/img/user5-128x128.jpg" alt="User Avatar">
+                                        <img class="contacts-list-img" src="dist/img/user5-128x128.jpg"
+                                            alt="User Avatar">
 
                                         <div class="contacts-list-info">
                                             <span class="contacts-list-name">
@@ -409,7 +440,8 @@
                                 <!-- End Contact Item -->
                                 <li>
                                     <a href="#">
-                                        <img class="contacts-list-img" src="dist/img/user6-128x128.jpg" alt="User Avatar">
+                                        <img class="contacts-list-img" src="dist/img/user6-128x128.jpg"
+                                            alt="User Avatar">
 
                                         <div class="contacts-list-info">
                                             <span class="contacts-list-name">
@@ -424,7 +456,8 @@
                                 <!-- End Contact Item -->
                                 <li>
                                     <a href="#">
-                                        <img class="contacts-list-img" src="dist/img/user8-128x128.jpg" alt="User Avatar">
+                                        <img class="contacts-list-img" src="dist/img/user8-128x128.jpg"
+                                            alt="User Avatar">
 
                                         <div class="contacts-list-info">
                                             <span class="contacts-list-name">
@@ -565,7 +598,8 @@
                                 <td>Call of Duty IV</td>
                                 <td><span class="badge badge-success">Shipped</span></td>
                                 <td>
-                                    <div class="sparkbar" data-color="#00a65a" data-height="20">90,80,90,-70,61,-83,63</div>
+                                    <div class="sparkbar" data-color="#00a65a" data-height="20">90,80,90,-70,61,-83,63
+                                    </div>
                                 </td>
                             </tr>
                             <tr>
@@ -573,7 +607,8 @@
                                 <td>Samsung Smart TV</td>
                                 <td><span class="badge badge-warning">Pending</span></td>
                                 <td>
-                                    <div class="sparkbar" data-color="#f39c12" data-height="20">90,80,-90,70,61,-83,68</div>
+                                    <div class="sparkbar" data-color="#f39c12" data-height="20">90,80,-90,70,61,-83,68
+                                    </div>
                                 </td>
                             </tr>
                             <tr>
@@ -581,7 +616,8 @@
                                 <td>iPhone 6 Plus</td>
                                 <td><span class="badge badge-danger">Delivered</span></td>
                                 <td>
-                                    <div class="sparkbar" data-color="#f56954" data-height="20">90,-80,90,70,-61,83,63</div>
+                                    <div class="sparkbar" data-color="#f56954" data-height="20">90,-80,90,70,-61,83,63
+                                    </div>
                                 </td>
                             </tr>
                             <tr>
@@ -589,7 +625,8 @@
                                 <td>Samsung Smart TV</td>
                                 <td><span class="badge badge-info">Processing</span></td>
                                 <td>
-                                    <div class="sparkbar" data-color="#00c0ef" data-height="20">90,80,-90,70,-61,83,63</div>
+                                    <div class="sparkbar" data-color="#00c0ef" data-height="20">90,80,-90,70,-61,83,63
+                                    </div>
                                 </td>
                             </tr>
                             <tr>
@@ -597,7 +634,8 @@
                                 <td>Samsung Smart TV</td>
                                 <td><span class="badge badge-warning">Pending</span></td>
                                 <td>
-                                    <div class="sparkbar" data-color="#f39c12" data-height="20">90,80,-90,70,61,-83,68</div>
+                                    <div class="sparkbar" data-color="#f39c12" data-height="20">90,80,-90,70,61,-83,68
+                                    </div>
                                 </td>
                             </tr>
                             <tr>
@@ -605,7 +643,8 @@
                                 <td>iPhone 6 Plus</td>
                                 <td><span class="badge badge-danger">Delivered</span></td>
                                 <td>
-                                    <div class="sparkbar" data-color="#f56954" data-height="20">90,-80,90,70,-61,83,63</div>
+                                    <div class="sparkbar" data-color="#f56954" data-height="20">90,-80,90,70,-61,83,63
+                                    </div>
                                 </td>
                             </tr>
                             <tr>
@@ -613,7 +652,8 @@
                                 <td>Call of Duty IV</td>
                                 <td><span class="badge badge-success">Shipped</span></td>
                                 <td>
-                                    <div class="sparkbar" data-color="#00a65a" data-height="20">90,80,90,-70,61,-83,63</div>
+                                    <div class="sparkbar" data-color="#00a65a" data-height="20">90,80,90,-70,61,-83,63
+                                    </div>
                                 </td>
                             </tr>
                         </tbody>

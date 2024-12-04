@@ -236,6 +236,14 @@
                 }).buttons().container().appendTo($(this).closest('.dataTables_wrapper').find(
                     '.col-md-6:eq(0)'));
             });
+            $(".datatable1").each(function() {
+                $(this).DataTable({
+                    "responsive": true,
+                    "lengthChange": false,
+                    "autoWidth": false,
+                }).buttons().container().appendTo($(this).closest('.dataTables_wrapper').find(
+                    '.col-md-6:eq(0)'));
+            });
         });
     </script>
     <script>

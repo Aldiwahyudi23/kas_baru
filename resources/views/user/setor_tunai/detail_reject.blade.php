@@ -104,7 +104,7 @@
                     <tr onclick="window.location='{{ route('kas.show',Crypt::encrypt($kas->id)) }}'"
                         style="cursor: pointer;">
                         <td>KAS</td>
-                        <td>{{ $kas->id }}</td>
+                        <td>{{ $kas->code }}</td>
                         <td>{{ $kas->data_warga->name }}</td>
                         <td>Rp{{ number_format($kas->amount, 0, ',', '.') }}</td>
                         <td>{{ $kas->payment_date }}</td>
@@ -132,7 +132,7 @@
                     <tr onclick="window.location='{{ route('kas.show',Crypt::encrypt($kas->id)) }}'"
                         style="cursor: pointer;">
                         <td>KAS</td>
-                        <td>{{ $kas->id }}</td>
+                        <td>{{ $kas->code }}</td>
                         <td>{{ $kas->data_warga->name }}</td>
                         <td>Rp{{ number_format($kas->amount, 0, ',', '.') }}</td>
                         <td>{{ $kas->payment_date }}</td>

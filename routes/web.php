@@ -26,7 +26,9 @@ use App\Http\Controllers\notificationController;
 use App\Http\Controllers\User\Kas\DepositController;
 use App\Http\Controllers\User\Kas\PengeluaranController;
 use App\Http\Controllers\User\Kas\LoanExtensionController;
-use App\Http\Controllers\User\Kas\SetorTunaiController;
+use App\Http\Controllers\User\Konter\ProductKonterController;
+use App\Http\Controllers\User\Konter\TransaksiKonterController;
+use App\Http\Controllers\User\SetorTunaiController;
 use App\Models\LoanExtension;
 use Illuminate\Support\Facades\Route;
 
@@ -105,9 +107,13 @@ Route::prefix('admin')->group(
 
             Route::resource('/loan', LoanController::class);
 
-
-
             Route::resource('/layouts-form', LayoutsFormController::class);
+
+            Route::resource('/konter-product', ProductKonterController::class);
+            Route::resource('/konter-transaksi', TransaksiKonterController::class);
+
+            Route::post('/check-phone', [TransaksiKonterController::class, 'checkPhone']);
+            Route::resource('/konter-transaksi-detail', TransaksiKonterController::class);
         });
     }
 );
@@ -125,8 +131,8 @@ Route::middleware([
     'verified',
 ])->group(function () {
     Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+        return view('user.dashboard.index');
+    })->name('user.dashboard');
 
     // Untuk pembayaran kas user
     Route::resource('/kas', PemasukanController::class);

@@ -175,6 +175,4 @@ class UserController extends Controller
             'new_status' => $data->is_active // Kembalikan status baru
         ]);
     }
-
-
 }
