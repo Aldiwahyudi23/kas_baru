@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->bigInteger('transaksi_id')->unsigned()->nullable();
             $table->string('name');
-            $table->string('no_hp')->nullable();
+            $table->string('no_hp');
             $table->string('no_listrik')->nullable();
             $table->string('token_code')->nullable();
             $table->timestamps();

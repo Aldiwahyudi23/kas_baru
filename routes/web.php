@@ -26,8 +26,9 @@ use App\Http\Controllers\notificationController;
 use App\Http\Controllers\User\Kas\DepositController;
 use App\Http\Controllers\User\Kas\PengeluaranController;
 use App\Http\Controllers\User\Kas\LoanExtensionController;
-use App\Http\Controllers\User\Konter\ProductKonterController;
-use App\Http\Controllers\User\Konter\TransaksiKonterController;
+use App\Http\Controllers\Admin\Konter\ProductKonterController;
+use App\Http\Controllers\Admin\Konter\TransaksiKonterController;
+use App\Http\Controllers\User\Konter\KonterController;
 use App\Http\Controllers\User\SetorTunaiController;
 use App\Models\LoanExtension;
 use Illuminate\Support\Facades\Route;
@@ -181,4 +182,13 @@ Route::middleware([
     Route::get('/setor-tunais/pengajuan/show/{id}', [SetorTunaiController::class, 'show_confirm'])->name('setor-tunai.show.confirm');
     Route::patch('/setor-tunais/pengajuan/show/{id}', [SetorTunaiController::class, 'confirm'])->name('setor-tunai.confirm');
     Route::get('/setor-tunais/detail/reject/{id}', [SetorTunaiController::class, 'detail_reject'])->name('setor-tunai.detail_reject');
+
+    Route::resource('/konter', KonterController::class);
+    Route::get('/token-listrik', [KonterController::class, 'token_listrik'])->name('token_listrik');
+    Route::get('/tagihan-listrik', [KonterController::class, 'tagihan_listrik'])->name('tagihan_listrik');
 });
+Route::post('/detect-provider', [KonterController::class, 'detectProvider'])->name('detect.provider');
+Route::get('/pulsa', [KonterController::class, 'pulsa'])->name('pulsa');
+Route::post('/transaction/calculate-price', [KonterController::class, 'calculatePrice'])->name('calculate-price');
+Route::get('/transaksi-umum/{encryptedProductId}/{phoneNumber}', [KonterController::class, 'transaksi_umum'])->name('transaksi-umum');
+Route::post('/transaksi-umum/proses', [KonterController::class, 'transaksi_proses'])->name('transaksi-proses');

@@ -9,16 +9,16 @@ use Livewire\Component;
 
 class ProductKonterCrud extends Component
 {
-    public $kategori_id, 
-    $provider_id, 
-    $amount, 
-    $buying_price, 
-    $price, 
-    $price1, 
-    $price2, 
-    $price3, 
-    $price4, 
-    $productId;
+    public $kategori_id,
+        $provider_id,
+        $amount,
+        $buying_price,
+        $price,
+        $price1,
+        $price2,
+        $price3,
+        $price4,
+        $productId;
 
     public $isEditing = false;
     public $isModalOpen = false;
@@ -58,9 +58,9 @@ class ProductKonterCrud extends Component
 
         // Cek kombinasi unik (kategori_id, provider_id, amount)
         $existingProduct = ProductKonter::where('kategori_id', $this->kategori_id)
-        ->where('provider_id', $this->provider_id)
-        ->where('amount', $this->amount) // Hilangkan koma pada amount
-        ->exists();
+            ->where('provider_id', $this->provider_id)
+            ->where('amount', $this->amount) // Hilangkan koma pada amount
+            ->exists();
 
         if ($existingProduct) {
             // Jika ada kombinasi yang sama, beri pesan error
@@ -137,6 +137,10 @@ class ProductKonterCrud extends Component
         $this->amount = '';
         $this->buying_price = '';
         $this->price = '';
+        $this->price1 = '';
+        $this->price2 = '';
+        $this->price3 = '';
+        $this->price4 = '';
         $this->productId = null;
     }
 

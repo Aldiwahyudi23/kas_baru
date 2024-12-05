@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\User\Konter;
+namespace App\Http\Controllers\Admin\Konter;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;

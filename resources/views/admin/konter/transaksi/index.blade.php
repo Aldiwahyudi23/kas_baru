@@ -27,12 +27,10 @@
     </div>
 </div>
 <!-- /.row -->
-<div class="row">
-    <div class="col-12">
-        <!-- Data ini di ambil dari file terpisah view/admin/master_data/data_admin/tabel -->
-        @include('admin.konter.transaksi.tabel')
-        <!-- /.card -->
-    </div>
+<div class="col-12">
+    <!-- Data ini di ambil dari file terpisah view/admin/master_data/data_admin/tabel -->
+    @include('admin.konter.transaksi.tabel')
+    <!-- /.card -->
 </div>
 @endsection
 

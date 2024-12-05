@@ -81,14 +81,7 @@ class DeadlineWarningMiddleware
 
             // Bagikan pesan hanya ke pengguna dengan role tertentu atau yang relevan
             if ($warnings) {
-                if (
-                    $user->role->name === "Ketua" ||
-                    $user->role->name == 'Bendahara' ||
-                    $user->role->name == 'Sekretaris' ||
-                    $user->data_warga->name
-                ) {
-                    View::share('globalWarnings', $warnings);
-                }
+                View::share('globalWarnings', $warnings);
             }
         }
 

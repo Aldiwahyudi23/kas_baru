@@ -1,33 +1,82 @@
             <div class="card-body">
-                <form action="{{ route('konter-transaksi.store') }}" method="POST" enctype="multipart/form-data" id="adminForm">
+                <form action="{{ route('konter-transaksi.store') }}" method="POST" enctype="multipart/form-data"
+                    id="adminForm">
                     @csrf
                     <div class="row">
                         <div class="col-12 col-sm-6">
-
-                            <div class="form-group">
-                                <label for="no_hp">No HandPhone <span class="text-danger">*</span></label>
-                                <input type="number" name="no_hp" id="no_hp" value="{{old('no_hp')}}" class="form-control col-12 @error('name') is-invalid @enderror">
+                            <div class="mb-3">
+                                <label for="code" class="form-label">Kode Transaksi</label>
+                                <input type="text" class="form-control" id="code" name="code" value="{{ old('code') }}"
+                                    required>
                             </div>
-
-                            <div>
-                                <label for="provider">Provider:</label>
-                                <input type="text" id="provider" name="provider" readonly>
-                            </div>
-                            <div>
-                                <label for="amount">Pilih Nominal:</label>
-                                <select id="amount" name="product_id" required>
-                                    <option value="">Pilih nominal</option>
+                            <div class="mb-3">
+                                <label for="product_id" class="form-label">Produk</label>
+                                <select class="form-control" id="product_id" name="product_id">
+                                    <option value="">--Pilih Produk--</option>
+                                    @foreach ($products as $product)
+                                    <option value="{{ $product->id }}"
+                                        {{ old('product_id') == $product->id ? 'selected' : '' }}>
+                                        {{ $product->kategori->name }} {{ $product->provider->name }}
+                                        {{number_format($product->amount,0,',','.' )}}
+                                    </option>
+                                    @endforeach
                                 </select>
                             </div>
-                            <div>
-                                <label for="price">Harga Jual:</label>
-                                <input type="text" id="price" name="price" readonly>
+                            <div class="mb-3">
+                                <label for="submitted_by" class="form-label">Diajukan Oleh</label>
+                                <input type="text" class="form-control" id="submitted_by" name="submitted_by"
+                                    value="{{ old('submitted_by') }}" required>
                             </div>
-
+                            <div class="mb-3">
+                                <label for="payment_method" class="form-label">Metode Pembayaran</label>
+                                <select class="form-control" id="payment_method" name="payment_method" required>
+                                    <option value="">--Pilih Pembayaran--</option>
+                                    <option value="cash" {{ old('payment_method') == 'cash' ? 'selected' : '' }}>Cash
+                                    </option>
+                                    <option value="transfer"
+                                        {{ old('payment_method') == 'transfer' ? 'selected' : '' }}>Transfer</option>
+                                </select>
+                            </div>
                         </div>
-
-                        <!-- Button Submit -->
-                        <button type="submit" class="btn btn-success" id="submitBtns">Create</button>
+                        <div class="col-12 col-sm-6">
+                            <div class="mb-3">
+                                <label for="buying_price" class="form-label">Harga Beli</label>
+                                <input type="number" step="0.01" class="form-control" id="buying_price"
+                                    name="buying_price" value="{{ old('buying_price') }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="price" class="form-label">Harga Jual</label>
+                                <input type="number" step="0.01" class="form-control" id="price" name="price"
+                                    value="{{ old('price') }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="status" class="form-label">Status</label>
+                                <select class="form-control" id="status" name="status" required>
+                                    <option value="pending" {{ old('status') == 'pending' ? 'selected' : '' }}>Pending
+                                    </option>
+                                    <option value="Berhasil" {{ old('status') == 'Berhasil' ? 'selected' : '' }}>
+                                        Berhasil</option>
+                                    <option value="Gagal" {{ old('status') == 'Gagal' ? 'selected' : '' }}>Gagal
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="is_deposited" class="form-label">Deposit</label>
+                                <select class="form-control" id="is_deposited" name="is_deposited" required>
+                                    <option value="">--pilih deposite--</option>
+                                    <option value="1" {{ old('is_deposited') == '1' ? 'selected' : '' }}>Ya</option>
+                                    <option value="0" {{ old('is_deposited') == '0' ? 'selected' : '' }}>Tidak</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="deadline_date" class="form-label">Tanggal Batas Waktu</label>
+                                <input type="date" class="form-control" id="deadline_date" name="deadline_date"
+                                    value="{{ old('deadline_date') }}">
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Button Submit -->
+                    <button type="submit" class="btn btn-success" id="submitBtns">Create</button>
                 </form>
             </div>
             <!-- /.card-body -->
@@ -36,113 +85,3 @@
                     <br>- Bertanda bintang Merah wajib di isi.
                 </p>
             </div>
-
-            <script>
-                document.addEventListener("DOMContentLoaded", function() {
-                    const noHpInput = document.getElementById("no_hp");
-                    const providerInput = document.getElementById("provider");
-                    const amountSelect = document.getElementById("amount");
-                    const priceInput = document.getElementById("price");
-                    const pulsaForm = document.getElementById("pulsaForm");
-
-                    // Event listener untuk cek nomor HP
-                    noHpInput.addEventListener("blur", async () => {
-                        const noHp = noHpInput.value;
-
-                        if (!noHp) {
-                            alert("Masukkan nomor HP!");
-                            return;
-                        }
-
-                        // Fetch data dari server
-                        try {
-                            const response = await fetch("/check-phone", {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json",
-                                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
-                                },
-                                body: JSON.stringify({
-                                    no_hp: noHp
-                                })
-                            });
-
-                            const data = await response.json();
-
-                            if (data.success) {
-                                providerInput.value = data.layanan;
-                                populateAmount(data.products);
-                            } else {
-                                alert(data.message);
-                                providerInput.value = "";
-                                amountSelect.innerHTML = '<option value="">Pilih nominal</option>';
-                                priceInput.value = "";
-                            }
-                        } catch (error) {
-                            console.error("Error:", error);
-                            alert("Terjadi kesalahan saat memproses data.");
-                        }
-                    });
-
-                    // Populasi dropdown amount
-                    function populateAmount(products) {
-                        amountSelect.innerHTML = '<option value="">Pilih nominal</option>';
-                        products.forEach(product => {
-                            const option = document.createElement("option");
-                            option.value = product.id; // Menggunakan ID produk
-                            option.textContent = `${product.amount}`;
-                            option.dataset.price = product.amount * 1.1; // Contoh markup 10% untuk harga jual
-                            amountSelect.appendChild(option);
-                        });
-                    }
-
-                    // Update harga jual ketika nominal dipilih
-                    amountSelect.addEventListener("change", function() {
-                        const selectedOption = amountSelect.options[amountSelect.selectedIndex];
-                        const price = selectedOption.dataset.price || "";
-                        priceInput.value = price;
-                    });
-
-                    // Handle submit form
-                    pulsaForm.addEventListener("submit", async function(event) {
-                        event.preventDefault();
-
-                        const formData = {
-                            no_hp: noHpInput.value,
-                            product_id: amountSelect.value,
-                            price: priceInput.value
-                        };
-
-                        if (!formData.product_id) {
-                            alert("Pilih nominal terlebih dahulu!");
-                            return;
-                        }
-
-                        try {
-                            const response = await fetch("/transaksi/store", {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json",
-                                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
-                                },
-                                body: JSON.stringify(formData)
-                            });
-
-                            const data = await response.json();
-
-                            if (data.success) {
-                                alert("Transaksi berhasil disimpan!");
-                                pulsaForm.reset();
-                                providerInput.value = "";
-                                amountSelect.innerHTML = '<option value="">Pilih nominal</option>';
-                                priceInput.value = "";
-                            } else {
-                                alert("Gagal menyimpan transaksi: " + data.message);
-                            }
-                        } catch (error) {
-                            console.error("Error:", error);
-                            alert("Terjadi kesalahan saat menyimpan transaksi.");
-                        }
-                    });
-                });
-            </script>

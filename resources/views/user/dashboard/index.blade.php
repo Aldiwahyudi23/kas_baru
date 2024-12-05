@@ -36,9 +36,9 @@
             <div class="card bg-success text-white shadow">
                 <div class="card-body">
                     Cek Laporan
-                    <div class="text-white-50 small">Lihat laporan keuangan</div>
+                    <div class="text-white-50 small">konter</div>
                 </div>
-                <a href="" class="card-footer text-white clearfix small z-1">
+                <a href="{{Route('konter.index')}}" class="card-footer text-white clearfix small z-1">
                     <span class="float-left">Lihat Detail</span>
                     <span class="float-right">
                         <i class="fas fa-angle-right"></i>
