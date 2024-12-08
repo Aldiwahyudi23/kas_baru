@@ -15,17 +15,26 @@ return new class extends Migration
             $table->id();
             $table->string('code')->unique();
             $table->bigInteger('product_id')->unsigned()->nullable();
+            $table->bigInteger('konter_detail_id')->unsigned()->nullable();
             $table->string('submitted_by');
+            $table->enum('payment_status', ['Langsung', 'Hutang']);
             $table->enum('payment_method', ['transfer', 'cash'])->nullable();
-            $table->enum('status', ['pending', 'Berhasil', 'Gagal'])->default('pending'); // Status perpanjangan
+            $table->enum('status', ['pending', 'Proses', 'Berhasil', 'Selesai', 'Gagal'])->default('pending'); // Status perpanjangan
             $table->decimal('buying_price', 10, 2)->nullable(); //harga belo
             $table->decimal('price', 10, 2); //harga jual
-            $table->boolean('is_deposited')->default(false)->nullable();
+            $table->decimal('diskon', 10, 2)->nullable(); //harga jual
+            $table->decimal('invoice', 10, 2)->nullable(); //harga jual
+            $table->decimal('margin', 10, 2)->nullable(); //harga jual
+            $table->timestamp('deadline_date')->nullable(); // Waktu batas akhir
+            $table->boolean('is_deposited')->default(false)->nullable(); //jika uang sudah masuk Bank kas bersetatus true
             $table->bigInteger('deposit_id')->unsigned()->nullable();
-            $table->timestamp('deadline_date')->nullable();
+            $table->bigInteger('warga_id')->unsigned()->nullable();
             $table->timestamps();
 
             $table->foreign('product_id')->references('id')->on('product_konters')->onDelete('set null');
+            $table->foreign('konter_detail_id')->references('id')->on('detail_transaksi_konters')->onDelete('set null');
+            $table->foreign('warga_id')->references('id')->on('data_wargas')->onDelete('set null');
+            $table->foreign('deposit_id')->references('id')->on('deposits')->onDelete('set null');
         });
     }
 

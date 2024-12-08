@@ -59,11 +59,11 @@
                 @section('script')
 
                 <script>
-                    // Function to toggle the visibility of the transfer receipt input based on selected payment method
-                    function toggleTransferReceipt() {
-                        var paymentMethod = document.getElementById('payment_method').value;
-                        var transferReceipt = document.getElementById('transfer_receipt');
-                        transferReceipt.style.display = (paymentMethod === 'transfer') ? 'block' : 'none';
-                    }
+// Function to toggle the visibility of the transfer receipt input based on selected payment method
+function toggleTransferReceipt() {
+    var paymentMethod = document.getElementById('payment_method').value;
+    var transferReceipt = document.getElementById('transfer_receipt');
+    transferReceipt.style.display = (paymentMethod === 'transfer') ? 'block' : 'none';
+}
                 </script>
                 @endsection

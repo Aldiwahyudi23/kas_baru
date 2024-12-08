@@ -146,6 +146,9 @@
 <body>
     <!-- Form -->
     <div class="transaction-container">
+        <div class="alert alert-success alert-dismissible">
+            <small id="message" class="form-text text-muted"></small>
+        </div>
         <div class="transaction-header">
             <h2>Transaksi Anda</h2>
             <p><strong>{{ $phoneNumber }}</strong> <br>
@@ -173,7 +176,8 @@
 
         <!-- Detail transaksi -->
         <div class="transaction-details">
-            <p><strong>Harga Jual:</strong> Rp <span id="price-display">{{ number_format($product->price, 0, ',', '.') }}</span></p>
+            <p><strong>Harga Jual:</strong> Rp <span
+                    id="price-display">{{ number_format($product->price, 0, ',', '.') }}</span></p>
             <p><strong>Deadline:</strong> <span id="deadline-display">-</span></p>
         </div>
 
@@ -186,12 +190,35 @@
             <input type="hidden" name="price" id="final-price" value="">
             <input type="hidden" name="deadline_date" id="final-deadline" value="">
 
+
             <div class="form-group ">
-                <center>
-                    <label for="submitted_by">Nama Pengaju</label>
-                </center>
-                <input type="text" id="submitted_by" name="submitted_by" class="form-control" placeholder="Masukkan nama Anda pengaju">
+                <label for="name">Atas Nama</label>
+                <input type="text" id="name" name="name" class="form-control"
+                    placeholder="Masukkan nama Pembeli / Nama Listrik">
             </div>
+            @if ($product->kategori->name == "Listrik")
+            <div class="form-group mt-3">
+                <label for="no_hp">No HP Tujuan</label>
+                <input type="text" id="no_hp" name="no_hp" class="form-control"
+                    placeholder="Masukkan No Hp Agar TOKEN di kirim no tujuan">
+            </div>
+            @if (!Auth::check())
+            <div class="form-group mt-3">
+                <label for="submitted_by">Nama Pengaju</label>
+                <input type="text" id="submitted_by" name="submitted_by" class="form-control"
+                    placeholder="Masukkan Anda yang pengajukan">
+            </div>
+            @endif
+            @endif
+            <div class="form-group row">
+                <center>
+                    <label for="description" class="col-sm-12 col-form-label">Keterangan
+                </center>
+                <textarea class="form-control col-12 @error('description') is-invalid @enderror" name="description"
+                    id="description"
+                    placeholder="Jelaskan untuk Uangnya di kasih kesiapa ">{{ old('description') }}</textarea>
+            </div>
+
             <br>
 
             <button type="submit" id="submit-btn" class="btn-submit" disabled>Submit</button>
@@ -213,7 +240,7 @@
             const finalPriceInput = $('#final-price');
             const finalDeadlineInput = $('#final-deadline');
             const submitBtn = $('#submit-btn');
-            const submittedByInput = $('#submitted_by'); // Input Nama
+            const submittedByInput = $('#name'); // Input Nama
             const productId = '{{ Crypt::encryptString($product->id) }}';
 
             // Reset fungsi untuk Hutang
@@ -239,7 +266,7 @@
                 if (activeButton.length > 0) {
                     const range = activeButton.data('range');
                     $.ajax({
-                        url: '{{ route('calculate-price') }}',
+                        // url: '{{ route('calculate-price') }}',
                         method: 'POST',
                         data: {
                             range: range,
@@ -299,7 +326,7 @@
 
                 const range = $(this).data('range');
                 $.ajax({
-                    url: '{{ route('calculate-price') }}',
+                    // url: '{{ route('calculate-price') }}',
                     method: 'POST',
                     data: {
                         range: range,
@@ -307,7 +334,8 @@
                         _token: '{{ csrf_token() }}'
                     },
                     success: function(response) {
-                        updatePriceAndDeadline(response.price, response.deadline); // Update data
+                        updatePriceAndDeadline(response.price, response
+                            .deadline); // Update data
                         checkSubmitStatus(); // Periksa status tombol submit
                     },
                     error: function() {
@@ -333,6 +361,34 @@
             const submitButton = document.getElementById('submit-btn');
             submitButton.disabled = true; // Disable tombol
             submitButton.textContent = 'Loading...'; // Ubah teks tombol
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Nomor telepon yang akan dicek
+            const phoneNumber = "{{ $phoneNumber }}";
+
+            // Kirim permintaan AJAX ke server untuk memeriksa nomor
+            fetch(`/check-phone/${phoneNumber}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Jika nomor ditemukan, isi nama dan tampilkan pesan
+                        document.getElementById('name').value = data.name;
+                        document.getElementById('name').text = data.name;
+                        document.getElementById('message').textContent =
+                            "Hallo Kel. Besar Ma HAYA, Selamat membeli pulsa!";
+                    } else {
+                        // Jika nomor tidak ditemukan, beri pesan berbeda
+                        document.getElementById('message').textContent =
+                            "Nomor ini bukan milik anggota Keluarga.";
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('message').textContent = "Terjadi kesalahan saat memproses data.";
+                });
         });
     </script>
 </body>

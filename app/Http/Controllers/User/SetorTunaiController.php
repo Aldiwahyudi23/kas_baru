@@ -8,6 +8,7 @@ use App\Models\DataWarga;
 use App\Models\Deposit;
 use App\Models\DepositDetail;
 use App\Models\KasPayment;
+use App\Models\Konter\TransaksiKonter;
 use App\Models\loanRepayment;
 use App\Models\Saldo;
 use App\Models\User;
@@ -33,10 +34,11 @@ class SetorTunaiController extends Controller
     {
         $kasPayments = KasPayment::where('is_deposited', false)->where('deposit_id', Null)->where('status', 'confirmed')->get();
         $loanRepayments = loanRepayment::where('is_deposited', false)->where('deposit_id', Null)->where('status', 'confirmed')->get();
+        $konters = TransaksiKonter::where('is_deposited', false)->where('deposit_id', Null)->where('status', 'Selesai')->get();
 
         $data_deposit = Deposit::all();
 
-        return view('user.setor_tunai.index', compact('kasPayments', 'loanRepayments', 'data_deposit'));
+        return view('user.setor_tunai.index', compact('kasPayments', 'loanRepayments', 'data_deposit', 'konters'));
     }
 
     /**
@@ -116,6 +118,12 @@ class SetorTunaiController extends Controller
 
                     case 'loan':
                         LoanRepayment::where('id', $recordId)
+                            ->update([
+                                'deposit_id' => $deposit->id
+                            ]);
+                        break;
+                    case 'konter':
+                        TransaksiKonter::where('id', $recordId)
                             ->update([
                                 'deposit_id' => $deposit->id
                             ]);

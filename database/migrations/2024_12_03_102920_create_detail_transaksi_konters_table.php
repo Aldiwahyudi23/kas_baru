@@ -13,14 +13,12 @@ return new class extends Migration
     {
         Schema::create('detail_transaksi_konters', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('transaksi_id')->unsigned()->nullable();
             $table->string('name');
             $table->string('no_hp');
             $table->string('no_listrik')->nullable();
             $table->string('token_code')->nullable();
+            $table->string('description')->nullable();
             $table->timestamps();
-
-            $table->foreign('transaksi_id')->references('id')->on('transaksi_konters')->onDelete('set null');
         });
     }
 

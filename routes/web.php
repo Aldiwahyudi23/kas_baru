@@ -184,11 +184,16 @@ Route::middleware([
     Route::get('/setor-tunais/detail/reject/{id}', [SetorTunaiController::class, 'detail_reject'])->name('setor-tunai.detail_reject');
 
     Route::resource('/konter', KonterController::class);
-    Route::get('/token-listrik', [KonterController::class, 'token_listrik'])->name('token_listrik');
-    Route::get('/tagihan-listrik', [KonterController::class, 'tagihan_listrik'])->name('tagihan_listrik');
+    Route::get('/konters/pengajuan/{id}', [KonterController::class, 'pengajuan'])->name('konter.pengajuan');
+    Route::patch('/konters/pengajuan/{id}', [KonterController::class, 'pengajuan_berhasil'])->name('konter.berhasil');
 });
 Route::post('/detect-provider', [KonterController::class, 'detectProvider'])->name('detect.provider');
 Route::get('/pulsa', [KonterController::class, 'pulsa'])->name('pulsa');
 Route::post('/transaction/calculate-price', [KonterController::class, 'calculatePrice'])->name('calculate-price');
 Route::get('/transaksi-umum/{encryptedProductId}/{phoneNumber}', [KonterController::class, 'transaksi_umum'])->name('transaksi-umum');
 Route::post('/transaksi-umum/proses', [KonterController::class, 'transaksi_proses'])->name('transaksi-proses');
+Route::get('/check-phone/{phone}', [KonterController::class, 'checkPhone']);
+
+
+Route::get('/token-listrik', [KonterController::class, 'token_listrik'])->name('token_listrik');
+Route::get('/tagihan-listrik', [KonterController::class, 'tagihan_listrik'])->name('tagihan_listrik');

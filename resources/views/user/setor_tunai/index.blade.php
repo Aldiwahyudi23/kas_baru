@@ -43,6 +43,7 @@
                         <div class="tab-pane fade" id="custom-tabs-four-messages" role="tabpanel"
                             aria-labelledby="custom-tabs-four-messages-tab">
                             <!-- Mengambil data tabel  -->
+                            @include('user.setor_tunai.tabel.konter')
                         </div>
                     </div>
                     {{-- Hidden Input untuk Total Kas --}}
@@ -51,6 +52,9 @@
                     {{-- Hidden Input untuk Total Pinjaman --}}
                     <p><strong>Total Pinjaman Dipilih:</strong>Rp <span id="totalLoan">0</span></p>
                     <input type="hidden" id="totalLoanInput" name="total_loan">
+                    {{-- Hidden Input untuk Total Pinjaman --}}
+                    <p><strong>Total Konter Dipilih:</strong>Rp <span id="totalKonter">0</span></p>
+                    <input type="hidden" id="totalKonterInput" name="total_konter">
 
                     {{-- Total Semua --}}
                     <p><strong>Total Keseluruhan:</strong>Rp <span id="totalKeseluruhan">0</span></p>
@@ -98,6 +102,7 @@
     function updateTotals() {
         let totalKas = 0;
         let totalLoan = 0;
+        let totalKonter = 0;
 
         // Hitung total Kas
         document.querySelectorAll('.kasCheckbox:checked').forEach(el => {
@@ -109,22 +114,29 @@
             totalLoan += parseFloat(el.dataset.amount);
         });
 
+        // Hitung total Loan
+        document.querySelectorAll('.konterCheckbox:checked').forEach(el => {
+            totalKonter += parseFloat(el.dataset.amount);
+        });
+
         // Update total keseluruhan
-        const totalKeseluruhan = totalKas + totalLoan;
+        const totalKeseluruhan = totalKas + totalLoan + totalKonter;
 
         // Tampilkan total
         document.getElementById('totalKas').innerText = totalKas.toLocaleString();
         document.getElementById('totalLoan').innerText = totalLoan.toLocaleString();
+        document.getElementById('totalKonter').innerText = totalKonter.toLocaleString();
         document.getElementById('totalKeseluruhan').innerText = totalKeseluruhan.toLocaleString();
 
         // Set hidden input values
         document.getElementById('totalKasInput').value = totalKas;
         document.getElementById('totalLoanInput').value = totalLoan;
+        document.getElementById('totalKonterInput').value = totalKonter;
         document.getElementById('totalKeseluruhanInput').value = totalKeseluruhan;
     }
 
     // Event Listener untuk checkbox
-    document.querySelectorAll('.kasCheckbox, .loanCheckbox').forEach(el => {
+    document.querySelectorAll('.kasCheckbox, .loanCheckbox, .konterCheckbox').forEach(el => {
         el.addEventListener('change', updateTotals);
     });
 
@@ -138,6 +150,11 @@
     document.getElementById('selectAllLoans').addEventListener('change', function() {
         const isChecked = this.checked;
         document.querySelectorAll('.loanCheckbox').forEach(el => el.checked = isChecked);
+        updateTotals();
+    });
+    document.getElementById('selectAllKonter').addEventListener('change', function() {
+        const isChecked = this.checked;
+        document.querySelectorAll('.konterCheckbox').forEach(el => el.checked = isChecked);
         updateTotals();
     });
 </script>

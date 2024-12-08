@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kasih Sayang untuk Agus Tina Ayu Wulandari</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+            height: 100vh;
+            overflow: hidden;
+            text-align: center;
+            color: #fff;
+        }
+
+        .container {
+            position: relative;
+            padding: 20px;
+            animation: fadeIn 2s ease-in-out;
+        }
+
+        .photo {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin: 10px auto;
+            border: 5px solid #fff;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            animation: bounceIn 1.5s ease-in-out;
+        }
+
+        .photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .poem {
+            font-size: 1.2rem;
+            margin: 20px auto;
+            line-height: 1.8;
+            padding: 0 10px;
+            animation: slideIn 2s ease-out;
+        }
+
+        .quote {
+            font-size: 1rem;
+            font-style: italic;
+            margin-top: 20px;
+            animation: pulse 2s infinite alternate;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+
+            60% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            from {
+                transform: scale(1);
+                color: #f7c6c7;
+            }
+
+            to {
+                transform: scale(1.1);
+                color: #fff;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="photo">
+            <img src="https://via.placeholder.com/150" alt="Agus Tina Ayu Wulandari">
+        </div>
+        <div class="poem">
+            <p>
+                Dalam senyum dan tawamu<br>
+                Aku temukan kedamaian tak terganti<br>
+                Agus Tina Ayu Wulandari, namamu bagai melodi<br>
+                Mengalun lembut, memenuhi ruang hati.
+            </p>
+            <p>
+                Setiap langkah yang kau tapaki<br>
+                Adalah cerita yang ingin kutemani<br>
+                Kau adalah bintang di malamku<br>
+                Cahaya yang selalu kuharap tak pernah redup.
+            </p>
+            <p>
+                Bersamamu, hari menjadi lebih indah<br>
+                Seperti pelangi setelah hujan reda<br>
+                Hatiku berbisik setiap detiknya<br>
+                Aku mencintaimu, dengan seluruh jiwaku.
+            </p>
+        </div>
+        <div class="quote">"Cinta adalah tentang kehadiranmu yang membuat segalanya sempurna."</div>
+    </div>
+</body>
+
+</html>

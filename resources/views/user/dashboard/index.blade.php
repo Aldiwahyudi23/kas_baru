@@ -35,7 +35,7 @@
         <div class="col-lg-3 col-md-6 mb-4">
             <div class="card bg-success text-white shadow">
                 <div class="card-body">
-                    Cek Laporan
+                   Konter
                     <div class="text-white-50 small">konter</div>
                 </div>
                 <a href="{{Route('konter.index')}}" class="card-footer text-white clearfix small z-1">
@@ -52,11 +52,15 @@
 </div>
 
 <!-- Info boxes -->
+
 <div class="row">
     <div class="col-3 col-sm-4 col-md-3">
-        <div class="info-box">
-            <span class="info-box-icon bg-info elevation-1"><i class="fas fa-cog"></i></span>
-        </div>
+        <a class="users-list-name" href="{{Route('konter.index')}}">
+            <div class="info-box">
+                <span class="info-box-icon bg-info elevation-1"><i class="fas fa-cog"></i></span>
+            </div>
+            <p class="text-bold users-list-date" style="font-size:14px;">Konter</p>
+        </a>
         <!-- /.info-box -->
     </div>
     <!-- /.col -->
