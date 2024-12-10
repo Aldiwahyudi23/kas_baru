@@ -5,6 +5,7 @@ use App\Http\Controllers\User\Kas\BayarPinjamanController;
 use App\Http\Controllers\User\Kas\PemasukanController;
 use App\Http\Controllers\User\Kas\PinjamanController;
 use App\Http\Controllers\User\KasController;
+use App\Http\Controllers\User\PemasukanLainController;
 use App\Http\Middleware\CheckActiveStatusAdmin;
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\AllRouteUrlController;
@@ -182,6 +183,11 @@ Route::middleware([
     Route::get('/setor-tunais/pengajuan/show/{id}', [SetorTunaiController::class, 'show_confirm'])->name('setor-tunai.show.confirm');
     Route::patch('/setor-tunais/pengajuan/show/{id}', [SetorTunaiController::class, 'confirm'])->name('setor-tunai.confirm');
     Route::get('/setor-tunais/detail/reject/{id}', [SetorTunaiController::class, 'detail_reject'])->name('setor-tunai.detail_reject');
+
+    Route::resource('/other-income', PemasukanLainController::class);
+    Route::get('/other-incomes/kas', [PemasukanLainController::class, 'pengajuan'])->name('income.pengajuan');
+    Route::get('/confirm/other-incomes/{id}', [PemasukanLainController::class, 'show_confirm'])->name('income.show.confirm');
+    Route::patch('/confirm/other-incomes/{id}', [PemasukanLainController::class, 'confirm'])->name('income.confirm');
 
     Route::resource('/konter', KonterController::class);
     Route::get('/konters/pengajuan/{id}', [KonterController::class, 'pengajuan'])->name('konter.pengajuan');

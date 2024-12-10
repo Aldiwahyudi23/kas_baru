@@ -151,8 +151,7 @@
         </div>
         <div class="transaction-header">
             <h2>Transaksi Anda</h2>
-            <p><strong>{{ $phoneNumber }}</strong> <br>
-                <strong>{{ number_format($product->amount, 0, ',', '.') }}</strong>
+            <p><strong>Tagihan Listrik</strong> <br>
             </p>
         </div>
         <!-- Pilihan metode pembayaran -->
@@ -176,27 +175,31 @@
 
         <!-- Detail transaksi -->
         <div class="transaction-details">
-            <p><strong>Harga Jual:</strong> Rp <span
-                    id="price-display">{{ number_format($product->price, 0, ',', '.') }}</span></p>
+            <p><strong>Harga :</strong>+ Rp <span
+                    id="price-display"></span></p>
             <p><strong>Deadline:</strong> <span id="deadline-display">-</span></p>
+            <span class="text-muted" >Harga di atas adalah harga transaksi, Untuk harga aslinya dari nominal tagihan di tambah yang di atas</span>
         </div>
 
         <!-- Form pengajuan -->
         <form action="{{ route('transaksi-proses') }}" method="POST" id="transaction-form">
             @csrf
             <input type="hidden" name="product_id" value="{{ $product->id }}">
-            <input type="hidden" name="phone_number" value="{{ $phoneNumber }}">
             <input type="hidden" name="payment_method" id="payment-method" value="">
             <input type="hidden" name="price" id="final-price" value="">
             <input type="hidden" name="deadline_date" id="final-deadline" value="">
 
 
             <div class="form-group ">
+                <label for="phone_number">No Meteran</label>
+                <input type="text" id="phone_number" name="phone_number" class="form-control"
+                    placeholder="Masukkan No Meteran">
+            </div>
+            <div class="form-group mt-3 ">
                 <label for="name">Atas Nama</label>
                 <input type="text" id="name" name="name" class="form-control"
                     placeholder="Masukkan nama Pembeli / Nama Listrik">
             </div>
-            @if ($product->kategori->name == "Listrik")
             <div class="form-group mt-3">
                 <label for="no_hp">No HP Tujuan</label>
                 <input type="text" id="no_hp" name="no_hp" class="form-control"
@@ -208,7 +211,6 @@
                 <input type="text" id="submitted_by" name="submitted_by" class="form-control"
                     placeholder="Masukkan Anda yang pengajukan">
             </div>
-            @endif
             @endif
             <div class="form-group row">
                 <center>
@@ -364,33 +366,6 @@
         });
     </script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Nomor telepon yang akan dicek
-            const phoneNumber = "{{ $phoneNumber }}";
-
-            // Kirim permintaan AJAX ke server untuk memeriksa nomor
-            fetch(`/check-phone/${phoneNumber}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Jika nomor ditemukan, isi nama dan tampilkan pesan
-                        document.getElementById('name').value = data.name;
-                        document.getElementById('name').text = data.name;
-                        document.getElementById('message').textContent =
-                            "Hallo Kel. Besar Ma HAYA, Selamat membeli pulsa!";
-                    } else {
-                        // Jika nomor tidak ditemukan, beri pesan berbeda
-                        document.getElementById('message').textContent =
-                            "Nomor ini bukan milik anggota Keluarga.";
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    document.getElementById('message').textContent = "Terjadi kesalahan saat memproses data.";
-                });
-        });
-    </script>
 </body>
 
 </html>

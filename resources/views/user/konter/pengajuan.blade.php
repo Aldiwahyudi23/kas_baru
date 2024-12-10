@@ -154,6 +154,15 @@
 
             </div>
             @endif
+            @if ($pengajuan->product->provider->name == "Tagihan Listrik")
+            <div class="form-group">
+                <label for="price_display">Nominal Tagihan</label>
+                <input type="text" name="price_display" id="price_display" value="{{ old('price_display')}}"
+                    class="form-control col-12 @error('price_display') is-invalid @enderror"
+                    placeholder="Masukan nominal Tagihan " disabled>
+                <input type="hidden" name="price" id="price" value="{{old('price')}}">
+            </div>
+            @endif
 
             @if ($pengajuan->payment_status == "Hutang" )
             <div class="form-group">
@@ -253,6 +262,8 @@
 
 <script>
     let originalBuyingPrice = 0; // Variabel global untuk menyimpan nilai asli
+    // Pastikan variabel global untuk nilai awal dari controller
+    let additionalPrice = parseFloat("{{ $pengajuan->price ?? 0 }}") || 0;
 
     function ID(element) {
         // Ambil nilai asli tanpa format
@@ -282,6 +293,24 @@
 
         // Tampilkan nilai awal di buying_price_display
         document.getElementById('buying_price_display').value = formattedValue;
+
+        // Hitung nilai final untuk price_display
+        const finalValue = (parseFloat(rawValue) || 0) + additionalPrice;
+
+        // Format nilai final
+        const [finalInteger, finalDecimal] = finalValue.toFixed(0).split('.');
+        const formattedFinalInteger = finalInteger.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        const formattedFinalValue = finalDecimal !== undefined ?
+            `${formattedFinalInteger},${finalDecimal.slice(0, 2)}` :
+            formattedFinalInteger;
+
+
+        // Simpan nilai asli (tanpa format) ke input hidden
+        document.getElementById('price').value = finalValue;
+
+        // Tampilkan nilai awal di price_display
+        document.getElementById('price_display').value = formattedFinalValue;
+
     }
 
     //membuat input diskon jadi bernilai nol

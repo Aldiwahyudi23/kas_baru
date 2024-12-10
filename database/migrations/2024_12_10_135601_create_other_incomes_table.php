@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('kas_payments', function (Blueprint $table) {
+        Schema::create('other_incomes', function (Blueprint $table) {
             $table->id();
             $table->string('code')->unique();
-            $table->bigInteger('data_warga_id')->unsigned(); // ID pengguna yang pembayaran kasnya tercatat
+            $table->bigInteger('anggaran_id')->unsigned(); // ID pengguna yang pembayaran kasnya tercatat
             $table->bigInteger('submitted_by')->unsigned()->nullable(); // ID pengguna yang menginput pembayaran jika berbeda
             $table->decimal('amount', 10, 2);
             $table->enum('payment_method', ['transfer', 'cash']);
@@ -28,7 +28,7 @@ return new class extends Migration
             $table->longText('description');
             $table->timestamps();
 
-            $table->foreign('data_warga_id')->references('id')->on('data_wargas')->onDelete('cascade');
+            $table->foreign('anggaran_id')->references('id')->on('anggarans')->onDelete('cascade');
             $table->foreign('submitted_by')->references('id')->on('data_wargas')->onDelete('set null'); // Menyimpan referensi ke pengguna yang input
             $table->foreign('confirmed_by')->references('id')->on('data_wargas')->onDelete('set null');
             $table->foreign('deposit_id')->references('id')->on('deposits')->onDelete('set null');
@@ -40,6 +40,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('kas_payments');
+        Schema::dropIfExists('other_incomes');
     }
 };

@@ -3,11 +3,15 @@
 namespace App\Http\Controllers\User\Konter;
 
 use App\Http\Controllers\Controller;
+use App\Models\Anggaran;
+use App\Models\AnggaranSaldo;
 use App\Models\DataWarga;
 use App\Models\Konter\DetailTransaksiKonter;
+use App\Models\Konter\KategoriKonter;
 use App\Models\Konter\ProductKonter;
 use App\Models\Konter\ProviderKonter;
 use App\Models\Konter\TransaksiKonter;
+use App\Models\Saldo;
 use App\Services\FonnteService;
 use Carbon\Carbon;
 use Dflydev\DotAccessData\Data;
@@ -64,7 +68,7 @@ class KonterController extends Controller
 
         $data = TransaksiKonter::find($id);
 
-        return view('user.konter.show',compact('data'));
+        return view('user.konter.show', compact('data'));
     }
 
     /**
@@ -113,6 +117,9 @@ class KonterController extends Controller
                 $data->buying_price = $request->buying_price;
                 $data->diskon = $request->diskon;
                 $data->status = $request->status;
+                if ($request->price) {
+                    $data->price = $request->price;
+                }
                 if ($request->invoice) {
                     $invoice = $request->invoice;
                 } else {
@@ -152,6 +159,50 @@ class KonterController extends Controller
                     $data_detail->description = $data_detail->description . "<br> Catatan Pengurus : <br>" . $request->description;
                 }
                 $data_detail->update();
+
+                // Menyimpan data ke saldo
+                if ($request->status == "Berhasil") {
+                    $nominal_saldo = $request->buying_price;
+                } elseif ($request->status == "Selesai") {
+                    $nominal_saldo = +$invoice;
+                }
+
+                $saldo_terbaru = Saldo::latest()->first();
+                if ($request->status == "Berhasil") {
+                    $nominal_amount = '-' . $request->buying_price;
+                    $atm = $saldo_terbaru->atm_balance + $nominal_amount;
+                    $total = $saldo_terbaru->total_balance + $nominal_amount;
+                } elseif ($request->status == "Selesai") {
+                    $nominal_amount = $invoice;
+                    $atm = $saldo_terbaru->atm_balance + $nominal_amount;
+                    $total = $saldo_terbaru->total_balance + $nominal_amount;
+                }
+                $saldo = new Saldo();
+                $saldo->code = $data->code;
+                $saldo->amount =  $nominal_amount;
+                $saldo->atm_balance = $atm;
+                $saldo->total_balance = $total;
+                $saldo->ending_balance = $saldo_terbaru->total_balance;
+                $saldo->cash_outside = $saldo_terbaru->cash_outside;
+
+                $saldo->save();
+                // -----------------------------------------
+                $anggaranKas = Anggaran::where('name', 'Dana Kas')->first();
+                $saldo_akhir_kas =  AnggaranSaldo::where('type', $anggaranKas->name)->latest()->first(); //mengambil data yang terakhir berdasarkan type anggaran
+                if ($request->status == "Berhasil") {
+                    $nominal_amount = '-' . $request->buying_price;
+                    $total = $saldo_akhir_kas->saldo + $nominal_amount;
+                } elseif ($request->status == "Selesai") {
+                    $nominal_amount = $invoice;
+                    $total = $saldo_akhir_kas->saldo + $nominal_amount;
+                }
+                $saldo_kas = new AnggaranSaldo();
+                $saldo_kas->type = $anggaranKas->name;
+                $saldo_kas->percentage = 0;
+                $saldo_kas->amount = $nominal_amount;
+                $saldo_kas->saldo = $total;
+                $saldo_kas->saldo_id = $saldo->id; //mengambil id dari model saldo di atas
+                $saldo_kas->save();
 
                 // // URL gambar dari direktori storage
                 // $imageUrl = asset('storage/kas/pengeluaran/ymKJ8SbQ7NLrLAhjAAKMNfOFHCK8O70HiqEiiIPE.jpg');
@@ -211,25 +262,25 @@ class KonterController extends Controller
 
     public function pulsa()
     {
-        $products = ProductKonter::where('provider_id', 1)
-            ->where('kategori_id', 1)
-            ->get(['id', 'amount']);
-        return view('user.konter.pulsa', compact('products'));
+
+        return view('user.konter.pulsa');
     }
 
     public function token_listrik()
     {
-        $products = ProductKonter::where('provider_id', 1)
-            ->where('kategori_id', 1)
-            ->get(['id', 'amount']);
-        return view('user.konter.token_listrik', compact('products'));
+        return view('user.konter.token_listrik');
     }
     public function tagihan_listrik()
     {
-        $products = ProductKonter::where('provider_id', 1)
-            ->where('kategori_id', 1)
-            ->get(['id', 'amount']);
-        return view('user.konter.tagihan_listrik', compact('products'));
+
+        $provider = ProviderKonter::where('name', 'Tagihan Listrik')->first();
+        if (!$provider) {
+            redirect()->back()->with('error', 'Tidak tersedia');
+        }
+        $product = ProductKonter::where('provider_id', $provider->id)
+            ->where('kategori_id', 2)
+            ->first();
+        return view('user.konter.transaksi_tagihanListrik', compact('product'));
     }
 
 
@@ -260,11 +311,13 @@ class KonterController extends Controller
 
         // Untuk menegecek Listrik
         if ($no_listrik) {
+            $cekKategori = KategoriKonter::where('name', 'Listrik')->first();
             // Tentukan provider berdasarkan aturan
             $provider = 'Token Listrik'; // Hardcoded untuk skenario "Token Listrik"
-            $kategori = 2;
+            $kategori = $cekKategori->id;
         } else {
-            $kategori = 1;
+            $cekKategori = KategoriKonter::where('name', 'Pulsa')->first();
+            $kategori = $cekKategori->id;
         }
 
         if (!$provider) {
@@ -426,8 +479,8 @@ class KonterController extends Controller
             $listrik = $request->phone_number;
             $no = $request->no_hp;
         }
-        if ($filter->kategori->name == "Token") {
-            $transactionCode = 'Tkn-' . $today . '-' . $newNumber;
+        if ($filter->kategori->name == "Kouta") {
+            $transactionCode = 'Kt-' . $today . '-' . $newNumber;
             // Cek apakah user sedang login
             $submittedBy = Auth::check() ? Auth::user()->name : $request->name;
             $listrik = $request->phone_number;
@@ -491,11 +544,11 @@ class KonterController extends Controller
             //     $message .= "- *Tanggal Pengajuan*: {$data->created_at}\n";
             //     $message .= "- *Number HP*: {$request->phone_number}\n";
             //     $message .= "- *Nominal*: Rp" . number_format($product->amount, 0, ',', '.') . "\n";
-                           // if ($product->kategori->name == "Listrik") {
-                //     $message .= "- *No Meteran*: {$data_detail->no_listrik}\n";
-                //     $message .= "- *No TOKEN*: *{$data_detail->token_code}* \n";
-                //     $message .= "- *A/N*: {$data_detail->name}\n";
-                // }
+            // if ($product->kategori->name == "Listrik") {
+            //     $message .= "- *No Meteran*: {$data_detail->no_listrik}\n";
+            //     $message .= "- *No TOKEN*: *{$data_detail->token_code}* \n";
+            //     $message .= "- *A/N*: {$data_detail->name}\n";
+            // }
             //     $message .= "- *Harga*: Rp" . number_format($request->price, 0, ',', '.') . "\n";
             //     $message .= "- *Pembelian*: {$request->payment_method}\n";
             //     $message .= "- *Jatuh Tempo*: {$jatuh_tempo}\n";

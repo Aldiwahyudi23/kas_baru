@@ -10,6 +10,7 @@
             <thead>
                 <tr>
                     <th><input type="checkbox" id="selectAllKonter"></th>
+                    <th>Di Pegang</th>
                     <th>Kode</th>
                     <th>Nama</th>
                     <th>Nominal</th>
@@ -20,9 +21,10 @@
                 @foreach ($konters as $data)
                 <tr>
                     <td>
-                        <input type="checkbox" class="konterCheckbox" name="selected_ids[]" value="konter-{{ $data->id }}"
-                            data-amount="{{ $data->invoice }}">
+                        <input type="checkbox" class="konterCheckbox" name="selected_ids[]"
+                            value="konter-{{ $data->id }}" data-amount="{{ $data->invoice }}">
                     </td>
+                    <td>{{ $data->warga->name }}</td>
                     <td>{{ $data->code }}</td>
                     <td>{{ $data->detail->name }}</td>
                     <td>Rp{{ number_format($data->invoice, 0, ',', '.') }}</td>

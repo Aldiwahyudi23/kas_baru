@@ -56,7 +56,7 @@
                 <li class="nav-item">
                     <a href="{{route('pinjaman.pengajuan')}}" class="nav-link">
                         <i class="far fa-circle nav-icon"></i>
-                        <p>Pengajuan Pinajaman</p>
+                        <p>Pengajuan Pinjaman</p>
                     </a>
                 </li>
                 <li class="nav-item">
@@ -75,6 +75,12 @@
                     <a href="{{route('setor-tunai.pengajuan')}}" class="nav-link">
                         <i class="far fa-circle nav-icon"></i>
                         <p>Pengajuan Setor Tunai</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{route('income.pengajuan')}}" class="nav-link">
+                        <i class="far fa-circle nav-icon"></i>
+                        <p>Pengajuan Pemasukan Lain</p>
                     </a>
                 </li>
             </ul>

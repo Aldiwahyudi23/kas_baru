@@ -129,13 +129,40 @@
                 </thead>
                 <tbody>
                     @foreach ($loanData as $loan)
-                    <tr onclick="window.location='{{ route('kas.show',Crypt::encrypt($kas->id)) }}'"
+                    <tr onclick="window.location='{{ route('bayar-pinjaman.show',Crypt::encrypt($loan->id)) }}'"
                         style="cursor: pointer;">
-                        <td>KAS</td>
-                        <td>{{ $kas->code }}</td>
-                        <td>{{ $kas->data_warga->name }}</td>
-                        <td>Rp{{ number_format($kas->amount, 0, ',', '.') }}</td>
-                        <td>{{ $kas->payment_date }}</td>
+                        <td>Bayar Pinjaman</td>
+                        <td>{{ $loan->code }}</td>
+                        <td>{{ $loan->data_warga->name }}</td>
+                        <td>Rp{{ number_format($loan->amount, 0, ',', '.') }}</td>
+                        <td>{{ $loan->payment_date }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            @else
+            <p>Tidak ada data LoanRepayment.</p>
+            @endif
+            @if (!empty($konterData))
+            <table class="table table-bordered table-striped table-responsive datatable1 ">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Kode</th>
+                        <th>Nama</th>
+                        <th>Nominal</th>
+                        <th>Tanggal Pembayaran</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($konterData as $konter)
+                    <tr onclick="window.location='{{ route('konter.show',Crypt::encrypt($konter->id)) }}'"
+                        style="cursor: pointer;">
+                        <td>Knter</td>
+                        <td>{{ $konter->code }}</td>
+                        <td>{{ $konter->detail->name }}</td>
+                        <td>Rp{{ number_format($konter->invoice, 0, ',', '.') }}</td>
+                        <td>{{ $konter->created_at }}</td>
                     </tr>
                     @endforeach
                 </tbody>

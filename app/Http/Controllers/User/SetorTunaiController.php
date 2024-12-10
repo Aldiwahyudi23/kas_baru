@@ -88,7 +88,7 @@ class SetorTunaiController extends Controller
         $fullDescription .= "Rincian: <br>";
         $fullDescription .= "- Total Kas: Rp" . number_format($request->total_kas, 0, ',', '.') . "<br>";
         $fullDescription .= "- Total Pinjaman: Rp" . number_format($request->total_loan, 0, ',', '.') . "<br>";
-        // $fullDescription .= "- Total Konter: Rp" . number_format($konterTotal, 0, ',', '.') . "\n";
+        $fullDescription .= "- Total Konter: Rp" . number_format($request->total_konter, 0, ',', '.') . "\n";
         // $fullDescription .= "- Total Tabungan: Rp" . number_format($tabunganTotal, 0, ',', '.') . "\n";
 
         DB::beginTransaction();
@@ -222,10 +222,12 @@ class SetorTunaiController extends Controller
         $deposit = Deposit::findOrFail($id);
         $data_kas = KasPayment::where('deposit_id', $deposit->id)->get();
         $data_loanRepayment = loanRepayment::where('deposit_id', $deposit->id)->get();
+        $data_konter = TransaksiKonter::where('deposit_id', $deposit->id)->get();
         // Tampah data lain yang terhubung
         $depositDetail = Deposit::with('details')->findOrFail($id);
         $kasData = [];
         $loanData = [];
+        $konterData = [];
 
         // Perbarui Status dan kumpulkan data
         foreach ($deposit->details as $detail) {
@@ -239,6 +241,11 @@ class SetorTunaiController extends Controller
                 if ($loan) {
                     $loanData[] = $loan; // Tambahkan data ke array
                 }
+            } elseif ($detail->transaction_type === 'konter') {
+                $konter = TransaksiKonter::where('id', $detail->transaction_id)->first();
+                if ($konter) {
+                    $konterData[] = $konter; // Tambahkan data ke array
+                }
             }
         }
 
@@ -246,8 +253,10 @@ class SetorTunaiController extends Controller
             'deposit',
             'data_kas',
             'data_loanRepayment',
+            'data_konter',
             'kasData',
             'loanData',
+            'konterData',
         ));
     }
 
@@ -288,9 +297,10 @@ class SetorTunaiController extends Controller
         $deposit = Deposit::findOrFail($id);
         $data_kas = KasPayment::where('deposit_id', $deposit->id)->get();
         $data_loanRepayment = loanRepayment::where('deposit_id', $deposit->id)->get();
+        $data_konter = TransaksiKonter::where('deposit_id', $deposit->id)->get();
         // Tampah data lain yang terhubung
 
-        return view('user.setor_tunai.konfirmasi', compact('deposit', 'data_kas', 'data_loanRepayment'));
+        return view('user.setor_tunai.konfirmasi', compact('deposit', 'data_kas', 'data_loanRepayment', 'data_konter'));
     }
 
     // sementara di balik dengan yang bawag
@@ -303,9 +313,10 @@ class SetorTunaiController extends Controller
         ]);
         $kas = KasPayment::where('deposit_id', $id)->where('is_deposited', false)->get();
         $loan = loanRepayment::where('deposit_id', $id)->where('is_deposited', false)->get();
+        $konter = TransaksiKonter::where('deposit_id', $id)->where('is_deposited', false)->get();
 
         // Periksa apakah kedua koleksi kosong
-        if ($kas->isEmpty() && $loan->isEmpty()) {
+        if ($kas->isEmpty() && $loan->isEmpty()&& $konter->isEmpty() ) {
             return redirect()->back()->with('error', 'Data Setor Tunai kosong, tidak bisa dilanjutkan.');
         }
 
@@ -337,6 +348,12 @@ class SetorTunaiController extends Controller
                     $setor_kas->update();
                 }
 
+                foreach ($konter as $data) {
+                    $setor_konter = loanRepayment::find($data->id);
+                    $setor_konter->deposit_id = Null;
+                    $setor_konter->update();
+                }
+
                 DB::commit();
                 return redirect()->back()->with('success', 'Setor tunai di reject data akan kembali ke awal, namun data setor tunai masih ada');
             } else if ($request->status == "confirmed") {
@@ -351,6 +368,12 @@ class SetorTunaiController extends Controller
                     $setor_kas = loanRepayment::find($data->id);
                     $setor_kas->is_deposited = true;
                     $setor_kas->update();
+                }
+
+                foreach ($konter as $data) {
+                    $setor_konter = loanRepayment::find($data->id);
+                    $setor_konter->deposit_id = true;
+                    $setor_konter->update();
                 }
 
 

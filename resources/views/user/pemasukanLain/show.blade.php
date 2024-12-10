@@ -2,34 +2,25 @@
 
 @section('content')
 
-@if ($bayarPinjaman->status == "process")
+@if ($income->status == "process")
 <div class="alert alert-warning alert-dismissible">
     <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
     <h5><i class="icon fas fa-exclamation-triangle"></i> Proses !</h5>
     Mohon menunggu konfirmasi dari pengurus. Jika ada pertanyaan, silakan hubungi pengurus melalui kontak resmi.
 </div>
 @endif
-@if ($bayarPinjaman->status == "confirmed")
+@if ($income->status == "confirmed")
 <div class="alert alert-success alert-dismissible">
     <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
     <h5><i class="icon fas fa-check"></i> Terkonfirmasi</h5>
-    Data pembayaran Pinjaman sudah di konfirmasi, dan sudah masuk ke data.
+    Data pembayaran kas sudah di konfirmasi, dan sudah masuk ke data.
 </div>
 @endif
 <!-- SELECT2 EXAMPLE -->
 <div class="card card-default">
     <div class="card-header">
-        <h3 class="card-title">{{$bayarPinjaman->data_warga->name}} ( {{$bayarPinjaman->code}} )</h3>
+        <h3 class="card-title">{{$income->anggaran->name}} ( {{$income->code}} )</h3>
         <div class="card-tools">
-            @if ($bayarPinjaman->status == "process")
-            <a class="btn btn-tool" href="{{route('bayar-pinjaman.edit',Crypt::encrypt($bayarPinjaman->id))}}">
-                <i class="fas fa-pencil-alt"></i>
-            </a>
-            <a class="btn btn-tool" href="{{route('bayar-pinjaman.destroy',Crypt::encrypt($bayarPinjaman->id))}}"
-                data-confirm-delete="true">
-                <i class="fas fa-trash"></i>
-            </a>
-            @endif
             <button type="button" class="btn btn-tool" data-card-widget="collapse">
                 <i class="fas fa-minus"></i>
             </button>
@@ -43,35 +34,35 @@
                     <tr>
                         <td>Kode</td>
                         <td>:</td>
-                        <td>{{$bayarPinjaman->code}}</td>
+                        <td>{{$income->code}}</td>
                     </tr>
                     <tr>
                         <td>Tanggal Pengajuan</td>
                         <td>:</td>
-                        <td>{{$bayarPinjaman->payment_date}}</td>
+                        <td>{{$income->payment_date}}</td>
                     </tr>
                     <tr>
-                        <td>Nama Anggota</td>
+                        <td>Nama Anggaran</td>
                         <td>:</td>
-                        <td>{{$bayarPinjaman->data_warga->name}}</td>
+                        <td>{{$income->anggaran->name}}</td>
                     </tr>
                     <tr>
                         <td>Di Input oleh</td>
                         <td>:</td>
-                        <td>{{$bayarPinjaman->submitted->name}}</td>
+                        <td>{{$income->submitted->name}}</td>
                     </tr>
                     <tr>
                         <td>Nominal</td>
                         <td>:</td>
-                        <td>Rp. {{number_format( $bayarPinjaman->amount, 0, ',', '.')}}</td>
+                        <td>Rp. {{number_format( $income->amount, 0, ',', '.')}}</td>
                     </tr>
                     <tr>
                         <td>Pembayaran</td>
                         <td>:</td>
-                        <td>{{ $bayarPinjaman->payment_method}} <br>
-                            @if ($bayarPinjaman->is_deposited == true)
+                        <td>{{ $income->payment_method}} <br>
+                            @if ($income->is_deposited == true)
                             <span class="badge badge-success"><i class="icon fas fa-check"></i> Done Setor</span>
-                            @elseif($bayarPinjaman->is_deposited == false)
+                            @elseif($income->is_deposited == false)
                             <span class="badge badge-warning"><i class="icon fas fa-exclamation-triangle"></i> Belum di
                                 setor</span>
                             @endif
@@ -81,29 +72,29 @@
                         <td>Status</td>
                         <td>:</td>
                         <td>
-                            @if($bayarPinjaman->status === 'confirmed')
+                            @if($income->status === 'confirmed')
                             <span class="badge badge-success">Selesai</span>
-                            @elseif($bayarPinjaman->status === 'process')
-                            <span class="badge badge-warning">Menunggu persetujuan <br> Bendahara</span>
-                            @elseif($bayarPinjaman->status === 'rejected')
+                            @elseif($income->status === 'process')
+                            <span class="badge badge-warning">Menunggu persetujuan <br> Ketua</span>
+                            @elseif($income->status === 'rejected')
                             <span class="badge badge-danger">Rejected</span>
-                            @elseif($bayarPinjaman->status === 'pending')
+                            @elseif($income->status === 'pending')
                             <span class="badge badge-secondary">Pending</span>
                             @else
                             <span class="badge badge-light">Unknown</span> <!-- default if status is undefined -->
                             @endif
                         </td>
                     </tr>
-                    @if ($bayarPinjaman->status == "confirmed")
+                    @if ($income->status == "confirmed")
                     <tr>
                         <td>Di Konfirmasi Oleh</td>
                         <td>:</td>
-                        <td>{{ $bayarPinjaman->confirmed->name}}</td>
+                        <td>{{ $income->confirmed->name}}</td>
                     </tr>
                     <tr>
                         <td>Tanggal di Konfirmasi</td>
                         <td>:</td>
-                        <td>{{ $bayarPinjaman->confirmation_date}}</td>
+                        <td>{{ $income->confirmation_date}}</td>
                     </tr>
                     @endif
                 </tbody>
@@ -111,17 +102,16 @@
             <div class="card-footer">
                 <p>
                     Keterangan : <br>
-                    {{$bayarPinjaman->description}}
+                    {{$income->description}}
                 </p>
             </div>
             <br>
             <!-- Thumbnail Tanda Bukti Transfer -->
-            @if ($bayarPinjaman->payment_method == "transfer")
+            @if ($income->payment_method == "transfer")
             <div class="form-group col-6 col-sm-2 justify-between">
-                <a href="{{ asset($bayarPinjaman->transfer_receipt_path) }}" data-toggle="lightbox"
-                    data-title="Tanda Bukti Transfer - {{$bayarPinjaman->code}}" data-gallery="gallery">
-                    <img src="{{ asset($bayarPinjaman->transfer_receipt_path) }}" class="img-fluid mb-2"
-                        alt="white sample" />
+                <a href="{{ asset($income->transfer_receipt_path) }}" data-toggle="lightbox"
+                    data-title="Tanda Bukti Transfer - {{$income->code}}" data-gallery="gallery">
+                    <img src="{{ asset($income->transfer_receipt_path) }}" class="img-fluid mb-2" alt="white sample" />
                 </a>
             </div>
             @endif
