@@ -170,6 +170,33 @@
             @else
             <p>Tidak ada data LoanRepayment.</p>
             @endif
+            @if (!empty($incomeData))
+            <table class="table table-bordered table-striped table-responsive datatable1 ">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Kode</th>
+                        <th>Nama</th>
+                        <th>Nominal</th>
+                        <th>Tanggal Pembayaran</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($incomeData as $income)
+                    <tr onclick="window.location='{{ route('other-income.show',Crypt::encrypt($income->id)) }}'"
+                        style="cursor: pointer;">
+                        <td>Knter</td>
+                        <td>{{ $income->code }}</td>
+                        <td>{{ $income->anggaran->name }}</td>
+                        <td>Rp{{ number_format($income->amount, 0, ',', '.') }}</td>
+                        <td>{{ $income->created_at }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            @else
+            <p>Tidak ada data LoanRepayment.</p>
+            @endif
 
             <br>
             <!-- Thumbnail Tanda Bukti Transfer -->

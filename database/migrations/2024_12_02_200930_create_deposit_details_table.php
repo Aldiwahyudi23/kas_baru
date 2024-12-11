@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('deposit_details', function (Blueprint $table) {
             $table->id();
             $table->foreignId('deposit_id')->constrained('deposits')->onDelete('cascade'); // Relasi ke deposits
-            $table->enum('transaction_type', ['kas', 'loan']); // Jenis transaksi
+            $table->enum('transaction_type', ['kas', 'loan', 'konter', 'income', 'tabungan']); // Jenis transaksi
             $table->bigInteger('transaction_id')->unsigned(); // ID transaksi (KasPayment atau LoanRepayment)
             $table->timestamps();
         });

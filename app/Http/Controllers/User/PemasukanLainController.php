@@ -131,64 +131,64 @@ class PemasukanLainController extends Controller
 
             $data->save();
 
-            // Mengambil nomor telepon Ketua Untuk Laporan
-            $ketua = User::whereHas('role', function ($query) {
-                $query->where('name', 'Ketua');
-            })->with('dataWarga')->first();
+            // // Mengambil nomor telepon Ketua Untuk Laporan
+            // $ketua = User::whereHas('role', function ($query) {
+            //     $query->where('name', 'Ketua');
+            // })->with('dataWarga')->first();
 
-            $phoneNumberPengurus = $ketua->dataWarga->no_hp ?? null;
+            // $phoneNumberPengurus = $ketua->dataWarga->no_hp ?? null;
 
-            $anggaran = Anggaran::find($request->anggaran_id);
-            $penginput = DataWarga::find(Auth::user()->data_warga_id);
+            // $anggaran = Anggaran::find($request->anggaran_id);
+            // $penginput = DataWarga::find(Auth::user()->data_warga_id);
 
-            // Data untuk pesan
-            $encryptedId = Crypt::encrypt($data->id); // Mengenkripsi ID untuk keamanan
-            $link = "https://keluargamahaya.com/confirm/other-incomes/{$encryptedId}";
+            // // Data untuk pesan
+            // $encryptedId = Crypt::encrypt($data->id); // Mengenkripsi ID untuk keamanan
+            // $link = "https://keluargamahaya.com/confirm/other-incomes/{$encryptedId}";
 
-            // Membuat pesan WhatsApp
-            $messageKetua = "*Persetujuan Pemasukan Lainnya Diperlukan*\n";
-            $messageKetua .= "Halo {$ketua->dataWarga->name},\n\n";
-            $messageKetua .= "Terdapat pengajuan pemasukan lainnya yang memerlukan persetujuan Anda sebelum masuk ke data. Berikut detail pengajuannya:\n\n";
-            $messageKetua .= "- *Kode* : {$code}\n";
-            $messageKetua .= "- *Nama Anggaran* : {$anggaran->name}\n";
-            $messageKetua .= "- *Tanggal Pengajuan* : {$dateTime}\n";
-            $messageKetua .= "- *Di Input* : {$penginput->name}\n";
-            $messageKetua .= "- *Nominal* : Rp" . number_format($request->amount, 0, ',', '.') . "\n\n";
-            $messageKetua .= "Silakan klik link berikut untuk memberikan persetujuan:\n";
-            $messageKetua .= $link . "\n\n";
-            $messageKetua .= "*Salam hormat,*\n";
-            $messageKetua .= "*Sistem Kas Keluarga*";
+            // // Membuat pesan WhatsApp
+            // $messageKetua = "*Persetujuan Pemasukan Lainnya Diperlukan*\n";
+            // $messageKetua .= "Halo {$ketua->dataWarga->name},\n\n";
+            // $messageKetua .= "Terdapat pengajuan pemasukan lainnya yang memerlukan persetujuan Anda sebelum masuk ke data. Berikut detail pengajuannya:\n\n";
+            // $messageKetua .= "- *Kode* : {$code}\n";
+            // $messageKetua .= "- *Nama Anggaran* : {$anggaran->name}\n";
+            // $messageKetua .= "- *Tanggal Pengajuan* : {$dateTime}\n";
+            // $messageKetua .= "- *Di Input* : {$penginput->name}\n";
+            // $messageKetua .= "- *Nominal* : Rp" . number_format($request->amount, 0, ',', '.') . "\n\n";
+            // $messageKetua .= "Silakan klik link berikut untuk memberikan persetujuan:\n";
+            // $messageKetua .= $link . "\n\n";
+            // $messageKetua .= "*Salam hormat,*\n";
+            // $messageKetua .= "*Sistem Kas Keluarga*";
 
 
-            // URL gambar dari direktori storage
-            $imageUrl = asset('storage/kas/pengeluaran/ymKJ8SbQ7NLrLAhjAAKMNfOFHCK8O70HiqEiiIPE.jpg');
+            // // URL gambar dari direktori storage
+            // $imageUrl = asset('storage/kas/pengeluaran/ymKJ8SbQ7NLrLAhjAAKMNfOFHCK8O70HiqEiiIPE.jpg');
 
-            $recipientEmailPengurus = $ketua->dataWarga->email;
-            $recipientNamePengurus = $ketua->dataWarga->name;
-            $status = "Menunggu persetujuan Ketua";
-            // Data untuk email pengurus
-            $bodyMessagePengurus = preg_replace('/\*(.*?)\*/', '<b>$1</b>', $messageKetua);
-            $actionUrlPengurus = $link;
+            // $recipientEmailPengurus = $ketua->dataWarga->email;
+            // $recipientNamePengurus = $ketua->dataWarga->name;
+            // $status = "Menunggu persetujuan Ketua";
+            // // Data untuk email pengurus
+            // $bodyMessagePengurus = preg_replace('/\*(.*?)\*/', '<b>$1</b>', $messageKetua);
+            // $actionUrlPengurus = $link;
 
-            // Mengirim email bendahara
-            Mail::to($recipientEmailPengurus)->send(new Notification($recipientNamePengurus, $bodyMessagePengurus, $status, $actionUrlPengurus));
+            // // Mengirim email bendahara
+            // Mail::to($recipientEmailPengurus)->send(new Notification($recipientNamePengurus, $bodyMessagePengurus, $status, $actionUrlPengurus));
 
-            // Mengirim pesan ke Pengurus
-            $responsePengurus = $this->fonnteService->sendWhatsAppMessage($phoneNumberPengurus, $messageKetua, $imageUrl);
+            // // Mengirim pesan ke Pengurus
+            // $responsePengurus = $this->fonnteService->sendWhatsAppMessage($phoneNumberPengurus, $messageKetua, $imageUrl);
 
-            DB::commit();
-            // Cek hasil pengiriman
-            if (
-                (isset($responsePengurus['status']) && $responsePengurus['status'] == 'success')
-            ) {
-                return back()->with('success', 'Data terkirim, Notifikasi berhasil dikirim ke ketua!');
-            }
+            // DB::commit();
+            // // Cek hasil pengiriman
+            // if (
+            //     (isset($responsePengurus['status']) && $responsePengurus['status'] == 'success')
+            // ) {
+            //     return back()->with('success', 'Data terkirim, Notifikasi berhasil dikirim ke ketua!');
+            // }
 
-            return back()->with('error', 'Data tersimpan, Gagal mengirim notifikasi');
+            // return back()->with('error', 'Data tersimpan, Gagal mengirim notifikasi');
 
             // Jik nitifikasi di aktifkan return yang ini di hapus
-            // DB::commit();
-            // return back()->with('success', 'Data tersimpan, Notifikasi tidak ada !');
+            DB::commit();
+            return back()->with('success', 'Data tersimpan, Notifikasi tidak ada !');
         } catch (\Exception $e) {
             DB::rollback();
             return redirect()->back()->with('error', 'Terjadi kesalahan saat pembayaran.' . $e->getMessage());
@@ -385,7 +385,7 @@ class PemasukanLainController extends Controller
                     $saldo_akhir_request = $anggaran->name;
                 }
 
-                $anggaran_saldo_terakhir =  AnggaranSaldo::where('type', $anggaran->name)->latest()->first(); //mengambil data yang terakhir berdasarkan type anggaran
+                $anggaran_saldo_terakhir =  AnggaranSaldo::where('type', $saldo_akhir_request)->latest()->first(); //mengambil data yang terakhir berdasarkan type anggaran
                 // Hitung alokasi dana berdasarkan catatan_anggaran sebagai persentase
                 $persen = ($request->amount / $anggaran_saldo_terakhir->saldo) * 100;
                 $saldo_anggaran = new AnggaranSaldo();
@@ -397,70 +397,70 @@ class PemasukanLainController extends Controller
 
                 $saldo_anggaran->save();
 
-                // Mengambil data warga yang mengikuti program "Kas Keluarga"
-                $access_program_kas = AccessProgram::whereHas('program', function ($query) {
-                    $query->where('name', 'Kas Keluarga');
-                })->get();
+                // // Mengambil data warga yang mengikuti program "Kas Keluarga"
+                // $access_program_kas = AccessProgram::whereHas('program', function ($query) {
+                //     $query->where('name', 'Kas Keluarga');
+                // })->get();
 
-                // URL gambar dari direktori storage
-                $imageUrl = asset('storage/kas/pengeluaran/ymKJ8SbQ7NLrLAhjAAKMNfOFHCK8O70HiqEiiIPE.jpg');
+                // // URL gambar dari direktori storage
+                // $imageUrl = asset('storage/kas/pengeluaran/ymKJ8SbQ7NLrLAhjAAKMNfOFHCK8O70HiqEiiIPE.jpg');
 
-                // Data untuk link
-                $encryptedId = Crypt::encrypt($data->id); // Mengenkripsi ID untuk keamanan
-                $link = "https://keluargamahaya.com/other-income/{$encryptedId}";
+                // // Data untuk link
+                // $encryptedId = Crypt::encrypt($data->id); // Mengenkripsi ID untuk keamanan
+                // $link = "https://keluargamahaya.com/other-income/{$encryptedId}";
 
-                // Mengirim pesan ke setiap nomor
-                foreach ($access_program_kas as $access) {
-                    $number = $access->dataWarga->no_hp; // Nomor telepon
-                    $name = $access->dataWarga->name;   // Nama warga
-                    $email = $access->dataWarga->email;   // Nama warga
+                // // Mengirim pesan ke setiap nomor
+                // foreach ($access_program_kas as $access) {
+                //     $number = $access->dataWarga->no_hp; // Nomor telepon
+                //     $name = $access->dataWarga->name;   // Nama warga
+                //     $email = $access->dataWarga->email;   // Nama warga
 
-                    // Membuat pesan khusus untuk masing-masing warga
-                    $message = "*Pemasukan Lain Lain*\n";
-                    $message .= "Halo {$name},\n\n";
-                    $message .= "Kami informasikan ada Pemasukan Lain Selain dari KAS:\n\n";
-                    $message .= "- *Kode* : {$data->code}\n";
-                    $message .= "- *Tanggal* : {$data->created_at}\n";
-                    $message .= "- *Di Input Oleh* : {$data->submitted->name}\n";
-                    $message .= "- *Nominal* : Rp " . number_format($data->amount, 0, ',', '.') . "\n\n";
-                    $message .= "- *Di Konfirmasi* : {$data->confirmed->name}\n";
-                    $message .= "- *Pada Tanggal* : {$data->confirmation_date}\n\n";
-                    $message .= "Pemasukan ini masuk ke anggaran  {$data->anggaran->name}.\n";
-                    $message .= "Terima kasih atas kerjasama dan dukungan Anda dalam proses ini.\n\n";
-                    $message .= "Silakan klik link berikut untuk info selanjutnya:\n";
-                    $message .= $link . "\n\n";
-                    $message .= "*Salam hormat,*\n";
-                    $message .= "*Sistem Kas Keluarga*";
+                //     // Membuat pesan khusus untuk masing-masing warga
+                //     $message = "*Pemasukan Lain Lain*\n";
+                //     $message .= "Halo {$name},\n\n";
+                //     $message .= "Kami informasikan ada Pemasukan Lain Selain dari KAS:\n\n";
+                //     $message .= "- *Kode* : {$data->code}\n";
+                //     $message .= "- *Tanggal* : {$data->created_at}\n";
+                //     $message .= "- *Di Input Oleh* : {$data->submitted->name}\n";
+                //     $message .= "- *Nominal* : Rp " . number_format($data->amount, 0, ',', '.') . "\n\n";
+                //     $message .= "- *Di Konfirmasi* : {$data->confirmed->name}\n";
+                //     $message .= "- *Pada Tanggal* : {$data->confirmation_date}\n\n";
+                //     $message .= "Pemasukan ini masuk ke anggaran  {$data->anggaran->name}.\n";
+                //     $message .= "Terima kasih atas kerjasama dan dukungan Anda dalam proses ini.\n\n";
+                //     $message .= "Silakan klik link berikut untuk info selanjutnya:\n";
+                //     $message .= $link . "\n\n";
+                //     $message .= "*Salam hormat,*\n";
+                //     $message .= "*Sistem Kas Keluarga*";
 
-                    // Untuk mengirim email
-                    $recipientEmail = $email;
-                    $recipientName = $name;
-                    $status = "Selesai";
-                    // Data untuk email pengurus
-                    $bodyMessage = preg_replace('/\*(.*?)\*/', '<b>$1</b>', $message);
-                    $actionUrl = $link;
+                //     // Untuk mengirim email
+                //     $recipientEmail = $email;
+                //     $recipientName = $name;
+                //     $status = "Selesai";
+                //     // Data untuk email pengurus
+                //     $bodyMessage = preg_replace('/\*(.*?)\*/', '<b>$1</b>', $message);
+                //     $actionUrl = $link;
 
-                    // Mengirim email bendahara
-                    Mail::to($recipientEmail)->send(new Notification($recipientName, $bodyMessage, $status, $actionUrl));
+                //     // Mengirim email bendahara
+                //     Mail::to($recipientEmail)->send(new Notification($recipientName, $bodyMessage, $status, $actionUrl));
 
-                    // Mengirim pesan ke nomor warga
-                    $response = $this->fonnteService->sendWhatsAppMessage($number, $message, $imageUrl);
-                }
+                //     // Mengirim pesan ke nomor warga
+                //     $response = $this->fonnteService->sendWhatsAppMessage($number, $message, $imageUrl);
+                // }
 
-                DB::commit();
+                // DB::commit();
 
-                if (isset($response['status']) && $response['status'] == 'success') {
-                    return back()->with('success', 'Data berhasil di simpan, Notifikasi berhasil dikirim!');
-                }
-                return back()->with('error', 'Data tersimpan, Gagal mengirim notifikasi');
+                // if (isset($response['status']) && $response['status'] == 'success') {
+                //     return back()->with('success', 'Data berhasil di simpan, Notifikasi berhasil dikirim!');
+                // }
+                // return back()->with('error', 'Data tersimpan, Gagal mengirim notifikasi');
 
                 // jika notifikasi email dan wa aktif maka yang di bawah di komen
             } else {
                 return redirect()->back()->with('info', 'Pembayaran kas belum masuk data');
             }
-            // DB::commit();
+            DB::commit();
 
-            // return redirect()->back()->with('success', 'Pembayaran kas berhasil');
+            return redirect()->back()->with('success', 'Pembayaran kas berhasil');
         } catch (\Exception $e) {
             DB::rollback();
             return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan pemasukan.' . $e->getMessage());

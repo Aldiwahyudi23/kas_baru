@@ -6,7 +6,7 @@
     <!-- /.card-header -->
     <div class="card-body">
         {{-- Tabel Loan Repayments --}}
-        <table class="table table-bordered table-striped datatable1 ">
+        <table class="table table-bordered table-resposive datatable1 ">
             <thead>
                 <tr>
                     <th><input type="checkbox" id="selectAllKas"></th>

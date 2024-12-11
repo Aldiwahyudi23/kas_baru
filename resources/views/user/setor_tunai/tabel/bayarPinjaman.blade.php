@@ -4,9 +4,9 @@
         <h3 class="card-title">Data Pembayaran Pinjaman </h3>
     </div>
     <!-- /.card-header -->
-    <div class="card-body">
+    <div class="card-body table-respnsive">
         {{-- Tabel Loan Repayments --}}
-        <table class="table table-bordered table-striped datatable1 ">
+        <table class="table table-bordered  datatable1 ">
             <thead>
                 <tr>
                     <th><input type="checkbox" id="selectAllLoans"></th>

@@ -19,18 +19,46 @@
         </div>
     </div>
 </div>
+<?php
 
+use App\Models\CashExpenditures;
+use App\Models\Deposit;
+use App\Models\KasPayment;
+use App\Models\Konter\TransaksiKonter;
+use App\Models\Loan;
+use App\Models\LoanExtension;
+use App\Models\loanRepayment;
+use App\Models\OtherIncomes;
+
+$kas = KasPayment::where('status', 'process')->get();
+$loan = Loan::whereIn('status', ['pending', 'approved_by_chairman', 'disbursed_by_treasurer'])->get();
+$ex = CashExpenditures::whereIn('status', ['approved_by_chairman', 'disbursed_by_treasurer'])->get();
+$rePayment = loanRepayment::where('status', 'process')->get();
+$konter = TransaksiKonter::where('status', 'Proses')->get();
+$income = OtherIncomes::where('status', 'process')->get();
+$loan2 = LoanExtension::where('status', 'pending')->get();
+$deposit = Deposit::where('status', 'pending')->get();
+
+$total = $kas->count() + $loan->count() + $ex->count() + $rePayment->count() + $income->count() + $loan2->count() + $deposit->count();
+?>
 <!-- Sidebar Menu -->
 <nav class="mt-2">
     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
         <!-- Add icons to the links using the .nav-icon class
                             with font-awesome or any other icon font library -->
+        @if(in_array(Auth::user()->role->name , ['Bendahara' , 'Wakil Bendahara' , 'Sekretaris' , 'Wakil
+        Sekretaris'
+        , 'Ketua' , 'Wakil Ketua']))
         <li class="nav-item">
             <a href="#" class="nav-link">
                 <i class="nav-icon fas fa-tachometer-alt"></i>
                 <p>
                     Tentang Perusahaan
-                    <i class="right fas fa-angle-left"></i>
+                    @if ($total >= 1)
+                    <span class="right badge badge-danger">{{$total}}</span>
+                    @endif
+                    <i class="right fas fa-angle-left">
+                    </i>
                 </p>
             </a>
             <ul class="nav nav-treeview">
@@ -38,49 +66,79 @@
                 <li class="nav-item">
                     <a href="{{route('kas.pengajuan')}}" class="nav-link">
                         <i class="far fa-circle nav-icon"></i>
-                        <p>Pengajuan Kas</p>
+                        <p>Pengajuan Kas
+                            @if ($kas->count() >= 1)
+                            <span class="right badge badge-danger">{{$kas->count()}}</span>
+                            @endif
+                        </p>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="{{route('pengeluaran.index')}}" class="nav-link">
                         <i class="far fa-circle nav-icon"></i>
-                        <p>Pengeluaran</p>
+                        <p>Pengeluaran
+
+                        </p>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="{{route('pengeluaran.pengajuan')}}" class="nav-link">
                         <i class="far fa-circle nav-icon"></i>
-                        <p>Pengajuan Pengeluaran</p>
+                        <p>Pengajuan Pengeluaran
+                            @if ($ex->count() >= 1)
+                            <span class="right badge badge-danger">{{$ex->count()}}</span>
+                            @endif
+                        </p>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="{{route('pinjaman.pengajuan')}}" class="nav-link">
                         <i class="far fa-circle nav-icon"></i>
-                        <p>Pengajuan Pinjaman</p>
+                        <p>Pengajuan Pinjaman
+                            @if ($loan->count() >= 1)
+                            <span class="right badge badge-danger">{{$loan->count()}}</span>
+                            @endif
+                        </p>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="{{route('bayar-pinjaman.pengajuan')}}" class="nav-link">
                         <i class="far fa-circle nav-icon"></i>
-                        <p>Pengajuan Bayar Pinjaman</p>
+                        <p>Pengajuan Bayar Pinjaman
+                            @if ($rePayment->count() >= 1)
+                            <span class="right badge badge-danger">{{$rePayment->count()}}</span>
+                            @endif
+                        </p>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="{{route('pinjaman-ke-dua.index')}}" class="nav-link">
                         <i class="far fa-circle nav-icon"></i>
-                        <p>Pengajuan Pinjaman ke 2</p>
+                        <p>Pengajuan Pinjaman ke 2
+                            @if ($loan2->count() >= 1)
+                            <span class="right badge badge-danger">{{$loan2->count()}}</span>
+                            @endif
+                        </p>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="{{route('setor-tunai.pengajuan')}}" class="nav-link">
                         <i class="far fa-circle nav-icon"></i>
-                        <p>Pengajuan Setor Tunai</p>
+                        <p>Pengajuan Setor Tunai
+                            @if ($deposit->count() >= 1)
+                            <span class="right badge badge-danger">{{$deposit->count()}}</span>
+                            @endif
+                        </p>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="{{route('income.pengajuan')}}" class="nav-link">
                         <i class="far fa-circle nav-icon"></i>
-                        <p>Pengajuan Pemasukan Lain</p>
+                        <p>Pengajuan Pemasukan Lain
+                            @if ($income->count() >= 1)
+                            <span class="right badge badge-danger">{{$income->count()}}</span>
+                            @endif
+                        </p>
                     </a>
                 </li>
             </ul>
@@ -94,6 +152,7 @@
                 </p>
             </a>
         </li>
+        @endif
 
     </ul>
 </nav>

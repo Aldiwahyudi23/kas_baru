@@ -78,7 +78,7 @@
                             @if($income->status === 'confirmed')
                             <span class="badge badge-success">Selesai</span>
                             @elseif($income->status === 'process')
-                            <span class="badge badge-warning">Menunggu persetujuan <br> Bendahara</span>
+                            <span class="badge badge-warning">Menunggu persetujuan <br> Ketua</span>
                             @elseif($income->status === 'rejected')
                             <span class="badge badge-danger">Rejected</span>
                             @elseif($income->status === 'pending')

@@ -120,6 +120,26 @@
                         <td>{{ $loan->payment_date }}</td>
                     </tr>
                     @endforeach
+                    @foreach ($data_konter as $konter)
+                    <tr onclick="window.location='{{ route('konter.show',Crypt::encrypt($konter->id)) }}'"
+                        style="cursor: pointer;">
+                        <td>Konter</td>
+                        <td>{{ $konter->code }}</td>
+                        <td>{{ $konter->detail->name }}</td>
+                        <td>Rp{{ number_format($konter->invoice, 0, ',', '.') }}</td>
+                        <td>{{ $konter->created_at }}</td>
+                    </tr>
+                    @endforeach
+                    @foreach ($data_income as $income)
+                    <tr onclick="window.location='{{ route('other-income.show',Crypt::encrypt($income->id)) }}'"
+                        style="cursor: pointer;">
+                        <td>Konter</td>
+                        <td>{{ $income->code }}</td>
+                        <td>{{ $income->anggaran->name }}</td>
+                        <td>Rp{{ number_format($income->amount, 0, ',', '.') }}</td>
+                        <td>{{ $income->created_at }}</td>
+                    </tr>
+                    @endforeach
                 </tbody>
             </table>
             <br>
