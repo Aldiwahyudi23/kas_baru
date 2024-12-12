@@ -29,6 +29,7 @@ use App\Http\Controllers\User\Kas\PengeluaranController;
 use App\Http\Controllers\User\Kas\LoanExtensionController;
 use App\Http\Controllers\Admin\Konter\ProductKonterController;
 use App\Http\Controllers\Admin\Konter\TransaksiKonterController;
+use App\Http\Controllers\User\HomeController;
 use App\Http\Controllers\User\Konter\KonterController;
 use App\Http\Controllers\User\SetorTunaiController;
 use App\Models\LoanExtension;
@@ -132,9 +133,11 @@ Route::middleware([
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('user.dashboard.index');
-    })->name('user.dashboard');
+    // Route::get('/dashboard', function () {
+    //     return view('user.dashboard.index');
+    // })->name('user.dashboard');
+
+    Route::resource('/dashboard', HomeController::class);
 
     // Untuk pembayaran kas user
     Route::resource('/kas', PemasukanController::class);
