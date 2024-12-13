@@ -35,7 +35,7 @@ class SetorTunaiController extends Controller
     {
         $kasPayments = KasPayment::where('is_deposited', false)->where('deposit_id', Null)->where('status', 'confirmed')->get();
         $loanRepayments = loanRepayment::where('is_deposited', false)->where('deposit_id', Null)->where('status', 'confirmed')->get();
-        $konters = TransaksiKonter::where('is_deposited', false)->where('deposit_id', Null)->where('status', 'Selesai')->where('payment_status', 'Hutang')->get();
+        $konters = TransaksiKonter::where('is_deposited', false)->where('deposit_id', Null)->where('status', 'Selesai')->get();
         $incomes = OtherIncomes::where('is_deposited', false)->where('deposit_id', Null)->where('status', 'confirmed')->get();
 
         $data_deposit = Deposit::all();
@@ -221,7 +221,7 @@ class SetorTunaiController extends Controller
         $deposit = Deposit::findOrFail($id);
         $data_kas = KasPayment::where('deposit_id', $deposit->id)->get();
         $data_loanRepayment = loanRepayment::where('deposit_id', $deposit->id)->get();
-        $data_konter = TransaksiKonter::where('deposit_id', $deposit->id)->where('payment_status', 'Hutang')->get();
+        $data_konter = TransaksiKonter::where('deposit_id', $deposit->id)->get();
         $data_income = OtherIncomes::where('deposit_id', $deposit->id)->get();
         // Tampah data lain yang terhubung
 

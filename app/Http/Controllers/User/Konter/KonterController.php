@@ -161,46 +161,91 @@ class KonterController extends Controller
                 $data_detail->update();
 
                 // Menyimpan data ke saldo
-                if ($request->status == "Berhasil") {
-                    $nominal_saldo = $request->buying_price;
-                } elseif ($request->status == "Selesai") {
-                    $nominal_saldo = +$invoice;
-                }
+
+
 
                 $saldo_terbaru = Saldo::latest()->first();
-                if ($request->status == "Berhasil") {
-                    $nominal_amount = '-' . $request->buying_price;
-                    $atm = $saldo_terbaru->atm_balance + $nominal_amount;
-                    $total = $saldo_terbaru->total_balance + $nominal_amount;
-                } elseif ($request->status == "Selesai") {
-                    $nominal_amount = $invoice;
-                    $atm = $saldo_terbaru->atm_balance + $nominal_amount;
-                    $total = $saldo_terbaru->total_balance + $nominal_amount;
-                }
-                $saldo = new Saldo();
-                $saldo->code = $data->code;
-                $saldo->amount =  $nominal_amount;
-                $saldo->atm_balance = $atm;
-                $saldo->total_balance = $total;
-                $saldo->ending_balance = $saldo_terbaru->total_balance;
-                $saldo->cash_outside = $saldo_terbaru->cash_outside;
 
-                $saldo->save();
+                if ($request->status == "Selesai") {
+                    // Nominal amount initialization
+                    $nominal_amount = 0;
+                    $atm = $saldo_terbaru->atm_balance;
+                    $out = $saldo_terbaru->cash_outside;
+
+                    if ($data->payment_status == "Hutang") {
+                        // Hutang condition
+                        $nominal_amount = $invoice; // Nominal amount is taken directly from the invoice
+
+                        if ($request->payment_method == "transfer") {
+                            $atm += $nominal_amount; // Add to ATM balance
+                            $total = $saldo_terbaru->total_balance + $nominal_amount;
+                        } elseif ($request->payment_method == "cash") {
+                            $out += $nominal_amount; // Add to cash outside
+                            $total = $saldo_terbaru->total_balance + $nominal_amount;
+                        }
+                    } elseif ($data->payment_status == "Langsung") {
+                        // Langsung condition
+                        if ($request->payment_method == "transfer") {
+                            $nominal_amount = $invoice - $request->buying_price; // Calculate margin
+                            $atm += $nominal_amount; // Add margin to ATM balance
+                            $total = $saldo_terbaru->total_balance + $nominal_amount;
+                        } elseif ($request->payment_method == "cash") {
+                            // First transaction: deduct buying price from ATM and total
+                            $atm -= $request->buying_price;
+                            $nominal_amount = $invoice;
+                            $out += $nominal_amount; // Add invoice to cash outside
+                            $nominal_amount_cash = $invoice - $request->buying_price; // Calculate margin
+                            $total = $saldo_terbaru->total_balance + $nominal_amount_cash;
+                        }
+                    }
+
+                    // Update total balance
+
+                    // Create new Saldo entry
+                    $saldo = new Saldo();
+                    $saldo->code = $data->code;
+                    $saldo->amount = $nominal_amount;
+                    $saldo->atm_balance = $atm;
+                    $saldo->total_balance = $total;
+                    $saldo->ending_balance = $saldo_terbaru->total_balance;
+                    $saldo->cash_outside = $out;
+
+                    $saldo->save();
+                } elseif ($request->status == "Berhasil") {
+                    // Berhasil condition: buying price reduces ATM and total balances
+                    $nominal_amount = -$request->buying_price;
+                    $atm = $saldo_terbaru->atm_balance + $nominal_amount;
+                    $total = $saldo_terbaru->total_balance + $nominal_amount;
+
+                    // Create new Saldo entry
+                    $saldo = new Saldo();
+                    $saldo->code = $data->code;
+                    $saldo->amount = $nominal_amount;
+                    $saldo->atm_balance = $atm;
+                    $saldo->total_balance = $total;
+                    $saldo->ending_balance = $saldo_terbaru->total_balance;
+                    $saldo->cash_outside = $saldo_terbaru->cash_outside;
+
+                    $saldo->save();
+                }
+
                 // -----------------------------------------
+                if ($data->payment_status == "Langsung") {
+                    if ($request->payment_method == "cash") {
+                        $nominal_anggaran = $invoice - $request->buying_price; // Calculate margin
+                    } else {
+                        $nominal_anggaran = $nominal_amount;
+                    }
+                } else {
+                    $nominal_anggaran = $nominal_amount;
+                }
                 $anggaranKas = Anggaran::where('name', 'Dana Kas')->first();
                 $saldo_akhir_kas =  AnggaranSaldo::where('type', $anggaranKas->name)->latest()->first(); //mengambil data yang terakhir berdasarkan type anggaran
-                if ($request->status == "Berhasil") {
-                    $nominal_amount = '-' . $request->buying_price;
-                    $total = $saldo_akhir_kas->saldo + $nominal_amount;
-                } elseif ($request->status == "Selesai") {
-                    $nominal_amount = $invoice;
-                    $total = $saldo_akhir_kas->saldo + $nominal_amount;
-                }
                 $saldo_kas = new AnggaranSaldo();
                 $saldo_kas->type = $anggaranKas->name;
                 $saldo_kas->percentage = 0;
-                $saldo_kas->amount = $nominal_amount;
-                $saldo_kas->saldo = $total;
+                $saldo_kas->amount = $nominal_anggaran;
+                $saldo_kas->saldo = $saldo_akhir_kas->saldo + $nominal_anggaran;
                 $saldo_kas->saldo_id = $saldo->id; //mengambil id dari model saldo di atas
                 $saldo_kas->save();
 
