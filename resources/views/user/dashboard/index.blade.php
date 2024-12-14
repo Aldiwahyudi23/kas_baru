@@ -40,13 +40,15 @@
                         {{number_format( $saldo->amount ?? 0,0,',','.')}}
                     </div>
                 </div>
-                <a href="" class="card-footer text-white clearfix small z-1">
+                <a href="{{Route('dashboard.saldo')}}" class="card-footer text-white clearfix small z-1">
                     <span class="float-left">Lihat Detail</span>
                     <span class="float-right">
                         <i class="fas fa-angle-right"></i>
                     </span>
                 </a>
             </div>
+            @if(Auth::user()->role->name == "Bendahara" || Auth::user()->role->name == "Wakil Bendahara" || Auth::user()->role->name == "Sekretaris" || Auth::user()->role->name == "Wakil Sekretaris" || Auth::user()->role->name == "Ketua" || Auth::user()->role->name == "Wakil Ketua")
+
             <div class="card bg-primary text-white shadow">
                 <center>
                     <h5>
@@ -62,40 +64,57 @@
                 </a>
             </div>
             <!-- /.row -->
+             @endif
             <!-- ./card-body -->
             <div class="card-footer">
                 <div class="row">
                     <div class="col-sm-3 col-6">
-                        <div class="description-block border-right">
-                            <h5 class="description-header">Rp {{number_format( $saldo_kas->saldo ?? 0,0,',','.')}}</h5>
-                            <span class="description-text">DANA KAS</span>
-                        </div>
+                        <a href="{{Route('saldo.anggaran', ['type' => 'Dana Kas'])}}"
+                            class="text-white no-underline hover:text-gray-300">
+                            <div class="description-block border-right">
+                                <h5 class="description-header">Rp {{number_format( $saldo_kas->saldo ?? 0,0,',','.')}}
+                                </h5>
+                                <span class="description-text">DANA KAS</span>
+                            </div>
+                        </a>
                         <!-- /.description-block -->
                     </div>
                     <!-- /.col -->
                     <div class="col-sm-3 col-6">
-                        <div class="description-block border-right">
-                            <h5 class="description-header">Rp {{number_format( $saldo_amal->saldo ?? 0,0,',','.')}}</h5>
-                            <span class="description-text">DANA AMAL</span>
-                        </div>
+                        <a href="{{Route('saldo.anggaran', ['type' => 'Dana Amal'])}}"
+                            class="text-white no-underline hover:text-gray-300">
+                            <div class="description-block border-right">
+                                <h5 class="description-header">Rp {{number_format( $saldo_amal->saldo ?? 0,0,',','.')}}
+                                </h5>
+                                <span class="description-text">DANA AMAL</span>
+                            </div>
+                        </a>
                         <!-- /.description-block -->
                     </div>
                     <!-- /.col -->
                     <div class="col-sm-3 col-6">
-                        <div class="description-block border-right">
-                            <h5 class="description-header">Rp {{number_format( $saldo_darurat->saldo ?? 0,0,',','.')}}
-                            </h5>
-                            <span class="description-text">DANA DARURAT</span>
-                        </div>
+                        <a href="{{Route('saldo.anggaran', ['type' => 'Dana Darurat'])}}"
+                            class="text-white no-underline hover:text-gray-300">
+                            <div class="description-block border-right">
+                                <h5 class="description-header">Rp
+                                    {{number_format( $saldo_darurat->saldo ?? 0,0,',','.')}}
+                                </h5>
+                                <span class="description-text">DANA DARURAT</span>
+                            </div>
+                        </a>
                         <!-- /.description-block -->
                     </div>
                     <!-- /.col -->
                     <div class="col-sm-3 col-6">
-                        <div class="description-block">
-                            <h5 class="description-header">Rp {{number_format( $saldo_pinjam->saldo ?? 0,0,',','.')}}
-                            </h5>
-                            <span class="description-text">DANA PINJAM</span>
-                        </div>
+                        <a href="{{Route('saldo.anggaran', ['type' => 'Dana Pinjam'])}}"
+                            class="text-white no-underline hover:text-gray-300">
+                            <div class="description-block">
+                                <h5 class="description-header">Rp
+                                    {{number_format( $saldo_pinjam->saldo ?? 0,0,',','.')}}
+                                </h5>
+                                <span class="description-text">DANA PINJAM</span>
+                            </div>
+                        </a>
                         <!-- /.description-block -->
                     </div>
                 </div>
@@ -109,6 +128,8 @@
 </div>
 <!-- /.row -->
 <div class="row">
+    @if(Auth::user()->role->name == "Bendahara" || Auth::user()->role->name == "Wakil Bendahara" || Auth::user()->role->name == "Sekretaris" || Auth::user()->role->name == "Wakil Sekretaris" || Auth::user()->role->name == "Ketua" || Auth::user()->role->name == "Wakil Ketua")
+
     <div class="col-3 col-sm-4 col-md-3">
         <a class="users-list-name" href="{{Route('konter.index')}}">
             <div class="info-box">
@@ -139,6 +160,39 @@
                 <span class="info-box-icon bg-success elevation-1"><i class="fas fa-shopping-cart"></i></span>
             </div>
             <p class="text-bold users-list-date" style="font-size:14px;">Pengeluaran</p>
+        </a>
+        <!-- /.info-box -->
+    </div>
+    <div class="clearfix hidden-md-up"></div>
+    @endif
+    <div class="col-3 col-sm-4 col-md-3">
+        <a class="users-list-name" href="{{route('pulsaUser')}}">
+            <div class="info-box mb-3">
+                <span class="info-box-icon bg-success elevation-1"><i class="fas fa-shopping-cart"></i></span>
+            </div>
+            <p class="text-bold users-list-date" style="font-size:14px;">Pulsa</p>
+        </a>
+        <!-- /.info-box -->
+    </div>
+    <div class="clearfix hidden-md-up"></div>
+
+    <div class="col-3 col-sm-4 col-md-3">
+        <a class="users-list-name" href="{{route('token_listrikUser')}}">
+            <div class="info-box mb-3">
+                <span class="info-box-icon bg-success elevation-1"><i class="fas fa-shopping-cart"></i></span>
+            </div>
+            <p class="text-bold users-list-date" style="font-size:14px;">Token Listrik</p>
+        </a>
+        <!-- /.info-box -->
+    </div>
+    <div class="clearfix hidden-md-up"></div>
+
+    <div class="col-3 col-sm-4 col-md-3">
+        <a class="users-list-name" href="{{route('tagihan_listrikUser')}}">
+            <div class="info-box mb-3">
+                <span class="info-box-icon bg-success elevation-1"><i class="fas fa-shopping-cart"></i></span>
+            </div>
+            <p class="text-bold users-list-date" style="font-size:14px;">Tagihan Listrik</p>
         </a>
         <!-- /.info-box -->
     </div>

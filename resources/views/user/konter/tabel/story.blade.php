@@ -1,7 +1,7 @@
 <!-- Kode ini untuk isi tabel di dalam index data_admin -->
 <div class="card">
     <div class="card-header">
-        <h3 class="card-title">Data Transaksi Sukses </h3>
+        <h3 class="card-title">Story Pembelian</h3>
     </div>
     <!-- /.card-header -->
     <div class="card-body">
@@ -19,7 +19,7 @@
             </thead>
             <tbody>
                 <?php $no = 0; ?>
-                @foreach($transaksi_selesai as $data)
+                @foreach($story as $data)
                 <?php $no++; ?>
                 <tr onclick="window.location='{{ route('konter.show',Crypt::encrypt($data->id)) }}'"
                     style="cursor: pointer;">

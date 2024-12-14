@@ -29,11 +29,14 @@ return new class extends Migration
             $table->boolean('is_deposited')->default(false)->nullable(); //jika uang sudah masuk Bank kas bersetatus true
             $table->bigInteger('deposit_id')->unsigned()->nullable();
             $table->bigInteger('warga_id')->unsigned()->nullable();
+            $table->bigInteger('confirmed_by')->unsigned()->nullable();
+            $table->timestamp('confirmation_date')->nullable();
             $table->timestamps();
 
             $table->foreign('product_id')->references('id')->on('product_konters')->onDelete('set null');
             $table->foreign('konter_detail_id')->references('id')->on('detail_transaksi_konters')->onDelete('set null');
             $table->foreign('warga_id')->references('id')->on('data_wargas')->onDelete('set null');
+            $table->foreign('confirmed_by')->references('id')->on('data_wargas')->onDelete('set null');
             $table->foreign('deposit_id')->references('id')->on('deposits')->onDelete('set null');
         });
     }

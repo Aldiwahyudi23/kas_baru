@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User\Kas;
 use App\Events\SaldoUpdated;
 use App\Http\Controllers\Controller;
 use App\Mail\Notification;
+use App\Models\AccessProgram;
 use App\Models\AnggaranSaldo;
 use App\Models\AnggaranSetting;
 use App\Models\DataWarga;
@@ -57,8 +58,11 @@ class PemasukanController extends Controller
             ->first();
         $layout_form = LayoutsForm::first();
 
+        $program = Program::where('name', 'Kas Keluarga')->first();
+        $access = AccessProgram::where('program_id', $program->id)->get();
 
-        return view('user.program.kas.pembayaran.kas', compact('program', 'cek_kasPayment', 'data_kasAnggota', 'layout_form', 'pembayaran_proses'));
+
+        return view('user.program.kas.pembayaran.kas', compact('program', 'cek_kasPayment', 'data_kasAnggota', 'layout_form', 'pembayaran_proses', 'access'));
     }
 
     /**
@@ -119,10 +123,15 @@ class PemasukanController extends Controller
 
             // menentukan nilai is_deposite sesuai metode pembayran
             $deposit = $request->payment_method === 'cash' ? false : true; // Tunai harus disetorkan, transfer otomatis dianggap deposited
+            if ($request->data_warga_id) {
+                $warga = $request->data_warga_id;
+            } else {
+                $warga = Auth::user()->data_warga_id;
+            }
 
             $data = new KasPayment();
             $data->code = $code;
-            $data->data_warga_id = $request->data_warga_id;
+            $data->data_warga_id = $warga;
             $data->amount = $request->amount;
             $data->payment_date = $dateTime;
             $data->payment_method = $request->payment_method;

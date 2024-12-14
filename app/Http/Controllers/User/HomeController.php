@@ -69,4 +69,19 @@ class HomeController extends Controller
     {
         //
     }
+    public function saldo()
+    {
+        // Fetch all Saldo records ordered by created_at descending
+        $saldoData = Saldo::orderBy('created_at', 'desc')->get();
+
+        return view('user.dashboard.saldo.utama', compact('saldoData'));
+    }
+    public function saldo_anggaran($type)
+    {
+        // Ambil data berdasarkan type
+        $saldoAnggaran = AnggaranSaldo::where('type', $type)->orderBy('created_at', 'desc')->get();
+
+        // Kirim data ke view
+        return view('user.dashboard.saldo.anggaran', compact('saldoAnggaran', 'type'));
+    }
 }

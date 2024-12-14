@@ -138,6 +138,9 @@ Route::middleware([
     // })->name('user.dashboard');
 
     Route::resource('/dashboard', HomeController::class);
+    Route::get('/dashboards/saldo', [HomeController::class, 'saldo'])->name('dashboard.saldo');
+    Route::get('dashboards/saldo/{type}', [HomeController::class, 'saldo_anggaran'])->name('saldo.anggaran');
+
 
     // Untuk pembayaran kas user
     Route::resource('/kas', PemasukanController::class);
@@ -195,6 +198,12 @@ Route::middleware([
     Route::resource('/konter', KonterController::class);
     Route::get('/konters/pengajuan/{id}', [KonterController::class, 'pengajuan'])->name('konter.pengajuan');
     Route::patch('/konters/pengajuan/{id}', [KonterController::class, 'pengajuan_berhasil'])->name('konter.berhasil');
+    Route::get('/konters/token-listrik', [KonterController::class, 'token_listrikUser'])->name('token_listrikUser');
+    Route::get('/konters/tagihan-listrik', [KonterController::class, 'tagihan_listrikUser'])->name('tagihan_listrikUser');
+    Route::get('/konters/pulsa', [KonterController::class, 'pulsaUser'])->name('pulsaUser');
+    Route::get('/transaksi-user/{encryptedProductId}/{phoneNumber}', [KonterController::class, 'transaksi_user'])->name('transaksi-user');
+    Route::post('/transaksi-user/proses', [KonterController::class, 'transaksi_proses_user'])->name('transaksi-proses_user');
+    Route::get('/repayment/konter/{id}',[KonterController::class, 'repayment_pulsa'])->name('repayment.pulsa');
 });
 Route::post('/detect-provider', [KonterController::class, 'detectProvider'])->name('detect.provider');
 Route::get('/pulsa', [KonterController::class, 'pulsa'])->name('pulsa');

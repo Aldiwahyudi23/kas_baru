@@ -4,6 +4,7 @@ namespace App\Http\Controllers\User\Kas;
 
 use App\Http\Controllers\Controller;
 use App\Mail\Notification;
+use App\Models\AccessProgram;
 use App\Models\Anggaran;
 use App\Models\AnggaranSaldo;
 use App\Models\AnggaranSetting;
@@ -12,6 +13,7 @@ use App\Models\LayoutsForm;
 use App\Models\Loan;
 use App\Models\LoanExtension;
 use App\Models\loanRepayment;
+use App\Models\Program;
 use App\Models\Saldo;
 use App\Models\User;
 use App\Services\FonnteService;
@@ -51,7 +53,10 @@ class PinjamanController extends Controller
         // mengambil data anggaran untuk Dana Pinajaman
         $anggaran = Anggaran::where('name', 'Dana Pinjam')->first();
 
-        return view('user.program.kas.pinjaman', compact('layout_form', 'pinjaman', 'anggaran', 'pinjaman_proses'));
+        $program = Program::where('name', 'Kas Keluarga')->first();
+        $access = AccessProgram::where('program_id', $program->id)->get();
+
+        return view('user.program.kas.pinjaman', compact('layout_form', 'pinjaman', 'anggaran', 'pinjaman_proses', 'access'));
     }
 
     /**
@@ -68,7 +73,6 @@ class PinjamanController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'data_warga_id' => 'required',
             'amount' => 'required',
             'description' => 'required',
 
@@ -172,11 +176,16 @@ class PinjamanController extends Controller
                 $newDescription .= "<p><b>Pengambilan</b>  : <br> {$request->cash_notes}";
             }
 
+            if ($request->data_warga_id) {
+                $warga = $request->data_warga_id;
+            } else {
+                $warga = Auth::user()->data_warga_id;
+            }
 
             $data = new Loan();
             $data->code = $code;
             $data->anggaran_id = $dataAnggaran->id;
-            $data->data_warga_id = $request->data_warga_id;
+            $data->data_warga_id = $warga;
             $data->loan_amount = $request->amount;
             $data->remaining_balance = $request->amount;
             $data->status = 'pending';

@@ -129,6 +129,8 @@ class KonterController extends Controller
 
                 if ($request->status == "Selesai") {
                     $data->margin = $invoice - $request->buying_price;
+                    $data->confirmed_by = Auth::user()->data_warga_id;
+                    $data->confirmation_date = now();
                 }
                 if ($request->payment_method) {
                     $data->payment_method = $request->payment_method;
@@ -198,6 +200,9 @@ class KonterController extends Controller
                             $total = $saldo_terbaru->total_balance + $nominal_amount_cash;
                         }
                     }
+
+                    // Mengambil waktu saat ini
+                    $dateTime = now();
 
                     // Update total balance
 
@@ -307,13 +312,22 @@ class KonterController extends Controller
 
     public function pulsa()
     {
-
         return view('user.konter.pulsa');
+    }
+    public function pulsaUser()
+    {
+        $story = TransaksiKonter::where('submitted_by',Auth::user()->dataWarga->name)->get();
+        return view('user.konter.user.pulsa',compact('story'));
     }
 
     public function token_listrik()
     {
         return view('user.konter.token_listrik');
+    }
+    public function token_listrikUser()
+    {
+        $story = TransaksiKonter::where('submitted_by', Auth::user()->dataWarga->name)->get();
+        return view('user.konter.user.token_listrik', compact('story'));
     }
     public function tagihan_listrik()
     {
@@ -326,6 +340,19 @@ class KonterController extends Controller
             ->where('kategori_id', 2)
             ->first();
         return view('user.konter.transaksi_tagihanListrik', compact('product'));
+    }
+    public function tagihan_listrikUser()
+    {
+
+        $provider = ProviderKonter::where('name', 'Tagihan Listrik')->first();
+        if (!$provider) {
+            redirect()->back()->with('error', 'Tidak tersedia');
+        }
+        $product = ProductKonter::where('provider_id', $provider->id)
+            ->where('kategori_id', 2)
+            ->first();
+        $story = TransaksiKonter::where('submitted_by', Auth::user()->dataWarga->name)->get();
+        return view('user.konter.user.transaksi_tagihanListrik', compact('product', 'story'));
     }
 
 
@@ -421,6 +448,45 @@ class KonterController extends Controller
         $product = ProductKonter::find($encryptedProductId);
 
         return view('user.konter.transaksi', [
+            'product' => $product,
+            'phoneNumber' => $phoneNumber
+        ]);
+    }
+    public function transaksi_user($encryptedProductId, $phoneNumber)
+    {
+        // Cek apakah nomor HP memiliki lebih dari 2 transaksi dengan status tertentu
+        $count_transaksi = TransaksiKonter::whereHas('detail', function ($query) use ($phoneNumber) {
+            $query->where('no_hp', $phoneNumber);
+        })->whereIn('status', ['pending', 'Proses', 'Berhasil'])
+            ->count();
+
+        // Jika sudah ada 2 transaksi atau lebih, berikan pesan error
+        if ($count_transaksi >= 2) {
+            return redirect()->back()->with(
+                'error',
+                'Pembelian tidak bisa dilakukan karena sudah ada 2 pengajuan yang masuk. Harap lunasi salah satu.'
+            );
+        }
+
+        // Cek jika ada transaksi dalam status "pending" atau "Proses" untuk nomor HP tersebut
+        $cek_status = TransaksiKonter::whereHas('detail', function ($query) use ($phoneNumber) {
+            $query->where('no_hp', $phoneNumber);
+        })->whereIn('status', ['pending', 'Proses'])
+            ->exists();
+
+        if ($cek_status) {
+            return redirect()->back()->with(
+                'error',
+                'Nomor HP tersebut sudah dalam pengajuan dan sedang diproses.'
+            );
+        }
+
+        // Lanjutkan proses lainnya jika semua validasi lolos
+
+
+        $product = ProductKonter::find($encryptedProductId);
+
+        return view('user.konter.user.transaksi', [
             'product' => $product,
             'phoneNumber' => $phoneNumber
         ]);
@@ -617,7 +683,183 @@ class KonterController extends Controller
             // //jika notifikasi email dan wa aktif maka yang di bawah di komen
 
             DB::commit();
-            return redirect()->route('pulsa')->with('success', 'Pengajuan Pembelian Pulsa sedang di proses');
+            if($request->repayment){
+                return redirect()->route('konter.index')->with('success', 'Pengajuan Pembelian Pulsa sedang di proses');
+            }else{
+                return redirect()->route('pulsa')->with('success', 'Pengajuan Pembelian Pulsa sedang di proses');
+            }
+        } catch (\Exception $e) {
+            DB::rollback();
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan data.' . $e->getMessage());
+        }
+    }
+    public function transaksi_proses_user(Request $request)
+    {
+        $request->validate([
+            'product_id' => 'nullable|exists:product_konters,id',
+            'name' => 'required|string',
+            'price' => 'required|numeric',
+            'phone_number' => 'required|numeric',
+            'deadline_date' => 'nullable',
+        ]);
+
+        // Cek apakah nomor HP memiliki lebih dari 2 transaksi dengan status tertentu
+        $count_transaksi = TransaksiKonter::whereHas('detail', function ($query) use ($request) {
+            $query->where('no_hp', $request->phone_number);
+        })->whereIn('status', ['pending', 'Proses', 'Berhasil'])
+            ->count();
+
+        // Jika sudah ada 2 transaksi atau lebih, berikan pesan error
+        if ($count_transaksi >= 2) {
+            return redirect()->back()->with(
+                'error',
+                'Pembelian tidak bisa dilakukan karena sudah ada 2 pengajuan yang masuk. Harap lunasi salah satu.'
+            );
+        }
+
+        // Cek jika ada transaksi dalam status "pending" atau "Proses" untuk nomor HP tersebut
+        $cek_status = TransaksiKonter::whereHas('detail', function ($query) use ($request) {
+            $query->where('no_hp', $request->phone_number);
+        })->whereIn('status', ['pending', 'Proses'])
+            ->exists();
+
+        if ($cek_status) {
+            return redirect()->back()->with(
+                'error',
+                'Nomor HP tersebut sudah dalam pengajuan dan sedang diproses.'
+            );
+        }
+
+        // Lanjutkan proses lainnya jika semua validasi lolos
+        $filter = ProductKonter::find($request->product_id);
+
+
+        // Untuk dedline merubah kata sekaran jadi waktu
+        if ($request->deadline_date == "Sekarang") {
+            $jatuh_tempo = now()->format('Y-m-d');
+        } else {
+            $jatuh_tempo = $request->deadline_date;
+        }
+        // Membuat kode transaksi otomatis
+        $today = date('Ymd'); // Format tanggal: YYYYMMDD
+        $lastTransaction = TransaksiKonter::whereDate('created_at', now()->format('Y-m-d'))
+            ->orderBy('id', 'desc')
+            ->first();
+        // Ambil nomor urut terakhir, jika tidak ada, mulai dari 1
+        $lastNumber = $lastTransaction ? intval(substr($lastTransaction->code, -3)) : 0;
+        $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT); // Menambahkan angka 3 digit
+        // Format kode transaksi
+        if ($filter->kategori->name == "Pulsa") {
+            $transactionCode = 'Pls-' . $today . '-' . $newNumber;
+            // Cek apakah user sedang login
+            $submittedBy = Auth::check() ? Auth::user()->name : $request->name;
+            $no = $request->phone_number;
+        }
+        if ($filter->kategori->name == "Listrik") {
+            $transactionCode = 'Ltk-' . $today . '-' . $newNumber;
+            // Cek apakah user sedang login
+            $submittedBy = Auth::check() ? Auth::user()->name : $request->submitted_by;
+            $listrik = $request->phone_number;
+            $no = $request->no_hp;
+        }
+        if ($filter->kategori->name == "Kouta") {
+            $transactionCode = 'Kt-' . $today . '-' . $newNumber;
+            // Cek apakah user sedang login
+            $submittedBy = Auth::check() ? Auth::user()->name : $request->name;
+            $listrik = $request->phone_number;
+            $no = $request->no_hp;
+        }
+
+        DB::beginTransaction();
+
+        try {
+
+            $data_detail = new DetailTransaksiKonter();
+            $data_detail->no_hp = $no;
+            $data_detail->name = $request->name;
+            $data_detail->description = $request->description;
+            if ($filter->kategori->name == "Listrik") {
+                $data_detail->no_listrik = $listrik;
+            }
+
+            $data_detail->save();
+
+
+            $data = new TransaksiKonter();
+            $data->code = $transactionCode;
+            $data->product_id = $request->product_id;
+            $data->konter_detail_id = $data_detail->id;
+            $data->submitted_by = $submittedBy;
+            $data->price = $request->price;
+            $data->deadline_date = $jatuh_tempo;
+            $data->payment_status = $request->payment_method;
+            $data->status = "Proses";
+
+            $data->save();
+
+
+            // // Nama-nama yang ingin dikirimkan pesan
+            // $selectedNames = ['aldi wahyudi', 'Rifki'];
+            // // Ambil data dari database berdasarkan nama yang dipilih
+            // $access_pengurus = DataWarga::whereIn('name', $selectedNames)
+            //     ->get();
+
+            // // URL gambar dari direktori storage
+            // $imageUrl = asset('storage/kas/pengeluaran/ymKJ8SbQ7NLrLAhjAAKMNfOFHCK8O70HiqEiiIPE.jpg');
+
+            // // Data untuk link
+            // $encryptedId = Crypt::encrypt($data->id); // Mengenkripsi ID untuk keamanan
+            // $link = "https://keluargamahaya.com/pulsa/{$encryptedId}";
+
+            // $product = ProductKonter::find($request->product_id);
+
+
+
+            // // Mengirim pesan ke setiap nomor
+            // foreach ($access_pengurus as $access) {
+            //     $number = $access->no_hp; // Nomor telepon
+            //     $name = $access->name;   // Nama warga
+            //     // Membuat pesan khusus untuk masing-masing warga
+            //     $message = "*Pengajuan Pulsa*\n";
+            //     $message .= "Halo {$name},\n\n";
+            //     $message .= "Kami informasikan bahwa {$request->submitted_by} mengajukan pembelian {$product->kategori->name} {$product->provider->name}:\n\n";
+            //     $message .= "- *ID transaksi*: {$transactionCode}\n";
+            //     $message .= "- *Tanggal Pengajuan*: {$data->created_at}\n";
+            //     $message .= "- *Number HP*: {$request->phone_number}\n";
+            //     $message .= "- *Nominal*: Rp" . number_format($product->amount, 0, ',', '.') . "\n";
+            // if ($product->kategori->name == "Listrik") {
+            //     $message .= "- *No Meteran*: {$data_detail->no_listrik}\n";
+            //     $message .= "- *No TOKEN*: *{$data_detail->token_code}* \n";
+            //     $message .= "- *A/N*: {$data_detail->name}\n";
+            // }
+            //     $message .= "- *Harga*: Rp" . number_format($request->price, 0, ',', '.') . "\n";
+            //     $message .= "- *Pembelian*: {$request->payment_method}\n";
+            //     $message .= "- *Jatuh Tempo*: {$jatuh_tempo}\n";
+            //     $message .= "Terima kasih atas kerjasama dan dukungan Anda dalam proses ini.\n\n";
+            //     $message .= "Silakan klik link berikut untuk info selanjutnya:\n";
+            //     $message .= $link . "\n\n";
+            //     $message .= "*Salam hormat,*\n";
+            //     $message .= "*Sistem Kas Keluarga*";
+
+            //     // Mengirim pesan ke nomor warga
+            //     $response = $this->fonnteService->sendWhatsAppMessage($number, $message, $imageUrl);
+            // }
+
+            // DB::commit();
+
+            // if (isset($response['status']) && $response['status'] == 'success') {
+            //     return redirect()->route('pulsa')->with('success', 'Pengajuan Pembelian Pulsa sedang di proses, Notifikasi berhasil dikirim!');
+            // }
+            // return back()->with('error', 'Data tersimpan, Gagal mengirim notifikasi');
+
+            // //jika notifikasi email dan wa aktif maka yang di bawah di komen
+
+            DB::commit();
+            if($request->repayment){
+                return redirect()->route('konter.index')->with('success', 'Pengajuan Pembelian Pulsa sedang di proses');
+            }else{
+                return redirect()->route('dashboard.index')->with('success', 'Pengajuan Pembelian Pulsa sedang di proses');
+            }
         } catch (\Exception $e) {
             DB::rollback();
             return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan data.' . $e->getMessage());
@@ -640,5 +882,21 @@ class KonterController extends Controller
             'success' => false,
             'message' => 'Nomor tidak ditemukan',
         ]);
+    }
+
+    public function repayment_pulsa ($id)
+    {
+$id = Crypt::decrypt($id);
+$pengajuan = TransaksiKonter::find($id);
+        $product = ProductKonter::find($pengajuan->product_id);
+        if ($product->kategori->name == "Pulsa") {
+            $phoneNumber = $pengajuan->detail->no_hp;
+        } elseif ($product->kategori->name == "Kouta") {
+            $phoneNumber = $pengajuan->detail->no_hp;
+        } else {
+            $phoneNumber = $pengajuan->detail->no_listrik;
+        }
+
+        return view('user.konter.repayment.transaksi',compact('product','phoneNumber', 'pengajuan'));
     }
 }

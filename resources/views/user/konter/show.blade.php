@@ -143,6 +143,9 @@
                 </p>
             </div>
         </div>
+        @if ($data->status == "Selesai")
+        <a href="{{route('repayment.pulsa',Crypt::encrypt($data->id))}}" class="btn btn-primary col-12 mt-2">Beli Lagi</a>
+        @endif
     </div>
     <!-- /.card-body -->
     <div class="card-footer">

@@ -1,6 +1,29 @@
                 <form action="{{ route('kas.store') }}" method="POST" enctype="multipart/form-data" id="adminForm">
                     @csrf
-
+                    <p class="btn btn-primary toggle-text" onclick="toggleInput()">Input Kas Anggota</p>
+                    <!-- Hanya pengurus yang bisa -->
+                    @if(Auth::user()->role->name == "Bendahara" || Auth::user()->role->name == "Wakil Bendahara" ||
+                    Auth::user()->role->name == "Sekretaris" || Auth::user()->role->name == "Wakil Sekretaris" ||
+                    Auth::user()->role->name == "Ketua" || Auth::user()->role->name == "Wakil Ketua")
+                    <!-- Metode Pembayaran -->
+                    <div id="inputForm" class="form-group hidden">
+                        <label for="data_warga_id">Pilih Anggota</label>
+                        <span class="text-danger">*</span></label>
+                        <select class="select2bs4 @error('data_warga_id') is-invalid @enderror" style="width: 100%;"
+                            name="data_warga_id" id="data_warga_id">
+                            <option value="">--Pilih Anggota--</option>
+                            @foreach ($access as $data )
+                            <option value="{{$data->data_warga_id}}"
+                                {{ old('data_warga_id') == $data->data_warga_id ? 'selected' : '' }} @if($data->
+                                is_active == 0) disabled @endif>
+                                {{$data->dataWarga->name}}
+                                @if($data->is_active == 0) (Tidak Aktif) @endif
+                            </option>
+                            @endforeach
+                        </select>
+                        <p class="label-info">Jika bayar kas untuk sendiri, kosongkan.</p>
+                    </div>
+                    @endif
                     <!-- Jumlah Pembayaran -->
                     <div class="form-group">
                         <label for="amount">Jumlah Pembayaran <span class="text-danger">*</span></label>
@@ -44,7 +67,6 @@
                         <textarea class="form-control col-12 @error('description') is-invalid @enderror"
                             name="description" id="description">{{ old('description') }}</textarea>
                     </div>
-                    <input type="hidden" name="data_warga_id" value="{{Auth::user()->data_warga_id}}">
                     <!-- Button Submit -->
                     <button type="submit" class="btn btn-success" id="submitBtns">Bayar Kas</button>
                 </form>
@@ -59,11 +81,40 @@
                 @section('script')
 
                 <script>
-// Function to toggle the visibility of the transfer receipt input based on selected payment method
-function toggleTransferReceipt() {
-    var paymentMethod = document.getElementById('payment_method').value;
-    var transferReceipt = document.getElementById('transfer_receipt');
-    transferReceipt.style.display = (paymentMethod === 'transfer') ? 'block' : 'none';
-}
+                    // Function to toggle the visibility of the transfer receipt input based on selected payment method
+                    function toggleTransferReceipt() {
+                        var paymentMethod = document.getElementById('payment_method').value;
+                        var transferReceipt = document.getElementById('transfer_receipt');
+                        transferReceipt.style.display = (paymentMethod === 'transfer') ? 'block' : 'none';
+                    }
                 </script>
+                <script>
+                    function toggleInput() {
+                        const inputForm = document.getElementById('inputForm');
+                        inputForm.classList.toggle('hidden');
+                    }
+                </script>
+                @endsection
+                @section(section: 'style')
+                <style>
+                    .hidden {
+                        display: none;
+                    }
+
+                    .label-info {
+                        font-size: 0.9em;
+                        color: gray;
+                        margin-top: 5px;
+                    }
+
+                    .toggle-text {
+                        color: #007BFF;
+                        cursor: pointer;
+                        text-decoration: underline;
+                    }
+
+                    .toggle-text:hover {
+                        color: #0056b3;
+                    }
+                </style>
                 @endsection

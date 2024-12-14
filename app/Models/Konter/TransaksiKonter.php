@@ -27,6 +27,8 @@ class TransaksiKonter extends Model
         'is_deposited',
         'deposit_id',
         'warga_id',
+        'confirmed_by',
+        'confirmation_date',
     ];
 
     public function product()
@@ -40,5 +42,9 @@ class TransaksiKonter extends Model
     public function warga()
     {
         return $this->belongsTo(DataWarga::class, 'warga_id');
+    }
+    public function confirmed()
+    {
+        return $this->belongsTo(DataWarga::class, 'confirmed_by');
     }
 }
