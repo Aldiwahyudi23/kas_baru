@@ -627,7 +627,7 @@ class KonterController extends Controller
 
 
             // Nama-nama yang ingin dikirimkan pesan
-            $selectedNames = ['aldi wahyudi', 'Rifki'];
+            $selectedNames = ['aldi wahyudi', 'Rifki Alfarez Putra', 'Rangga Mulyana'];
             // Ambil data dari database berdasarkan nama yang dipilih
             $access_pengurus = DataWarga::whereIn('name', $selectedNames)
                 ->get();

@@ -621,9 +621,9 @@ class PemasukanController extends Controller
             } else {
                 return redirect()->back()->with('info', 'Pembayaran kas belum masuk data');
             }
-            // DB::commit();
+            DB::commit();
 
-            // return redirect()->back()->with('success', 'Pembayaran kas berhasil');
+            return redirect()->back()->with('success', 'Pembayaran kas berhasil');
         } catch (\Exception $e) {
             DB::rollback();
             return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan pemasukan.' . $e->getMessage());
