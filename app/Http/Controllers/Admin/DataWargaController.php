@@ -434,30 +434,30 @@ class DataWargaController extends Controller
 
             DB::commit();
 
-            // $phoneNumber = $request->no_hp;
+            $phoneNumber = $request->no_hp;
 
-            // // Contoh pesan notifikasi untuk pendaftaran berhasil
-            // $message = "*Pendaftaran Berhasil* \n";
-            // $message .= "Selamat, pendaftaran Anda telah berhasil!\n\n";
-            // $message .= "Berikut adalah detail akun Anda:\n";
-            // $message .= "- *Email*: {$request->email}\n";
-            // $message .= "- *Kata Sandi*: Keluarga123 \n"; // Pastikan variabel password dienkripsi atau diacak jika aman
-            // $message .= "- *Link Login*: " . url('https://kas.keluargamahaya.com/login') . "\n\n";
-            // $message .= "*Harap simpan informasi ini dengan baik.*\n";
-            // $message .= "Terima kasih telah mendaftar di platform kami!\n\n";
-            // $message .= "*Salam,* \n";
-            // $message .= "*Terima Kami*";
-
-
-            // // URL gambar dari direktori storage
-            // $imageUrl = asset('storage/kas/pengeluaran/ymKJ8SbQ7NLrLAhjAAKMNfOFHCK8O70HiqEiiIPE.jpg');
+            // Contoh pesan notifikasi untuk pendaftaran berhasil
+            $message = "*Pendaftaran Berhasil* \n";
+            $message .= "Selamat, pendaftaran Anda telah berhasil!\n\n";
+            $message .= "Berikut adalah detail akun Anda:\n";
+            $message .= "- *Email*: {$request->email}\n";
+            $message .= "- *Kata Sandi*: Keluarga123 \n"; // Pastikan variabel password dienkripsi atau diacak jika aman
+            $message .= "- *Link Login*: " . url('https://kas.keluargamahaya.com/login') . "\n\n";
+            $message .= "*Harap simpan informasi ini dengan baik.*\n";
+            $message .= "Terima kasih telah mendaftar di platform kami!\n\n";
+            $message .= "*Salam,* \n";
+            $message .= "*Terima Kami*";
 
 
-            // $response = $this->fonnteService->sendWhatsAppMessage($phoneNumber, $message, $imageUrl);
+            // URL gambar dari direktori storage
+            $imageUrl = asset('storage/kas/pengeluaran/ymKJ8SbQ7NLrLAhjAAKMNfOFHCK8O70HiqEiiIPE.jpg');
 
-            // if (isset($response['status']) && $response['status'] == 'success') {
-            //     return back()->with('success', 'Data tersimpan, Notifikasi berhasil dikirim!');
-            // }
+
+            $response = $this->fonnteService->sendWhatsAppMessage($phoneNumber, $message, $imageUrl);
+
+            if (isset($response['status']) && $response['status'] == 'success') {
+                return back()->with('success', 'Data tersimpan, Notifikasi berhasil dikirim!');
+            }
 
             return back()->with('success', 'Gagal mengirim notifikasi');
         } catch (\Exception $e) {
