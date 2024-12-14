@@ -151,64 +151,64 @@ class SetorTunaiController extends Controller
                 $data->save();
             }
 
-            // Mengambil data pengaju (pengguna yang menginput)
-            $pengaju = DataWarga::find(Auth::user()->data_warga_id);
-            // Mengambil nomor telepon Ketua Untuk Laporan
-            $ketua = User::whereHas('role', function ($query) {
-                $query->where('name', 'Ketua');
-            })->with('dataWarga')->first();
+            // // Mengambil data pengaju (pengguna yang menginput)
+            // $pengaju = DataWarga::find(Auth::user()->data_warga_id);
+            // // Mengambil nomor telepon Ketua Untuk Laporan
+            // $ketua = User::whereHas('role', function ($query) {
+            //     $query->where('name', 'Ketua');
+            // })->with('dataWarga')->first();
 
-            $phoneNumberPengurus = $ketua->dataWarga->no_hp ?? null;
+            // $phoneNumberPengurus = $ketua->dataWarga->no_hp ?? null;
 
-            // Data untuk pesan
-            $encryptedId = Crypt::encrypt($data->id); // Mengenkripsi ID untuk keamanan
-            $link = "https://keluargamahaya.com/confirm/pengeluaran/{$encryptedId}";
+            // // Data untuk pesan
+            // $encryptedId = Crypt::encrypt($data->id); // Mengenkripsi ID untuk keamanan
+            // $link = "https://keluargamahaya.com/confirm/pengeluaran/{$encryptedId}";
 
-            // Membuat pesan WhatsApp
-            $messageKetua = "*Persetujuan Setor Tunai*\n";
-            $messageKetua .= "Halo {$ketua->dataWarga->name},\n\n";
-            $messageKetua .= "Terdapat pengajuan Setor Tunai yang sudah di input, Perlu di Konfirmasi agar masuk data. Berikut detail pengajuannya:\n\n";
-            $messageKetua .= "- *Kode* : {$code}\n";
-            $messageKetua .= "- *Tanggal Deposit*: {$$dateTime}\n";
-            $messageKetua .= "- *Type*: Setor Tunai\n";
-            $messageKetua .= "- *Penyetor*: {$pengaju->name}\n";
-            $messageKetua .= "- *Nominal*: Rp" . number_format($request->total_all, 0, ',', '.') . "\n\n";
-            $messageKetua .= "Silakan klik link berikut untuk memberikan persetujuan:\n";
-            $messageKetua .= $link . "\n\n";
-            $messageKetua .= "*Salam hormat,*\n";
-            $messageKetua .= "*Sistem Kas Keluarga*";
+            // // Membuat pesan WhatsApp
+            // $messageKetua = "*Persetujuan Setor Tunai*\n";
+            // $messageKetua .= "Halo {$ketua->dataWarga->name},\n\n";
+            // $messageKetua .= "Terdapat pengajuan Setor Tunai yang sudah di input, Perlu di Konfirmasi agar masuk data. Berikut detail pengajuannya:\n\n";
+            // $messageKetua .= "- *Kode* : {$code}\n";
+            // $messageKetua .= "- *Tanggal Deposit*: {$$dateTime}\n";
+            // $messageKetua .= "- *Type*: Setor Tunai\n";
+            // $messageKetua .= "- *Penyetor*: {$pengaju->name}\n";
+            // $messageKetua .= "- *Nominal*: Rp" . number_format($request->total_all, 0, ',', '.') . "\n\n";
+            // $messageKetua .= "Silakan klik link berikut untuk memberikan persetujuan:\n";
+            // $messageKetua .= $link . "\n\n";
+            // $messageKetua .= "*Salam hormat,*\n";
+            // $messageKetua .= "*Sistem Kas Keluarga*";
 
 
-            // URL gambar dari direktori storage
-            $imageUrl = asset('storage/kas/pengeluaran/ymKJ8SbQ7NLrLAhjAAKMNfOFHCK8O70HiqEiiIPE.jpg');
+            // // URL gambar dari direktori storage
+            // $imageUrl = asset('storage/kas/pengeluaran/ymKJ8SbQ7NLrLAhjAAKMNfOFHCK8O70HiqEiiIPE.jpg');
 
-            $recipientEmailPengurus = $ketua->dataWarga->email;
-            $recipientNamePengurus = $ketua->dataWarga->name;
-            $status = "Menunggu persetujuan Ketua";
-            // Data untuk email pengurus
-            $bodyMessagePengurus = preg_replace('/\*(.*?)\*/', '<b>$1</b>', $messageKetua);
-            $actionUrlPengurus = $link;
+            // $recipientEmailPengurus = $ketua->dataWarga->email;
+            // $recipientNamePengurus = $ketua->dataWarga->name;
+            // $status = "Menunggu persetujuan Ketua";
+            // // Data untuk email pengurus
+            // $bodyMessagePengurus = preg_replace('/\*(.*?)\*/', '<b>$1</b>', $messageKetua);
+            // $actionUrlPengurus = $link;
 
-            // Mengirim email bendahara
-            Mail::to($recipientEmailPengurus)->send(new Notification($recipientNamePengurus, $bodyMessagePengurus, $status, $actionUrlPengurus));
+            // // Mengirim email bendahara
+            // Mail::to($recipientEmailPengurus)->send(new Notification($recipientNamePengurus, $bodyMessagePengurus, $status, $actionUrlPengurus));
 
-            // Mengirim pesan ke Pengurus
-            $responsePengurus = $this->fonnteService->sendWhatsAppMessage($phoneNumberPengurus, $messageKetua, $imageUrl);
+            // // Mengirim pesan ke Pengurus
+            // $responsePengurus = $this->fonnteService->sendWhatsAppMessage($phoneNumberPengurus, $messageKetua, $imageUrl);
 
-            DB::commit();
-            // Cek hasil pengiriman
-            if (
-                (isset($responsePengurus['status']) && $responsePengurus['status'] == 'success')
-            ) {
-                return back()->with('success', 'Data tersimpan, Notifikasi berhasil dikirim ke Warga dan Pengurus!');
-            }
+            // DB::commit();
+            // // Cek hasil pengiriman
+            // if (
+            //     (isset($responsePengurus['status']) && $responsePengurus['status'] == 'success')
+            // ) {
+            //     return back()->with('success', 'Data tersimpan, Notifikasi berhasil dikirim ke Warga dan Pengurus!');
+            // }
 
-            return back()->with('error', 'Data tersimpan, Gagal mengirim notifikasi');
+            // return back()->with(key: 'error', 'Data tersimpan, Gagal mengirim notifikasi');
 
             // // Jik nitifikasi di aktifkan return yang ini di hapus
 
-            // DB::commit();
-            // return redirect()->route('setor-tunai.index')->with('success', 'Setor tunai berhasil disimpan, menunggu di konfirmasi');
+            DB::commit();
+            return redirect()->route('setor-tunai.index')->with('success', 'Setor tunai berhasil disimpan, menunggu di konfirmasi');
         } catch (\Exception $e) {
             DB::rollback();
             return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan.' . $e->getMessage());
