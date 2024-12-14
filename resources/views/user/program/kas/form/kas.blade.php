@@ -1,10 +1,10 @@
                 <form action="{{ route('kas.store') }}" method="POST" enctype="multipart/form-data" id="adminForm">
                     @csrf
-                    <p class="btn btn-primary toggle-text" onclick="toggleInput()">Input Kas Anggota</p>
                     <!-- Hanya pengurus yang bisa -->
                     @if(Auth::user()->role->name == "Bendahara" || Auth::user()->role->name == "Wakil Bendahara" ||
                     Auth::user()->role->name == "Sekretaris" || Auth::user()->role->name == "Wakil Sekretaris" ||
                     Auth::user()->role->name == "Ketua" || Auth::user()->role->name == "Wakil Ketua")
+                    <p class="btn btn-primary toggle-text" onclick="toggleInput()">Input Kas Anggota</p>
                     <!-- Metode Pembayaran -->
                     <div id="inputForm" class="form-group hidden">
                         <label for="data_warga_id">Pilih Anggota</label>
