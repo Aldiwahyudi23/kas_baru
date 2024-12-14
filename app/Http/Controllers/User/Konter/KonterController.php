@@ -254,49 +254,49 @@ class KonterController extends Controller
                 $saldo_kas->saldo_id = $saldo->id; //mengambil id dari model saldo di atas
                 $saldo_kas->save();
 
-                // // URL gambar dari direktori storage
-                // $imageUrl = asset('storage/kas/pengeluaran/ymKJ8SbQ7NLrLAhjAAKMNfOFHCK8O70HiqEiiIPE.jpg');
+                // URL gambar dari direktori storage
+                $imageUrl = asset('storage/kas/pengeluaran/ymKJ8SbQ7NLrLAhjAAKMNfOFHCK8O70HiqEiiIPE.jpg');
 
-                // // Data untuk link
-                // $encryptedId = Crypt::encrypt($data->id); // Mengenkripsi ID untuk keamanan
-                // $link = "https://keluargamahaya.com/pulsa/{$encryptedId}";
+                // Data untuk link
+                $encryptedId = Crypt::encrypt($data->id); // Mengenkripsi ID untuk keamanan
+                $link = "https://keluargamahaya.com/pulsa/{$encryptedId}";
 
-                // $product = ProductKonter::find($data->product_id);
+                $product = ProductKonter::find($data->product_id);
 
-                // $number = $data_detail->no_hp; // Nomor telepon
-                // $name = $data_detail->name;   // Nama warga
-                // // Membuat pesan khusus untuk masing-masing warga
-                // $message = "*Halo {$name},*\n";
-                // $message .= "Kami informasikan bahwa pembelian {$product->kategori->name} {$product->provider->name}:\n";
-                // $message .= "- *Pengajuan*: {$data->created_at}\n";
-                // $message .= "- *Nominal*: " . number_format($product->amount, 0, ',', '.') . "\n";
-                // if ($product->kategori->name == "Listrik") {
-                //     $message .= "- *No Meteran*: {$data_detail->no_listrik}\n";
-                //     $message .= "- *No TOKEN*: *{$data_detail->token_code}* \n";
-                //     $message .= "- *A/N*: {$data_detail->name}\n";
-                // }
-                // $message .= "- *Harga*: Rp" . number_format($data->price, 0, ',', '.') . "\n";
-                // $message .= "- *Pembelian*: {$data->payment_status}\n";
-                // $message .= "- *Jatuh Tempo*: {$data->deadline_date}\n";
-                // $message .= "Terima kasih atas kerjasama dan dukungannya.\n\n";
-                // $message .= "*Salam hormat,*\n";
-                // $message .= "*Sistem Kas Keluarga*";
+                $number = $data_detail->no_hp; // Nomor telepon
+                $name = $data_detail->name;   // Nama warga
+                // Membuat pesan khusus untuk masing-masing warga
+                $message = "*Halo {$name},*\n";
+                $message .= "Kami informasikan bahwa pembelian {$product->kategori->name} {$product->provider->name}:\n";
+                $message .= "- *Pengajuan*: {$data->created_at}\n";
+                $message .= "- *Nominal*: " . number_format($product->amount, 0, ',', '.') . "\n";
+                if ($product->kategori->name == "Listrik") {
+                    $message .= "- *No Meteran*: {$data_detail->no_listrik}\n";
+                    $message .= "- *No TOKEN*: *{$data_detail->token_code}* \n";
+                    $message .= "- *A/N*: {$data_detail->name}\n";
+                }
+                $message .= "- *Harga*: Rp" . number_format($data->price, 0, ',', '.') . "\n";
+                $message .= "- *Pembelian*: {$data->payment_status}\n";
+                $message .= "- *Jatuh Tempo*: {$data->deadline_date}\n";
+                $message .= "Terima kasih atas kerjasama dan dukungannya.\n\n";
+                $message .= "*Salam hormat,*\n";
+                $message .= "*Sistem Kas Keluarga*";
 
-                // // Mengirim pesan ke nomor warga
-                // $response = $this->fonnteService->sendWhatsAppMessage($number, $message, $imageUrl);
+                // Mengirim pesan ke nomor warga
+                $response = $this->fonnteService->sendWhatsAppMessage($number, $message, $imageUrl);
 
 
-                // DB::commit();
+                DB::commit();
 
-                // if (isset($response['status']) && $response['status'] == 'success') {
-                //     return redirect()->back()->with('success', 'Pengajuan Pembelian Pulsa sedang di proses, Notifikasi berhasil dikirim!');
-                // }
-                // return back()->with('error', 'Data tersimpan, Gagal mengirim notifikasi');
+                if (isset($response['status']) && $response['status'] == 'success') {
+                    return redirect()->back()->with('success', 'Pengajuan Pembelian Pulsa sedang di proses, Notifikasi berhasil dikirim!');
+                }
+                return back()->with('error', 'Data tersimpan, Gagal mengirim notifikasi');
 
                 //jika notifikasi email dan wa aktif maka yang di bawah di komen
 
-                DB::commit();
-                return redirect()->back()->with('success', 'Pengajuan Pembelian Pulsa sedang di proses');
+                // DB::commit();
+                // return redirect()->back()->with('success', 'Pengajuan Pembelian Pulsa sedang di proses');
             } else {
                 $data = TransaksiKonter::find($id);
                 $data->status = $request->status;
@@ -316,8 +316,8 @@ class KonterController extends Controller
     }
     public function pulsaUser()
     {
-        $story = TransaksiKonter::where('submitted_by',Auth::user()->dataWarga->name)->get();
-        return view('user.konter.user.pulsa',compact('story'));
+        $story = TransaksiKonter::where('submitted_by', Auth::user()->dataWarga->name)->get();
+        return view('user.konter.user.pulsa', compact('story'));
     }
 
     public function token_listrik()
@@ -626,68 +626,72 @@ class KonterController extends Controller
             $data->save();
 
 
-            // // Nama-nama yang ingin dikirimkan pesan
-            // $selectedNames = ['aldi wahyudi', 'Rifki'];
-            // // Ambil data dari database berdasarkan nama yang dipilih
-            // $access_pengurus = DataWarga::whereIn('name', $selectedNames)
-            //     ->get();
+            // Nama-nama yang ingin dikirimkan pesan
+            $selectedNames = ['aldi wahyudi', 'Rifki'];
+            // Ambil data dari database berdasarkan nama yang dipilih
+            $access_pengurus = DataWarga::whereIn('name', $selectedNames)
+                ->get();
 
-            // // URL gambar dari direktori storage
-            // $imageUrl = asset('storage/kas/pengeluaran/ymKJ8SbQ7NLrLAhjAAKMNfOFHCK8O70HiqEiiIPE.jpg');
+            // URL gambar dari direktori storage
+            $imageUrl = asset('storage/kas/pengeluaran/ymKJ8SbQ7NLrLAhjAAKMNfOFHCK8O70HiqEiiIPE.jpg');
 
-            // // Data untuk link
-            // $encryptedId = Crypt::encrypt($data->id); // Mengenkripsi ID untuk keamanan
-            // $link = "https://keluargamahaya.com/pulsa/{$encryptedId}";
+            // Data untuk link
+            $encryptedId = Crypt::encrypt($data->id); // Mengenkripsi ID untuk keamanan
+            $link = "https://keluargamahaya.com/pulsa/{$encryptedId}";
 
-            // $product = ProductKonter::find($request->product_id);
+            $product = ProductKonter::find($request->product_id);
 
 
 
-            // // Mengirim pesan ke setiap nomor
-            // foreach ($access_pengurus as $access) {
-            //     $number = $access->no_hp; // Nomor telepon
-            //     $name = $access->name;   // Nama warga
-            //     // Membuat pesan khusus untuk masing-masing warga
-            //     $message = "*Pengajuan Pulsa*\n";
-            //     $message .= "Halo {$name},\n\n";
-            //     $message .= "Kami informasikan bahwa {$request->submitted_by} mengajukan pembelian {$product->kategori->name} {$product->provider->name}:\n\n";
-            //     $message .= "- *ID transaksi*: {$transactionCode}\n";
-            //     $message .= "- *Tanggal Pengajuan*: {$data->created_at}\n";
-            //     $message .= "- *Number HP*: {$request->phone_number}\n";
-            //     $message .= "- *Nominal*: Rp" . number_format($product->amount, 0, ',', '.') . "\n";
-            // if ($product->kategori->name == "Listrik") {
-            //     $message .= "- *No Meteran*: {$data_detail->no_listrik}\n";
-            //     $message .= "- *No TOKEN*: *{$data_detail->token_code}* \n";
-            //     $message .= "- *A/N*: {$data_detail->name}\n";
-            // }
-            //     $message .= "- *Harga*: Rp" . number_format($request->price, 0, ',', '.') . "\n";
-            //     $message .= "- *Pembelian*: {$request->payment_method}\n";
-            //     $message .= "- *Jatuh Tempo*: {$jatuh_tempo}\n";
-            //     $message .= "Terima kasih atas kerjasama dan dukungan Anda dalam proses ini.\n\n";
-            //     $message .= "Silakan klik link berikut untuk info selanjutnya:\n";
-            //     $message .= $link . "\n\n";
-            //     $message .= "*Salam hormat,*\n";
-            //     $message .= "*Sistem Kas Keluarga*";
+            // Mengirim pesan ke setiap nomor
+            foreach ($access_pengurus as $access) {
+                $number = $access->no_hp; // Nomor telepon
+                $name = $access->name;   // Nama warga
+                // Membuat pesan khusus untuk masing-masing warga
+                $message = "*Pengajuan Pulsa*\n";
+                $message .= "Halo {$name},\n\n";
+                $message .= "Kami informasikan bahwa {$request->submitted_by} mengajukan pembelian {$product->kategori->name} {$product->provider->name}:\n\n";
+                $message .= "- *ID transaksi*: {$transactionCode}\n";
+                $message .= "- *Tanggal Pengajuan*: {$data->created_at}\n";
+                $message .= "- *Number HP*: {$request->phone_number}\n";
+                $message .= "- *Nominal*: Rp" . number_format($product->amount, 0, ',', '.') . "\n";
+                if ($product->kategori->name == "Listrik") {
+                    $message .= "- *No Meteran*: {$data_detail->no_listrik}\n";
+                    $message .= "- *No TOKEN*: *{$data_detail->token_code}* \n";
+                    $message .= "- *A/N*: {$data_detail->name}\n";
+                }
+                $message .= "- *Harga*: Rp" . number_format($request->price, 0, ',', '.') . "\n";
+                $message .= "- *Pembelian*: {$request->payment_method}\n";
+                $message .= "- *Jatuh Tempo*: {$jatuh_tempo}\n";
+                $message .= "Terima kasih atas kerjasama dan dukungan Anda dalam proses ini.\n\n";
+                $message .= "Silakan klik link berikut untuk info selanjutnya:\n";
+                $message .= $link . "\n\n";
+                $message .= "*Salam hormat,*\n";
+                $message .= "*Sistem Kas Keluarga*";
 
-            //     // Mengirim pesan ke nomor warga
-            //     $response = $this->fonnteService->sendWhatsAppMessage($number, $message, $imageUrl);
-            // }
+                // Mengirim pesan ke nomor warga
+                $response = $this->fonnteService->sendWhatsAppMessage($number, $message, $imageUrl);
+            }
 
-            // DB::commit();
+            DB::commit();
 
-            // if (isset($response['status']) && $response['status'] == 'success') {
-            //     return redirect()->route('pulsa')->with('success', 'Pengajuan Pembelian Pulsa sedang di proses, Notifikasi berhasil dikirim!');
-            // }
-            // return back()->with('error', 'Data tersimpan, Gagal mengirim notifikasi');
+            if (isset($response['status']) && $response['status'] == 'success') {
+                if ($request->repayment) {
+                    return redirect()->route('konter.index')->with('success', 'Pengajuan Pembelian Pulsa sedang di proses');
+                } else {
+                    return redirect()->route('pulsa')->with('success', 'Pengajuan Pembelian Pulsa sedang di proses, Notifikasi berhasil dikirim!');
+                }
+            }
+            return back()->with('error', 'Data tersimpan, Gagal mengirim notifikasi');
 
             // //jika notifikasi email dan wa aktif maka yang di bawah di komen
 
-            DB::commit();
-            if($request->repayment){
-                return redirect()->route('konter.index')->with('success', 'Pengajuan Pembelian Pulsa sedang di proses');
-            }else{
-                return redirect()->route('pulsa')->with('success', 'Pengajuan Pembelian Pulsa sedang di proses');
-            }
+            // DB::commit();
+            // if($request->repayment){
+            //     return redirect()->route('konter.index')->with('success', 'Pengajuan Pembelian Pulsa sedang di proses');
+            // }else{
+            //     return redirect()->route('pulsa')->with('success', 'Pengajuan Pembelian Pulsa sedang di proses');
+            // }
         } catch (\Exception $e) {
             DB::rollback();
             return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan data.' . $e->getMessage());
@@ -798,68 +802,72 @@ class KonterController extends Controller
             $data->save();
 
 
-            // // Nama-nama yang ingin dikirimkan pesan
-            // $selectedNames = ['aldi wahyudi', 'Rifki'];
-            // // Ambil data dari database berdasarkan nama yang dipilih
-            // $access_pengurus = DataWarga::whereIn('name', $selectedNames)
-            //     ->get();
+            // Nama-nama yang ingin dikirimkan pesan
+            $selectedNames = ['aldi wahyudi', 'Rifki'];
+            // Ambil data dari database berdasarkan nama yang dipilih
+            $access_pengurus = DataWarga::whereIn('name', $selectedNames)
+                ->get();
 
-            // // URL gambar dari direktori storage
-            // $imageUrl = asset('storage/kas/pengeluaran/ymKJ8SbQ7NLrLAhjAAKMNfOFHCK8O70HiqEiiIPE.jpg');
+            // URL gambar dari direktori storage
+            $imageUrl = asset('storage/kas/pengeluaran/ymKJ8SbQ7NLrLAhjAAKMNfOFHCK8O70HiqEiiIPE.jpg');
 
-            // // Data untuk link
-            // $encryptedId = Crypt::encrypt($data->id); // Mengenkripsi ID untuk keamanan
-            // $link = "https://keluargamahaya.com/pulsa/{$encryptedId}";
+            // Data untuk link
+            $encryptedId = Crypt::encrypt($data->id); // Mengenkripsi ID untuk keamanan
+            $link = "https://keluargamahaya.com/pulsa/{$encryptedId}";
 
-            // $product = ProductKonter::find($request->product_id);
+            $product = ProductKonter::find($request->product_id);
 
 
 
-            // // Mengirim pesan ke setiap nomor
-            // foreach ($access_pengurus as $access) {
-            //     $number = $access->no_hp; // Nomor telepon
-            //     $name = $access->name;   // Nama warga
-            //     // Membuat pesan khusus untuk masing-masing warga
-            //     $message = "*Pengajuan Pulsa*\n";
-            //     $message .= "Halo {$name},\n\n";
-            //     $message .= "Kami informasikan bahwa {$request->submitted_by} mengajukan pembelian {$product->kategori->name} {$product->provider->name}:\n\n";
-            //     $message .= "- *ID transaksi*: {$transactionCode}\n";
-            //     $message .= "- *Tanggal Pengajuan*: {$data->created_at}\n";
-            //     $message .= "- *Number HP*: {$request->phone_number}\n";
-            //     $message .= "- *Nominal*: Rp" . number_format($product->amount, 0, ',', '.') . "\n";
-            // if ($product->kategori->name == "Listrik") {
-            //     $message .= "- *No Meteran*: {$data_detail->no_listrik}\n";
-            //     $message .= "- *No TOKEN*: *{$data_detail->token_code}* \n";
-            //     $message .= "- *A/N*: {$data_detail->name}\n";
-            // }
-            //     $message .= "- *Harga*: Rp" . number_format($request->price, 0, ',', '.') . "\n";
-            //     $message .= "- *Pembelian*: {$request->payment_method}\n";
-            //     $message .= "- *Jatuh Tempo*: {$jatuh_tempo}\n";
-            //     $message .= "Terima kasih atas kerjasama dan dukungan Anda dalam proses ini.\n\n";
-            //     $message .= "Silakan klik link berikut untuk info selanjutnya:\n";
-            //     $message .= $link . "\n\n";
-            //     $message .= "*Salam hormat,*\n";
-            //     $message .= "*Sistem Kas Keluarga*";
+            // Mengirim pesan ke setiap nomor
+            foreach ($access_pengurus as $access) {
+                $number = $access->no_hp; // Nomor telepon
+                $name = $access->name;   // Nama warga
+                // Membuat pesan khusus untuk masing-masing warga
+                $message = "*Pengajuan Pulsa*\n";
+                $message .= "Halo {$name},\n\n";
+                $message .= "Kami informasikan bahwa {$request->submitted_by} mengajukan pembelian {$product->kategori->name} {$product->provider->name}:\n\n";
+                $message .= "- *ID transaksi*: {$transactionCode}\n";
+                $message .= "- *Tanggal Pengajuan*: {$data->created_at}\n";
+                $message .= "- *Number HP*: {$request->phone_number}\n";
+                $message .= "- *Nominal*: Rp" . number_format($product->amount, 0, ',', '.') . "\n";
+                if ($product->kategori->name == "Listrik") {
+                    $message .= "- *No Meteran*: {$data_detail->no_listrik}\n";
+                    $message .= "- *No TOKEN*: *{$data_detail->token_code}* \n";
+                    $message .= "- *A/N*: {$data_detail->name}\n";
+                }
+                $message .= "- *Harga*: Rp" . number_format($request->price, 0, ',', '.') . "\n";
+                $message .= "- *Pembelian*: {$request->payment_method}\n";
+                $message .= "- *Jatuh Tempo*: {$jatuh_tempo}\n";
+                $message .= "Terima kasih atas kerjasama dan dukungan Anda dalam proses ini.\n\n";
+                $message .= "Silakan klik link berikut untuk info selanjutnya:\n";
+                $message .= $link . "\n\n";
+                $message .= "*Salam hormat,*\n";
+                $message .= "*Sistem Kas Keluarga*";
 
-            //     // Mengirim pesan ke nomor warga
-            //     $response = $this->fonnteService->sendWhatsAppMessage($number, $message, $imageUrl);
-            // }
+                // Mengirim pesan ke nomor warga
+                $response = $this->fonnteService->sendWhatsAppMessage($number, $message, $imageUrl);
+            }
 
-            // DB::commit();
+            DB::commit();
 
-            // if (isset($response['status']) && $response['status'] == 'success') {
-            //     return redirect()->route('pulsa')->with('success', 'Pengajuan Pembelian Pulsa sedang di proses, Notifikasi berhasil dikirim!');
-            // }
-            // return back()->with('error', 'Data tersimpan, Gagal mengirim notifikasi');
+            if (isset($response['status']) && $response['status'] == 'success') {
+                if ($request->repayment) {
+                    return redirect()->route('konter.index')->with('success', 'Pengajuan Pembelian Pulsa sedang di proses');
+                } else {
+                    return redirect()->route('pulsa')->with('success', 'Pengajuan Pembelian Pulsa sedang di proses, Notifikasi berhasil dikirim!');
+                }
+            }
+            return back()->with('error', 'Data tersimpan, Gagal mengirim notifikasi');
 
             // //jika notifikasi email dan wa aktif maka yang di bawah di komen
 
-            DB::commit();
-            if($request->repayment){
-                return redirect()->route('konter.index')->with('success', 'Pengajuan Pembelian Pulsa sedang di proses');
-            }else{
-                return redirect()->route('dashboard.index')->with('success', 'Pengajuan Pembelian Pulsa sedang di proses');
-            }
+            // DB::commit();
+            // if ($request->repayment) {
+            //     return redirect()->route('konter.index')->with('success', 'Pengajuan Pembelian Pulsa sedang di proses');
+            // } else {
+            //     return redirect()->route('dashboard.index')->with('success', 'Pengajuan Pembelian Pulsa sedang di proses');
+            // }
         } catch (\Exception $e) {
             DB::rollback();
             return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan data.' . $e->getMessage());
@@ -884,10 +892,10 @@ class KonterController extends Controller
         ]);
     }
 
-    public function repayment_pulsa ($id)
+    public function repayment_pulsa($id)
     {
-$id = Crypt::decrypt($id);
-$pengajuan = TransaksiKonter::find($id);
+        $id = Crypt::decrypt($id);
+        $pengajuan = TransaksiKonter::find($id);
         $product = ProductKonter::find($pengajuan->product_id);
         if ($product->kategori->name == "Pulsa") {
             $phoneNumber = $pengajuan->detail->no_hp;
@@ -897,6 +905,6 @@ $pengajuan = TransaksiKonter::find($id);
             $phoneNumber = $pengajuan->detail->no_listrik;
         }
 
-        return view('user.konter.repayment.transaksi',compact('product','phoneNumber', 'pengajuan'));
+        return view('user.konter.repayment.transaksi', compact('product', 'phoneNumber', 'pengajuan'));
     }
 }

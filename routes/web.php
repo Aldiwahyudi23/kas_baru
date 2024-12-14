@@ -167,6 +167,7 @@ Route::middleware([
     Route::get('/edit/pinjaman/{id}', [PinjamanController::class, 'editPengurus'])->name('pinjaman.editPengurus');
     Route::patch('/edit/pinjaman/{id}', [PinjamanController::class, 'updatePengurus'])->name('pinjaman.updatePengurus');
     Route::delete('/hapus/pinjaman/{id}', [PinjamanController::class, 'destroyPengurus'])->name('pinjaman.destroyPengurus');
+    Route::get('/laporan/pinjaman', [PinjamanController::class, 'laporan'])->name('pinjaman.laporan');
 
     // Untuk pembayaran pinjaman
     Route::resource('/bayar-pinjaman', BayarPinjamanController::class);

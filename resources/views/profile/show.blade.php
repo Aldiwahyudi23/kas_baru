@@ -1,48 +1,72 @@
 @extends('user.layout.app')
 
 @section('content')
-<x-slot name="header">
-    <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-        {{ __('Profile') }}
-    </h2>
-</x-slot>
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">{{ __('Profile') }}</h1>
+    </div>
 
-<div>
-    <div class="max-w-7xl mx-auto py-10 sm:px-6 lg:px-8">
-        @if (Laravel\Fortify\Features::canUpdateProfileInformation())
-        @livewire('profile.update-profile-information-form')
+    <div class="row">
+        <div class="col-lg-12">
+            <!-- Profile Information -->
+            @if (Laravel\Fortify\Features::canUpdateProfileInformation())
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Update Profile Information</h6>
+                </div>
+                <div class="card-body">
+                    @livewire('profile.update-profile-information-form')
+                </div>
+            </div>
+            @endif
 
-        <x-section-border />
-        @endif
+            <!-- Update Password -->
+            @if (Laravel\Fortify\Features::enabled(Laravel\Fortify\Features::updatePasswords()))
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Update Password</h6>
+                </div>
+                <div class="card-body">
+                    @livewire('profile.update-password-form')
+                </div>
+            </div>
+            @endif
 
-        @if (Laravel\Fortify\Features::enabled(Laravel\Fortify\Features::updatePasswords()))
-        <div class="mt-10 sm:mt-0">
-            @livewire('profile.update-password-form')
+            <!-- Two-Factor Authentication -->
+            @if (Laravel\Fortify\Features::canManageTwoFactorAuthentication())
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Two-Factor Authentication</h6>
+                </div>
+                <div class="card-body">
+                    @livewire('profile.two-factor-authentication-form')
+                </div>
+            </div>
+            @endif
+
+            <!-- Logout Other Browser Sessions -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Logout Other Browser Sessions</h6>
+                </div>
+                <div class="card-body">
+                    @livewire('profile.logout-other-browser-sessions-form')
+                </div>
+            </div>
+
+            <!-- Delete Account -->
+            <!-- @if (Laravel\Jetstream\Jetstream::hasAccountDeletionFeatures())
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-danger">Delete Account</h6>
+                </div>
+                <div class="card-body">
+                    @livewire('profile.delete-user-form')
+                </div>
+            </div>
+            @endif -->
         </div>
-
-        <x-section-border />
-        @endif
-
-        @if (Laravel\Fortify\Features::canManageTwoFactorAuthentication())
-        <div class="mt-10 sm:mt-0">
-            @livewire('profile.two-factor-authentication-form')
-        </div>
-
-        <x-section-border />
-        @endif
-
-        <div class="mt-10 sm:mt-0">
-            @livewire('profile.logout-other-browser-sessions-form')
-        </div>
-
-        @if (Laravel\Jetstream\Jetstream::hasAccountDeletionFeatures())
-        <x-section-border />
-
-        <div class="mt-10 sm:mt-0">
-            @livewire('profile.delete-user-form')
-        </div>
-        @endif
     </div>
 </div>
-
 @endsection

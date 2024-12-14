@@ -36,8 +36,8 @@
                     <h3> <B>
                             Rp {{number_format( $saldo->total_balance ?? 0,0,',','.')}}
                         </B></h3>
-                    <div class="text-white-50 small">{{$saldo->code ?? ''}} Rp
-                        {{number_format( $saldo->amount ?? 0,0,',','.')}}
+                    <div class="text-white-50 small"> Rp
+                        {{number_format( $saldo->amount ?? 0,0,',','.')}} ( {{$saldo->code ?? ''}} )
                     </div>
                 </div>
                 <a href="{{Route('dashboard.saldo')}}" class="card-footer text-white clearfix small z-1">
@@ -47,7 +47,9 @@
                     </span>
                 </a>
             </div>
-            @if(Auth::user()->role->name == "Bendahara" || Auth::user()->role->name == "Wakil Bendahara" || Auth::user()->role->name == "Sekretaris" || Auth::user()->role->name == "Wakil Sekretaris" || Auth::user()->role->name == "Ketua" || Auth::user()->role->name == "Wakil Ketua")
+            @if(Auth::user()->role->name == "Bendahara" || Auth::user()->role->name == "Wakil Bendahara" ||
+            Auth::user()->role->name == "Sekretaris" || Auth::user()->role->name == "Wakil Sekretaris" ||
+            Auth::user()->role->name == "Ketua" || Auth::user()->role->name == "Wakil Ketua")
 
             <div class="card bg-primary text-white shadow">
                 <center>
@@ -64,7 +66,7 @@
                 </a>
             </div>
             <!-- /.row -->
-             @endif
+            @endif
             <!-- ./card-body -->
             <div class="card-footer">
                 <div class="row">
@@ -128,7 +130,9 @@
 </div>
 <!-- /.row -->
 <div class="row">
-    @if(Auth::user()->role->name == "Bendahara" || Auth::user()->role->name == "Wakil Bendahara" || Auth::user()->role->name == "Sekretaris" || Auth::user()->role->name == "Wakil Sekretaris" || Auth::user()->role->name == "Ketua" || Auth::user()->role->name == "Wakil Ketua")
+    @if(Auth::user()->role->name == "Bendahara" || Auth::user()->role->name == "Wakil Bendahara" ||
+    Auth::user()->role->name == "Sekretaris" || Auth::user()->role->name == "Wakil Sekretaris" ||
+    Auth::user()->role->name == "Ketua" || Auth::user()->role->name == "Wakil Ketua")
 
     <div class="col-3 col-sm-4 col-md-3">
         <a class="users-list-name" href="{{Route('konter.index')}}">
@@ -160,6 +164,17 @@
                 <span class="info-box-icon bg-success elevation-1"><i class="fas fa-shopping-cart"></i></span>
             </div>
             <p class="text-bold users-list-date" style="font-size:14px;">Pengeluaran</p>
+        </a>
+        <!-- /.info-box -->
+    </div>
+    <div class="clearfix hidden-md-up"></div>
+
+    <div class="col-3 col-sm-4 col-md-3">
+        <a class="users-list-name" href="{{route('pinjaman.laporan')}}">
+            <div class="info-box mb-3">
+                <span class="info-box-icon bg-success elevation-1"><i class="fas fa-shopping-cart"></i></span>
+            </div>
+            <p class="text-bold users-list-date" style="font-size:14px;">L Pinjaman</p>
         </a>
         <!-- /.info-box -->
     </div>

@@ -2,6 +2,22 @@
 
 @section('content')
 
+<div class="card bg-primary text-white shadow">
+    <div class="card-body">
+        <h3> <B>
+                Rp {{number_format( $saldo_pinjam->saldo ?? 0,0,',','.')}}
+            </B></h3>
+        <div class="text-white-50 small"> Rp
+            {{number_format( $saldo_pinjam->amount ?? 0,0,',','.')}} ( {{$saldo_pinjam->saldos->code ?? ''}} )
+        </div>
+    </div>
+    <a href="{{Route('saldo.anggaran', ['type' => 'Dana Pinjam'])}}" class="card-footer text-white clearfix small z-1">
+        <span class="float-left">Lihat Detail</span>
+        <span class="float-right">
+            <i class="fas fa-angle-right"></i>
+        </span>
+    </a>
+</div>
 <!-- ./row -->
 <div class="row">
     <div class="col-12 col-sm-6">
@@ -175,6 +191,10 @@
 <div class="col-12 col-sm-6">
     <!-- Mengambil pinjaman_proses->first() tabel  -->
     @include('user.program.kas.tabel.pinjaman.anggota')
+</div>
+<div class="col-12 col-sm-6">
+    <!-- Mengambil pinjaman_proses->first() tabel  -->
+    @include('user.program.kas.tabel.pinjaman.all')
 </div>
 </div>
 <!-- /.row -->
