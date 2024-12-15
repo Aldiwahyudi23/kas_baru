@@ -279,11 +279,11 @@
                 </li>
             </ul>
         </li>
-        <li class="nav-header">MISCELLANEOUS</li>
+        <li class="nav-header">Notification</li>
         <li class="nav-item">
-            <a href="https://adminlte.io/docs/3.1/" class="nav-link">
+            <a href="{{route('access-notification.index')}}" class="nav-link">
                 <i class="nav-icon fas fa-file"></i>
-                <p>Documentation</p>
+                <p>Access WA</p>
             </a>
         </li>
         <li class="nav-header">MULTI LEVEL EXAMPLE</li>

@@ -4,6 +4,8 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Mail\Notification;
+use App\Models\AccessNotification;
+use App\Models\DataNotification;
 use App\Models\DataWarga;
 use App\Models\Deposit;
 use App\Models\DepositDetail;
@@ -151,64 +153,68 @@ class SetorTunaiController extends Controller
                 $data->save();
             }
 
-            // // Mengambil data pengaju (pengguna yang menginput)
-            // $pengaju = DataWarga::find(Auth::user()->data_warga_id);
-            // // Mengambil nomor telepon Ketua Untuk Laporan
-            // $ketua = User::whereHas('role', function ($query) {
-            //     $query->where('name', 'Ketua');
-            // })->with('dataWarga')->first();
 
-            // $phoneNumberPengurus = $ketua->dataWarga->no_hp ?? null;
+            $notif = DataNotification::where('name', 'Setor Tunai')
+                ->where('type', 'Pengajuan')
+                ->first();
+            // ============================Notif untuk pengurus=========================================================
 
-            // // Data untuk pesan
-            // $encryptedId = Crypt::encrypt($data->id); // Mengenkripsi ID untuk keamanan
-            // $link = "https://keluargamahaya.com/confirm/pengeluaran/{$encryptedId}";
+            // Mengambil nomor telepon Ketua Untuk Laporan
+            $notifPengurus = AccessNotification::where('notification_id', $notif->id)->where('is_active', true)->get();
+            foreach ($notifPengurus as $notif_pengurus) {
 
-            // // Membuat pesan WhatsApp
-            // $messageKetua = "*Persetujuan Setor Tunai*\n";
-            // $messageKetua .= "Halo {$ketua->dataWarga->name},\n\n";
-            // $messageKetua .= "Terdapat pengajuan Setor Tunai yang sudah di input, Perlu di Konfirmasi agar masuk data. Berikut detail pengajuannya:\n\n";
-            // $messageKetua .= "- *Kode* : {$code}\n";
-            // $messageKetua .= "- *Tanggal Deposit*: {$$dateTime}\n";
-            // $messageKetua .= "- *Type*: Setor Tunai\n";
-            // $messageKetua .= "- *Penyetor*: {$pengaju->name}\n";
-            // $messageKetua .= "- *Nominal*: Rp" . number_format($request->total_all, 0, ',', '.') . "\n\n";
-            // $messageKetua .= "Silakan klik link berikut untuk memberikan persetujuan:\n";
-            // $messageKetua .= $link . "\n\n";
-            // $messageKetua .= "*Salam hormat,*\n";
-            // $messageKetua .= "*Sistem Kas Keluarga*";
+                // Mengambil data pengaju (pengguna yang menginput)
+                $pengaju = DataWarga::find(Auth::user()->data_warga_id);
+                $phoneNumberPengurus = $notif_pengurus->Warga->no_hp ?? null;
 
+                // Data untuk pesan
+                $encryptedId = Crypt::encrypt($data->id); // Mengenkripsi ID untuk keamanan
+                $link = "https://keluargamahaya.com/setor-tunais/pengajuan/show/{$encryptedId}";
 
-            // // URL gambar dari direktori storage
-            // $imageUrl = asset('storage/kas/pengeluaran/ymKJ8SbQ7NLrLAhjAAKMNfOFHCK8O70HiqEiiIPE.jpg');
+                // Membuat pesan WhatsApp
+                $messagePengurus = "*Persetujuan Setor Tunai*\n";
+                $messagePengurus .= "Halo {$notif_pengurus->Warga->name},\n\n";
+                $messagePengurus .= "Terdapat pengajuan Setor Tunai yang sudah di input, Perlu di Konfirmasi agar masuk data. Berikut detail pengajuannya:\n\n";
+                $messagePengurus .= "- *Kode* : {$code}\n";
+                $messagePengurus .= "- *Tanggal Deposit* : {$dateTime}\n";
+                $messagePengurus .= "- *Type* : Setor Tunai\n";
+                $messagePengurus .= "- *Penyetor* : {$pengaju->name}\n";
+                $messagePengurus .= "- *Nominal* : Rp" . number_format($request->total_all, 0, ',', '.') . "\n\n";
+                $messagePengurus .= "Silakan klik link berikut untuk memberikan persetujuan:\n";
+                $messagePengurus .= $link . "\n\n";
+                $messagePengurus .= "*Salam hormat,*\n";
+                $messagePengurus .= "*Sistem Kas Keluarga*";
 
-            // $recipientEmailPengurus = $ketua->dataWarga->email;
-            // $recipientNamePengurus = $ketua->dataWarga->name;
-            // $status = "Menunggu persetujuan Ketua";
-            // // Data untuk email pengurus
-            // $bodyMessagePengurus = preg_replace('/\*(.*?)\*/', '<b>$1</b>', $messageKetua);
-            // $actionUrlPengurus = $link;
+                // URL gambar dari direktori storage
+                $imageUrl = asset('storage/kas/pengeluaran/ymKJ8SbQ7NLrLAhjAAKMNfOFHCK8O70HiqEiiIPE.jpg');
 
-            // // Mengirim email bendahara
-            // Mail::to($recipientEmailPengurus)->send(new Notification($recipientNamePengurus, $bodyMessagePengurus, $status, $actionUrlPengurus));
+                $recipientEmailPengurus = $notif_pengurus->Warga->email;
+                $recipientNamePengurus = $notif_pengurus->Warga->name;
+                $status = "Menunggu persetujuan Ketua";
+                // Data untuk email pengurus
+                $bodyMessagePengurus = preg_replace('/\*(.*?)\*/', '<b>$1</b>', $messagePengurus);
+                $actionUrlPengurus = $link;
 
-            // // Mengirim pesan ke Pengurus
-            // $responsePengurus = $this->fonnteService->sendWhatsAppMessage($phoneNumberPengurus, $messageKetua, $imageUrl);
-
-            // DB::commit();
-            // // Cek hasil pengiriman
-            // if (
-            //     (isset($responsePengurus['status']) && $responsePengurus['status'] == 'success')
-            // ) {
-            //     return back()->with('success', 'Data tersimpan, Notifikasi berhasil dikirim ke Warga dan Pengurus!');
-            // }
-
-            // return back()->with(key: 'error', 'Data tersimpan, Gagal mengirim notifikasi');
-
-            // // Jik nitifikasi di aktifkan return yang ini di hapus
-
+                if ($notif->email_notification && $notif->pengurus) {
+                    // Mengirim email notif_pengurus
+                    Mail::to($recipientEmailPengurus)->send(new Notification($recipientNamePengurus, $bodyMessagePengurus, $status, $actionUrlPengurus));
+                }
+                if ($notif->wa_notification && $notif->pengurus) {
+                    // Mengirim pesan ke Pengurus
+                    $responsePengurus = $this->fonnteService->sendWhatsAppMessage($phoneNumberPengurus, $messagePengurus, $imageUrl);
+                }
+            }
             DB::commit();
-            return redirect()->route('setor-tunai.index')->with('success', 'Setor tunai berhasil disimpan, menunggu di konfirmasi');
+            // Cek hasil pengiriman
+            // Evaluasi keberhasilan pengiriman
+            $pengurusSuccess = isset($responsePengurus['status']) && $responsePengurus['status'] == 'success';
+
+            // Berikan feedback berdasarkan hasil pengiriman
+            if ($pengurusSuccess) {
+                return back()->with('success', 'Data Setor Tunai terkirim, Notifikasi terkirim ke Ketua');
+            } else {
+                return back()->with('warning', 'Data Setor Tunai terkirim, tetapi Notifikasi tidak terkirim ke Pengurus!');
+            }
         } catch (\Exception $e) {
             DB::rollback();
             return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan.' . $e->getMessage());

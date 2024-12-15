@@ -13,11 +13,12 @@ return new class extends Migration
     {
         Schema::create('access_notifications', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->bigInteger('notification_id')->unsigned(); // ID pengguna yang pembayaran kasnya tercatat
             $table->bigInteger('data_warga_id')->unsigned(); // ID pengguna yang pembayaran kasnya tercatat
-            $table->enum('is_active', [1, 0]);
+            $table->boolean('is_active')->default(false)->nullable();
             $table->timestamps();
 
+            $table->foreign('notification_id')->references('id')->on('data_notifications')->onDelete('cascade');
             $table->foreign('data_warga_id')->references('id')->on('data_wargas')->onDelete('cascade');
         });
     }

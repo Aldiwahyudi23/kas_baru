@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AccessNotificationController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\User\Kas\BayarPinjamanController;
 use App\Http\Controllers\User\Kas\PemasukanController;
@@ -117,6 +118,8 @@ Route::prefix('admin')->group(
 
             Route::post('/check-phone', [TransaksiKonterController::class, 'checkPhone']);
             Route::resource('/konter-transaksi-detail', TransaksiKonterController::class);
+
+            Route::resource('/access-notification', AccessNotificationController::class);
         });
     }
 );
@@ -204,7 +207,7 @@ Route::middleware([
     Route::get('/konters/pulsa', [KonterController::class, 'pulsaUser'])->name('pulsaUser');
     Route::get('/transaksi-user/{encryptedProductId}/{phoneNumber}', [KonterController::class, 'transaksi_user'])->name('transaksi-user');
     Route::post('/transaksi-user/proses', [KonterController::class, 'transaksi_proses_user'])->name('transaksi-proses_user');
-    Route::get('/repayment/konter/{id}',[KonterController::class, 'repayment_pulsa'])->name('repayment.pulsa');
+    Route::get('/repayment/konter/{id}', [KonterController::class, 'repayment_pulsa'])->name('repayment.pulsa');
 });
 Route::post('/detect-provider', [KonterController::class, 'detectProvider'])->name('detect.provider');
 Route::get('/pulsa', [KonterController::class, 'pulsa'])->name('pulsa');
