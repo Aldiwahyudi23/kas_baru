@@ -114,12 +114,12 @@
                     <tr>
                         <td>Pencaian</td>
                         <td>:</td>
-                        <td>{{ $pinjaman->bendahara->name}}</td>
+                        <td>{{ $pinjaman->bendahara->name ?? ''}}</td>
                     </tr>
                     <tr>
                         <td>Tanggal di cairkan</td>
                         <td>:</td>
-                        <td>{{ $pinjaman->disbursed_date}}</td>
+                        <td>{{ $pinjaman->disbursed_date ?? ''}}</td>
                     </tr>
                     @endif
                 </tbody>

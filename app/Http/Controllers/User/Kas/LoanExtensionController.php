@@ -4,7 +4,9 @@ namespace App\Http\Controllers\User\Kas;
 
 use App\Http\Controllers\Controller;
 use App\Mail\Notification;
+use App\Models\AccessNotification;
 use App\Models\Anggaran;
+use App\Models\DataNotification;
 use App\Models\DataWarga;
 use App\Models\Loan;
 use App\Models\LoanExtension;
@@ -105,12 +107,21 @@ class LoanExtensionController extends Controller
 
             $data->save();
 
+
+            $notif = DataNotification::where('name', 'Pinjaman ke 2')
+                ->where('type', 'Pengajuan')
+                ->first();
+
+            // ==========================Notif Anggota=======================================
+
             // Mengambil data pengaju (pengguna yang menginput)
             $pengaju = DataWarga::find(Auth::user()->data_warga_id);
 
             // Data Warga
             $data_warga = DataWarga::find($pinjaman->data_warga_id);
             $phoneNumberWarga = $data_warga->no_hp;
+            // URL gambar dari direktori storage
+            $imageUrl = '';
 
             // Pesan untuk Warga
             $messageWarga = "*Pengajuan Perpanjangan Pinjaman atau Pinjaman Kedua*\n\n";
@@ -136,52 +147,65 @@ class LoanExtensionController extends Controller
             // Ganti tanda bintang dengan HTML <strong>
             $bodyMessage = preg_replace('/\*(.*?)\*/', '<b>$1</b>', $messageWarga);
             $status = $data->status;
-            $actionUrl = 'https://keluargamahaya.com/detail';
+            $encryptedId = Crypt::encrypt($data->id); // Mengenkripsi ID untuk keamanan
+            $actionUrl = "https://keluargamahaya.com/pinjaman-ke-dua/{$encryptedId}";
+
+            if ($notif->wa_notification  && $notif->anggota) {
+                // Mengirim pesan ke Warga
+                $responseWarga = $this->fonnteService->sendWhatsAppMessage($phoneNumberWarga, $messageWarga, $imageUrl);
+            }
+            if ($notif->email_notification && $notif->anggota) {
+                // Mengirim notifikasi email ke anggota
+                Mail::to($recipientEmail)->send(new Notification($recipientName, $bodyMessage, $status, $actionUrl));
+            }
+
+            // ============================Notif untuk pengurus=========================================================
 
             // Mengambil nomor telepon Ketua Untuk Laporan
-            $ketua = User::whereHas('role', function ($query) {
-                $query->where('name', 'Ketua');
-            })->with('dataWarga')->first();
+            $notifPengurus = AccessNotification::where('notification_id', $notif->id)->where('is_active', true)->get();
 
-            $phoneNumberPengurus = $ketua->dataWarga->no_hp ?? null;
+            foreach ($notifPengurus as $notif_pengurus) {
 
-            // Pesan untuk Ketua
-            $messageKetua = "*Pemberitahuan Pengajuan Perpanjangan Pinjaman atau Pinjaman Kedua*\n\n";
-            $messageKetua .= "Halo *{$ketua->dataWarga->name}*,\n";
-            $messageKetua .= "Terdapat pengajuan baru yang membutuhkan persetujuan Anda. Berikut adalah detail pengajuan:\n\n";
-            $messageKetua .= "📝 *Detail Pengajuan:*\n";
-            $messageKetua .= "- *Kode Pinjaman*: {$pinjaman->code}\n";
-            $messageKetua .= "- *Tanggal Pengajuan*: {$data->extension_date}\n";
-            $messageKetua .= "- *Nama Warga*: {$data_warga->name}\n";
-            $messageKetua .= "- *Di Ajukan Oleh*: {$pengaju->name}\n";
-            $messageKetua .= "- *Nominal Pinjaman Awal*: Rp" . number_format($request->loan_amount, 0, ',', '.') . "\n";
-            $messageKetua .= "- *Sisa Pinjaman Saat Ini*: Rp" . number_format($request->remaining_balance, 0, ',', '.') . "\n";
-            $messageKetua .= "- *Alasan Pengajuan*: {$request->reason}\n\n";
-            $messageKetua .= "Mohon untuk segera memproses pengajuan ini sesuai prosedur yang berlaku.\n\n";
-            $messageKetua .= "*Terima kasih atas perhatian dan kerja sama Anda!*\n\n";
-            $messageKetua .= "*Salam hormat,*\n";
-            $messageKetua .= "*Pengurus Kas Keluarga*";
+                $phoneNumberPengurus = $notif_pengurus->Warga->no_hp ?? null;
+                $encryptedIdpengurus = Crypt::encrypt($data->id); // Mengenkripsi ID untuk keamanan
+                $actionUrlPengurus = "https://keluargamahaya.com/confirm/pinjaman-ke-2/{$encryptedIdpengurus}";
 
-            // URL gambar dari direktori storage
-            $imageUrl = asset('storage/kas/pengeluaran/ymKJ8SbQ7NLrLAhjAAKMNfOFHCK8O70HiqEiiIPE.jpg');
 
-            $recipientEmailPengurus = $ketua->dataWarga->email;
-            $recipientNamePengurus = $ketua->dataWarga->name;
-            // Data untuk email pengurus
-            $bodyMessagePengurus = preg_replace('/\*(.*?)\*/', '<b>$1</b>', $messageKetua);
-            $actionUrlPengurus = 'https://keluargamahaya.com/detail';
+                // Pesan untuk Ketua
+                $messagePengurus = "*Pemberitahuan Pengajuan Perpanjangan Pinjaman atau Pinjaman Kedua*\n\n";
+                $messagePengurus .= "Halo *{$notif_pengurus->Warga->name}*,\n";
+                $messagePengurus .= "Terdapat pengajuan baru yang membutuhkan persetujuan Anda. Berikut adalah detail pengajuan:\n\n";
+                $messagePengurus .= "📝 *Detail Pengajuan* :\n";
+                $messagePengurus .= "- *Kode Pinjaman* : {$pinjaman->code}\n";
+                $messagePengurus .= "- *Tanggal Pengajuan* : {$data->extension_date}\n";
+                $messagePengurus .= "- *Nama Warga* : {$data_warga->name}\n";
+                $messagePengurus .= "- *Di Ajukan Oleh* : {$pengaju->name}\n";
+                $messagePengurus .= "- *Nominal Pinjaman Awal* : Rp" . number_format($request->loan_amount, 0, ',', '.') . "\n";
+                $messagePengurus .= "- *Sisa Pinjaman Saat Ini* : Rp" . number_format($request->remaining_balance, 0, ',', '.') . "\n";
+                $messagePengurus .= "- *Alasan Pengajuan* : {$request->reason}\n\n";
+                $messagePengurus .= "Mohon untuk segera memproses pengajuan ini sesuai prosedur yang berlaku.\n";
+                $messagePengurus .= "- *Link Konfirmasi* : " . $actionUrlPengurus . "\n\n";
+                $messagePengurus .= "*Terima kasih atas perhatian dan kerja sama Anda!*\n\n";
+                $messagePengurus .= "*Salam hormat,*\n";
+                $messagePengurus .= "*Pengurus Kas Keluarga*";
 
-            // Mengirim notifikasi email ke anggota
-            Mail::to($recipientEmail)->send(new Notification($recipientName, $bodyMessage, $status, $actionUrl));
+                // URL gambar dari direktori storage
+                $imageUrl = asset('storage/kas/pengeluaran/ymKJ8SbQ7NLrLAhjAAKMNfOFHCK8O70HiqEiiIPE.jpg');
 
-            // Mengirim email bendahara
-            Mail::to($recipientEmailPengurus)->send(new Notification($recipientNamePengurus, $bodyMessagePengurus, $status, $actionUrlPengurus));
+                $recipientEmailPengurus = $notif_pengurus->Warga->email;
+                $recipientNamePengurus = $notif_pengurus->Warga->name;
+                // Data untuk email pengurus
+                $bodyMessagePengurus = preg_replace('/\*(.*?)\*/', '<b>$1</b>', $messagePengurus);
 
-            // Mengirim pesan ke Warga
-            $responseWarga = $this->fonnteService->sendWhatsAppMessage($phoneNumberWarga, $messageWarga, $imageUrl);
-
-            // Mengirim pesan ke Pengurus
-            $responsePengurus = $this->fonnteService->sendWhatsAppMessage($phoneNumberPengurus, $messageKetua, $imageUrl);
+                if ($notif->email_notification && $notif->pengurus) {
+                    // Mengirim email notif_pengurus
+                    Mail::to($recipientEmailPengurus)->send(new Notification($recipientNamePengurus, $bodyMessagePengurus, $status, $actionUrlPengurus));
+                }
+                if ($notif->wa_notification && $notif->pengurus) {
+                    // Mengirim pesan ke Pengurus
+                    $responsePengurus = $this->fonnteService->sendWhatsAppMessage($phoneNumberPengurus, $messagePengurus, $imageUrl);
+                }
+            }
 
             DB::commit();
             // Cek hasil pengiriman
@@ -198,6 +222,7 @@ class LoanExtensionController extends Controller
 
             // DB::commit();
             // return redirect()->route('bayar-pinjaman.pembayaran', Crypt::encrypt($request->loan_id))->with('success', 'Pengajuan pinjaman ke dua sudah masuk, dan sedah di proses');
+
         } catch (\Exception $e) {
             DB::rollback();
             return redirect()->back()->with('error', 'Terjadi kesalahan saat pembayaran.' . $e->getMessage());
@@ -387,57 +412,68 @@ class LoanExtensionController extends Controller
 
             $ke_dua->update();
 
-            // Mengambil data pengaju (pengguna yang menginput)
-            // $pengaju = DataWarga::find($);
+            // -------------------------------------
+            $notif = DataNotification::where('name', 'Pinjaman ke 2')
+                ->where('type', 'Konfirmasi')
+                ->first();
 
-            // // Data Warga
-            // $data_warga = DataWarga::find($pinjaman->data_warga_id);
-            // $phoneNumberWarga = $data_warga->no_hp;
+            // ==========================Notif Anggota=======================================
 
-            // // Pesan untuk Warga
-            // $messageWarga = "*Pengajuan Perpanjangan Pinjaman atau Pinjaman Kedua Disetujui*\n\n";
-            // $messageWarga .= "Halo *{$data_warga->name}*,\n";
-            // $messageWarga .= "Selamat! Pengajuan pinjaman Anda telah disetujui oleh pengurus. Berikut adalah detail pengajuan Anda:\n\n";
-            // $messageWarga .= "📝 *Detail Pengajuan:*\n";
-            // $messageWarga .= "- *Kode Pinjaman*: {$pinjaman->code}\n";
-            // $messageWarga .= "- *Tanggal Pengajuan*: {$dateTime}\n";
-            // $messageWarga .= "- *Tanggal Jatuh Tempo*: {$deadlineDate}\n";
-            // $messageWarga .= "- *Nama Pengaju*: {$data_warga->name}\n";
-            // $messageWarga .= "- *DiAjukan oleh*: {$pinjamanKeDua->data_warga->name}\n";
-            // $messageWarga .= "- *Nominal Pinjaman Awal*: Rp" . number_format($sisa_nominal, 0, ',', '.') . "\n\n";
-            // $messageWarga .= "- *Alasan Pengajuan*: {$request->reason}\n\n";
-            // $messageWarga .= "Pengajuan Anda telah berhasil diproses. Silakan cek kembali detail di atas dan hubungi pengurus jika ada pertanyaan lebih lanjut.\n\n";
-            // $messageWarga .= "Terima kasih atas kepercayaan Anda. Semoga pinjaman ini dapat membantu kebutuhan Anda.\n\n";
-            // $messageWarga .= "*Salam hangat,*\n";
-            // $messageWarga .= "*Pengurus Kas Keluarga*";
+            // Data Warga
+            $data_warga = DataWarga::find($pinjaman->data_warga_id);
+            $phoneNumberWarga = $data_warga->no_hp;
+            // URL gambar dari direktori storage
+            $imageUrl = '';
+            $encryptedId = Crypt::encrypt($pinjaman->id); // Mengenkripsi ID untuk keamanan
+            $link = "https://keluargamahaya.com/pinjaman/{$encryptedId}";
 
-
-            // // mengirim ke email 
-            // $recipientEmail = $data_warga->email;
-            // $recipientName = $data_warga->name;
-            // // Ganti tanda bintang dengan HTML <strong>
-            // $bodyMessage = preg_replace('/\*(.*?)\*/', '<b>$1</b>', $messageWarga);
-            // $status = $data->status;
-            // $actionUrl = 'https://keluargamahaya.com/detail';
-
-            // // Mengirim pesan ke Warga
-            // $responseWarga = $this->fonnteService->sendWhatsAppMessage($phoneNumberWarga, $messageWarga, $imageUrl);
-
-            // // Mengirim notifikasi email ke anggota
-            // Mail::to($recipientEmail)->send(new Notification($recipientName, $bodyMessage, $status, $actionUrl));
+            // Pesan untuk Warga
+            $messageWarga = "*Pengajuan Perpanjangan Pinjaman atau Pinjaman Kedua Disetujui*\n\n";
+            $messageWarga .= "Halo *{$data_warga->name}*,\n";
+            $messageWarga .= "Selamat! Pengajuan pinjaman Anda telah disetujui oleh pengurus. Berikut adalah detail pengajuan Anda:\n\n";
+            $messageWarga .= "📝 *Detail Pengajuan* :\n";
+            $messageWarga .= "- *Kode Pinjaman* : {$pinjaman->code}\n";
+            $messageWarga .= "- *Tanggal Pengajuan* : {$dateTime}\n";
+            $messageWarga .= "- *Tanggal Jatuh Tempo* : {$deadlineDate}\n";
+            $messageWarga .= "- *DiAjukan oleh* : {$data_warga->name}\n";
+            $messageWarga .= "- *Nama Warga* : {$pinjamanKeDua->data_warga->name}\n";
+            $messageWarga .= "- *Nominal Pinjaman Awal* : Rp" . number_format($sisa_nominal, 0, ',', '.') . "\n";
+            $messageWarga .= "- *Alasan Pengajuan* : {$request->reason}\n\n";
+            $messageWarga .= "Pengajuan Anda telah berhasil diproses. Silakan cek kembali detail di atas dan hubungi pengurus jika ada pertanyaan lebih lanjut.\n\n";
+            $messageWarga .= "Terima kasih atas kepercayaan Anda. Semoga pinjaman ini dapat membantu kebutuhan Anda. Segera Konfirmasi di Aplikasi\n\n";
+            $messageWarga .=  $link . "\n";
+            $messageWarga .= "Terima kasih atas perhatian Anda.\n\n";
+            $messageWarga .= "*Salam hormat,*\n";
+            $messageWarga .= "*Sistem Kas Keluarga*";
 
 
-            // DB::commit();
-            // // Cek hasil pengiriman
-            // if (isset($responseWarga['status']) && $responseWarga['status'] == 'success') {
-            //     return redirect()->route('bayar-pinjaman.pembayaran', Crypt::encrypt($request->loan_id))->with('success', 'Data tersimpan, Notifikasi berhasil dikirim ke Warga dan Pengurus!');
-            // }
+            // mengirim ke email 
+            $recipientEmail = $data_warga->email;
+            $recipientName = $data_warga->name;
+            // Ganti tanda bintang dengan HTML <strong>
+            $bodyMessage = preg_replace('/\*(.*?)\*/', '<b>$1</b>', $messageWarga);
+            $status = $pinjaman->status;
+            $actionUrl = $link;
 
-            // return back()->with('error', 'Data tersimpan, Gagal mengirim notifikasi');
-
+            if ($notif->wa_notification  && $notif->anggota) {
+                // Mengirim pesan ke Warga
+                $responseWarga = $this->fonnteService->sendWhatsAppMessage($phoneNumberWarga, $messageWarga, $imageUrl);
+            }
+            if ($notif->email_notification && $notif->anggota) {
+                // Mengirim notifikasi email ke anggota
+                Mail::to($recipientEmail)->send(new Notification($recipientName, $bodyMessage, $status, $actionUrl));
+            }
 
             DB::commit();
-            return redirect()->back()->with('success', 'Pengajuan sudah selesai');
+            // Evaluasi keberhasilan pengiriman
+            $pengurusSuccess = isset($responseWarga['status']) && $responseWarga['status'] == 'success';
+
+            // Berikan feedback berdasarkan hasil pengiriman
+            if ($pengurusSuccess) {
+                return back()->with('success', 'Terima kasih sudah mengkonfirmasi, semoga bermanfaat');
+            } else {
+                return back()->with('warning', 'sudah mengkonfirmasi, tetapi Notifikasi tidak terkirim ke Pengurus!');
+            }
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', ' Terjadi kesalahan saat menyimpan data ' . $e->getMessage());

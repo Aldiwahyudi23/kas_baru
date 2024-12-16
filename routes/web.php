@@ -185,8 +185,8 @@ Route::middleware([
     Route::resource('/pinjaman-ke-dua', LoanExtensionController::class);
     Route::get('/pinjaman-ke-dua/pengajuan/{id}', [LoanExtensionController::class, 'pengajuan'])->name('pinjaman-ke-dua.pengajuan');
     Route::patch('/pinjaman-ke-dua/pengajuan/reject/{id}', [LoanExtensionController::class, 'rejected'])->name('pinjaman-ke-dua.reject');
-    Route::get('confirm/pinjaman-ke-2/{id}', [LoanExtensionController::class, 'show_confirm'])->name('pinjaman-ke-dua.show.confirm');
-    Route::patch('confirm/pinjaman-ke-2/{id}', [LoanExtensionController::class, 'confirm'])->name('pinjaman-ke-dua.confirm');
+    Route::get('/confirm/pinjaman-ke-2/{id}', [LoanExtensionController::class, 'show_confirm'])->name('pinjaman-ke-dua.show.confirm');
+    Route::patch('/confirm/pinjaman-ke-2/{id}', [LoanExtensionController::class, 'confirm'])->name('pinjaman-ke-dua.confirm');
 
     Route::resource('/setor-tunai', SetorTunaiController::class);
     Route::get('/setor-tunais/pengajuan', [SetorTunaiController::class, 'pengajuan'])->name('setor-tunai.pengajuan');

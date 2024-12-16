@@ -184,6 +184,26 @@ class DataNotificationSeeder extends Seeder
                 'program' => '0',
                 'keterangan' => 'keterangan',
             ],
+            [
+                'name' => 'Pinjaman ke 2',
+                'type' => 'Pengajuan',
+                'wa_notification' => '1',
+                'email_notification' => '1',
+                'pengurus' => '1',
+                'anggota' => '1',
+                'program' => '0',
+                'keterangan' => 'keterangan',
+            ],
+            [
+                'name' => 'Pinjaman ke 2',
+                'type' => 'Konfirmasi',
+                'wa_notification' => '1',
+                'email_notification' => '1',
+                'pengurus' => '0',
+                'anggota' => '1',
+                'program' => '0',
+                'keterangan' => 'keterangan',
+            ],
 
             // Tambahkan lebih banyak admin sesuai kebutuhan
         ]);
