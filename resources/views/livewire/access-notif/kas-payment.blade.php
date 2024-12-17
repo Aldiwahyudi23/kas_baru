@@ -34,8 +34,8 @@
                     <small class="text-muted">
                         Di bawah adalah access untuk pengurus yang akan menerima notifikasi
                     </small>
+
                     <div class="row">
-                        <!-- Foreach Yang menampilkan data Access Notification berdasarkan notification_id yang saat ini -->
                         @foreach ($roles as $role)
                         <div class="col-4 col-sm-4">
                             <div class="form-group">
@@ -51,6 +51,8 @@
                         </div>
                         @endforeach
                     </div>
+
+
                     <hr>
                     @endif
                     <div class="form-group">

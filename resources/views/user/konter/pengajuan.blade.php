@@ -169,13 +169,11 @@
                 <label for="status">Satus Konfirmasi<span class="text-danger">*</span></label>
                 <select class="select2bs4 @error('status') is-invalid @enderror" style="width: 100%;" name="status"
                     id="status">
-                    <option value="">--Pilih status--</option>
-                    <option value="pending" {{ old('status',$pengajuan->status) == 'pending' ? 'selected' : '' }}>
-                        Pending</option>
-                    <option value="Berhasil" selected
-                        {{ old('status',$pengajuan->status) == 'Berhasil' ? 'selected' : '' }}>
+                    <option value="Berhasil" {{ old('status',$pengajuan->status) == 'Berhasil' ? 'selected' : '' }}>
                         Pulsa sudah Berhasil di kirim
                     </option>
+                    <option value="pending" {{ old('status',$pengajuan->status) == 'pending' ? 'selected' : '' }}>
+                        Pending</option>
                     <option value="Gagal" {{ old('status',$pengajuan->status) == 'Gagal' ? 'selected' : '' }}>
                         Batal / Gagal</option>
                 </select>
@@ -261,181 +259,181 @@
 @endsection
 
 <script>
-    let originalBuyingPrice = 0; // Variabel global untuk menyimpan nilai asli
-    // Pastikan variabel global untuk nilai awal dari controller
-    let additionalPrice = parseFloat("{{ $pengajuan->price ?? 0 }}") || 0;
+let originalBuyingPrice = 0; // Variabel global untuk menyimpan nilai asli
+// Pastikan variabel global untuk nilai awal dari controller
+let additionalPrice = parseFloat("{{ $pengajuan->price ?? 0 }}") || 0;
 
-    function ID(element) {
-        // Ambil nilai asli tanpa format
-        let rawValue = element.value.replace(/\./g, '').replace(',', '.');
+function ID(element) {
+    // Ambil nilai asli tanpa format
+    let rawValue = element.value.replace(/\./g, '').replace(',', '.');
 
-        // Pastikan hanya angka dan desimal yang valid
-        if (!/^\d*(\.\d{0,2})?$/.test(rawValue)) {
-            rawValue = element.dataset.previousValue || '';
-        }
-
-        // Simpan nilai sebelumnya untuk validasi selanjutnya
-        element.dataset.previousValue = rawValue;
-
-        // Format angka sesuai Indonesia (titik ribuan, koma desimal)
-        const [integer, decimal] = rawValue.split('.');
-        const formattedInteger = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-        const formattedValue = decimal !== undefined ?
-            `${formattedInteger},${decimal.slice(0, 2)}` :
-            formattedInteger;
-
-        element.value = formattedValue;
-
-        // Simpan nilai asli (tanpa format) ke input hidden
-        document.getElementById('buying_price').value = rawValue;
-        // Simpan nilai asli ke variabel global untuk digunakan dalam penghitungan diskon
-        originalBuyingPrice = parseFloat(rawValue) || 0;
-
-        // Tampilkan nilai awal di buying_price_display
-        document.getElementById('buying_price_display').value = formattedValue;
-
-        // Hitung nilai final untuk price_display
-        const finalValue = (parseFloat(rawValue) || 0) + additionalPrice;
-
-        // Format nilai final
-        const [finalInteger, finalDecimal] = finalValue.toFixed(0).split('.');
-        const formattedFinalInteger = finalInteger.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-        const formattedFinalValue = finalDecimal !== undefined ?
-            `${formattedFinalInteger},${finalDecimal.slice(0, 2)}` :
-            formattedFinalInteger;
-
-
-        // Simpan nilai asli (tanpa format) ke input hidden
-        document.getElementById('price').value = finalValue;
-
-        // Tampilkan nilai awal di price_display
-        document.getElementById('price_display').value = formattedFinalValue;
-
+    // Pastikan hanya angka dan desimal yang valid
+    if (!/^\d*(\.\d{0,2})?$/.test(rawValue)) {
+        rawValue = element.dataset.previousValue || '';
     }
 
-    //membuat input diskon jadi bernilai nol
-    function clearZero(element) {
-        if (element.value === '0') {
-            element.value = ''; // Hapus nilai jika 0
-        }
+    // Simpan nilai sebelumnya untuk validasi selanjutnya
+    element.dataset.previousValue = rawValue;
+
+    // Format angka sesuai Indonesia (titik ribuan, koma desimal)
+    const [integer, decimal] = rawValue.split('.');
+    const formattedInteger = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    const formattedValue = decimal !== undefined ?
+        `${formattedInteger},${decimal.slice(0, 2)}` :
+        formattedInteger;
+
+    element.value = formattedValue;
+
+    // Simpan nilai asli (tanpa format) ke input hidden
+    document.getElementById('buying_price').value = rawValue;
+    // Simpan nilai asli ke variabel global untuk digunakan dalam penghitungan diskon
+    originalBuyingPrice = parseFloat(rawValue) || 0;
+
+    // Tampilkan nilai awal di buying_price_display
+    document.getElementById('buying_price_display').value = formattedValue;
+
+    // Hitung nilai final untuk price_display
+    const finalValue = (parseFloat(rawValue) || 0) + additionalPrice;
+
+    // Format nilai final
+    const [finalInteger, finalDecimal] = finalValue.toFixed(0).split('.');
+    const formattedFinalInteger = finalInteger.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    const formattedFinalValue = finalDecimal !== undefined ?
+        `${formattedFinalInteger},${finalDecimal.slice(0, 2)}` :
+        formattedFinalInteger;
+
+
+    // Simpan nilai asli (tanpa format) ke input hidden
+    document.getElementById('price').value = finalValue;
+
+    // Tampilkan nilai awal di price_display
+    document.getElementById('price_display').value = formattedFinalValue;
+
+}
+
+//membuat input diskon jadi bernilai nol
+function clearZero(element) {
+    if (element.value === '0') {
+        element.value = ''; // Hapus nilai jika 0
+    }
+}
+
+function IDdiskon(element) {
+    // Ambil nilai asli tanpa format
+    let rawValue = element.value.replace(/\./g, '').replace(',', '.');
+
+    // Pastikan hanya angka dan desimal yang valid
+    if (!/^\d*(\.\d{0,2})?$/.test(rawValue)) {
+        rawValue = element.dataset.previousValue || '';
     }
 
-    function IDdiskon(element) {
-        // Ambil nilai asli tanpa format
-        let rawValue = element.value.replace(/\./g, '').replace(',', '.');
+    // Simpan nilai sebelumnya untuk validasi selanjutnya
+    element.dataset.previousValue = rawValue;
 
-        // Pastikan hanya angka dan desimal yang valid
-        if (!/^\d*(\.\d{0,2})?$/.test(rawValue)) {
-            rawValue = element.dataset.previousValue || '';
-        }
+    // Format angka sesuai Indonesia (titik ribuan, koma desimal)
+    const [integer, decimal] = rawValue.split('.');
+    const formattedInteger = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    const formattedValue = decimal !== undefined ?
+        `${formattedInteger},${decimal.slice(0, 2)}` :
+        formattedInteger;
 
-        // Simpan nilai sebelumnya untuk validasi selanjutnya
-        element.dataset.previousValue = rawValue;
+    element.value = formattedValue;
 
-        // Format angka sesuai Indonesia (titik ribuan, koma desimal)
-        const [integer, decimal] = rawValue.split('.');
-        const formattedInteger = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-        const formattedValue = decimal !== undefined ?
-            `${formattedInteger},${decimal.slice(0, 2)}` :
-            formattedInteger;
+    document.getElementById('diskon').value = rawValue;
 
-        element.value = formattedValue;
+    // Lakukan penghitungan harga setelah diskon
+    const discountValue = parseFloat(rawValue) || 0;
+    const updatedPrice = Math.max(originalBuyingPrice - discountValue, 0); // Pastikan hasil tidak negatif
 
-        document.getElementById('diskon').value = rawValue;
+    // Format hasil penghitungan dan tampilkan di buying_price_display
+    const [updatedInteger, updatedDecimal] = updatedPrice.toFixed(0).split('.');
+    const formattedUpdatedInteger = updatedInteger.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    const formattedUpdatedValue = updatedDecimal !== undefined ?
+        `${formattedUpdatedInteger},${updatedDecimal}` :
+        formattedUpdatedInteger;
 
-        // Lakukan penghitungan harga setelah diskon
-        const discountValue = parseFloat(rawValue) || 0;
-        const updatedPrice = Math.max(originalBuyingPrice - discountValue, 0); // Pastikan hasil tidak negatif
+    document.getElementById('buying_price_display').value = formattedUpdatedValue;
+    document.getElementById('buying_price').value = updatedPrice;
 
-        // Format hasil penghitungan dan tampilkan di buying_price_display
-        const [updatedInteger, updatedDecimal] = updatedPrice.toFixed(0).split('.');
-        const formattedUpdatedInteger = updatedInteger.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-        const formattedUpdatedValue = updatedDecimal !== undefined ?
-            `${formattedUpdatedInteger},${updatedDecimal}` :
-            formattedUpdatedInteger;
+    // Reset ke nilai awal jika diskon kosong
+    if (rawValue === '') {
+        const [originalInteger, originalDecimal] = originalBuyingPrice.toFixed(0).split('.');
+        const formattedOriginalInteger = originalInteger.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        const formattedOriginalValue = originalDecimal !== undefined ?
+            `${formattedOriginalInteger},${originalDecimal}` :
+            formattedOriginalInteger;
 
-        document.getElementById('buying_price_display').value = formattedUpdatedValue;
+        document.getElementById('buying_price_display').value = formattedOriginalValue;
         document.getElementById('buying_price').value = updatedPrice;
-
-        // Reset ke nilai awal jika diskon kosong
-        if (rawValue === '') {
-            const [originalInteger, originalDecimal] = originalBuyingPrice.toFixed(0).split('.');
-            const formattedOriginalInteger = originalInteger.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-            const formattedOriginalValue = originalDecimal !== undefined ?
-                `${formattedOriginalInteger},${originalDecimal}` :
-                formattedOriginalInteger;
-
-            document.getElementById('buying_price_display').value = formattedOriginalValue;
-            document.getElementById('buying_price').value = updatedPrice;
-        }
-
     }
 
-    //Untuk menyambungkan data input No hp yang ada di luar fom 
-    function syncPhoneNumber(element) {
-        // Sinkronisasi nilai dari input luar ke input di dalam form
-        document.getElementById('no_hp').value = element.value;
+}
 
+//Untuk menyambungkan data input No hp yang ada di luar fom 
+function syncPhoneNumber(element) {
+    // Sinkronisasi nilai dari input luar ke input di dalam form
+    document.getElementById('no_hp').value = element.value;
+
+}
+
+function Invoice(element) {
+    // Ambil nilai asli tanpa format
+    let rawValue = element.value.replace(/\./g, '').replace(',', '.');
+
+    // Pastikan hanya angka dan desimal yang valid
+    if (!/^\d*(\.\d{0,2})?$/.test(rawValue)) {
+        rawValue = element.dataset.previousValue || '';
     }
 
-    function Invoice(element) {
-        // Ambil nilai asli tanpa format
-        let rawValue = element.value.replace(/\./g, '').replace(',', '.');
+    // Simpan nilai sebelumnya untuk validasi selanjutnya
+    element.dataset.previousValue = rawValue;
 
-        // Pastikan hanya angka dan desimal yang valid
-        if (!/^\d*(\.\d{0,2})?$/.test(rawValue)) {
-            rawValue = element.dataset.previousValue || '';
-        }
+    // Format angka sesuai Indonesia (titik ribuan, koma desimal)
+    const [integer, decimal] = rawValue.split('.');
+    const formattedInteger = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    const formattedValue = decimal !== undefined ?
+        `${formattedInteger},${decimal.slice(0, 2)}` :
+        formattedInteger;
 
-        // Simpan nilai sebelumnya untuk validasi selanjutnya
-        element.dataset.previousValue = rawValue;
+    element.value = formattedValue;
 
-        // Format angka sesuai Indonesia (titik ribuan, koma desimal)
-        const [integer, decimal] = rawValue.split('.');
-        const formattedInteger = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-        const formattedValue = decimal !== undefined ?
-            `${formattedInteger},${decimal.slice(0, 2)}` :
-            formattedInteger;
+    // Simpan nilai asli (tanpa format) ke input hidden
+    document.getElementById('invoice').value = rawValue;
+    // Simpan nilai asli ke variabel global untuk digunakan dalam penghitungan diskon
+    originalBuyingPrice = parseFloat(rawValue) || 0;
 
-        element.value = formattedValue;
+    // Tampilkan nilai awal di invoice_display
+    document.getElementById('invoice_display').value = formattedValue;
+}
 
-        // Simpan nilai asli (tanpa format) ke input hidden
-        document.getElementById('invoice').value = rawValue;
-        // Simpan nilai asli ke variabel global untuk digunakan dalam penghitungan diskon
-        originalBuyingPrice = parseFloat(rawValue) || 0;
 
-        // Tampilkan nilai awal di invoice_display
-        document.getElementById('invoice_display').value = formattedValue;
+
+
+// Inisialisasi ulang format saat halaman dimuat (untuk nilai lama)
+document.addEventListener('DOMContentLoaded', function() {
+    const displayInput = document.getElementById('buying_price_display');
+    if (displayInput && displayInput.value) {
+        ID(displayInput);
     }
 
+    const displayInputDiskon = document.getElementById('diskon_display');
+    if (displayInputDiskon && displayInputDiskon.value) {
+        IDdiskon(displayInputDiskon);
+    }
+    const displayInputNoHP = document.getElementById('no_hp');
+    if (displayInputNoHP && displayInputNoHP.value) {
+        syncPhoneNumber(displayInputNoHP);
+    }
 
-
-
-    // Inisialisasi ulang format saat halaman dimuat (untuk nilai lama)
-    document.addEventListener('DOMContentLoaded', function() {
-        const displayInput = document.getElementById('buying_price_display');
-        if (displayInput && displayInput.value) {
-            ID(displayInput);
-        }
-
-        const displayInputDiskon = document.getElementById('diskon_display');
-        if (displayInputDiskon && displayInputDiskon.value) {
-            IDdiskon(displayInputDiskon);
-        }
-        const displayInputNoHP = document.getElementById('no_hp');
-        if (displayInputNoHP && displayInputNoHP.value) {
-            syncPhoneNumber(displayInputNoHP);
-        }
-
-    });
+});
 </script>
 
 <!-- Untuk memunculkan Input tanda bukti Tf -->
 <script>
-    // Function to toggle the visibility of the transfer receipt input based on selected payment method
-    function togglePembayaran() {
-        var paymentMethod = document.getElementById('payment_method').value;
-        var transferReceipt = document.getElementById('transfer_receipt');
-        transferReceipt.style.display = (paymentMethod === 'cash') ? 'block' : 'none';
-    }
+// Function to toggle the visibility of the transfer receipt input based on selected payment method
+function togglePembayaran() {
+    var paymentMethod = document.getElementById('payment_method').value;
+    var transferReceipt = document.getElementById('transfer_receipt');
+    transferReceipt.style.display = (paymentMethod === 'cash') ? 'block' : 'none';
+}
 </script>

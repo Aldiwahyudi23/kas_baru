@@ -168,7 +168,7 @@
             <form id="pulsaForm">
                 <div class="mb-3">
                     <label for="phoneNumber" class="form-label">Nomor HP</label>
-                    <input type="text" id="phoneNumber" name="phoneNumber" placeholder="08xxxxxxxxxx"
+                    <input type="number" id="phoneNumber" name="phoneNumber" placeholder="08xxxxxxxxxx"
                         class="form-control">
                     <small id="phone-validation-message" class="text-danger" style="display: none;">Nomor HP tidak boleh lebih dari 14 karakter.</small>
                     <small id="phone-validation-message2" class="text-danger" style="display: none;">Masukan Nomor HP yang sesuai diAtas 10 karakter.</small>

@@ -192,7 +192,7 @@
 
             <div class="form-group ">
                 <label for="phone_number">No Meteran</label>
-                <input type="text" id="phone_number" name="phone_number" class="form-control"
+                <input type="number" id="phone_number" name="phone_number" class="form-control"
                     placeholder="Masukkan No Meteran">
             </div>
             <div class="form-group mt-3 ">
@@ -202,7 +202,7 @@
             </div>
             <div class="form-group mt-3">
                 <label for="no_hp">No HP Tujuan</label>
-                <input type="text" id="no_hp" name="no_hp" class="form-control"
+                <input type="number" id="no_hp" name="no_hp" class="form-control"
                     placeholder="Masukkan No Hp Agar TOKEN di kirim no tujuan">
             </div>
             @if (!Auth::check())

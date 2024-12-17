@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\User\Konter;
 
 use App\Http\Controllers\Controller;
+use App\Models\AccessNotification;
 use App\Models\Anggaran;
 use App\Models\AnggaranSaldo;
+use App\Models\DataNotification;
 use App\Models\DataWarga;
 use App\Models\Konter\DetailTransaksiKonter;
 use App\Models\Konter\KategoriKonter;
@@ -109,9 +111,34 @@ class KonterController extends Controller
     {
         $id = Crypt::decrypt($id);
 
+        if ($request->status == "pending" || $request->status == "Gagal") {
+            $data = TransaksiKonter::find($id);
+            $data->status = $request->status;
+            $data->update();
+            return redirect()->back()->with('success', 'Pengajuan Pembelian Pulsa sedang di proses');
+        }
+
+
+
         DB::beginTransaction();
 
         try {
+
+            // Ambil pengajuan dengan row-level locking untuk mencegah race condition
+            $pengajuan = TransaksiKonter::where('id', $id)->lockForUpdate()->first();
+
+            // Validasi apakah pengajuan sudah disetujui
+            if ($pengajuan->status === 'Berhasil') {
+                DB::rollBack();
+                return back()->with('error', 'Pengajuan sudah di simpan ');
+            }
+            // Validasi apakah pengajuan sudah disetujui
+            if ($pengajuan->status === 'Selesai') {
+                DB::rollBack();
+                return back()->with('error', 'Pengajuan sudah selesai ');
+            }
+
+
             if ($request->status == "Berhasil" || $request->status == "Selesai") {
                 $data = TransaksiKonter::find($id);
                 $data->buying_price = $request->buying_price;
@@ -254,12 +281,14 @@ class KonterController extends Controller
                 $saldo_kas->saldo_id = $saldo->id; //mengambil id dari model saldo di atas
                 $saldo_kas->save();
 
+                $notif = DataNotification::where('name', 'Konter')
+                    ->where('type', 'Berhasil')
+                    ->first();
+
+                // ==========================Notif Anggota=======================================
+
                 // URL gambar dari direktori storage
                 $imageUrl = asset('storage/kas/pengeluaran/ymKJ8SbQ7NLrLAhjAAKMNfOFHCK8O70HiqEiiIPE.jpg');
-
-                // Data untuk link
-                $encryptedId = Crypt::encrypt($data->id); // Mengenkripsi ID untuk keamanan
-                $link = "https://keluargamahaya.com/pulsa/{$encryptedId}";
 
                 $product = ProductKonter::find($data->product_id);
 
@@ -282,26 +311,30 @@ class KonterController extends Controller
                 $message .= "*Salam hormat,*\n";
                 $message .= "*Sistem Kas Keluarga*";
 
-                // Mengirim pesan ke nomor warga
-                $response = $this->fonnteService->sendWhatsAppMessage($number, $message, $imageUrl);
-
+                if ($data->payment_status == "Hutang" && $request->status == "Berhasil") {
+                    if ($notif->wa_notification  && $notif->anggota) {
+                        // Mengirim pesan ke nomor warga
+                        $response = $this->fonnteService->sendWhatsAppMessage($number, $message, $imageUrl);
+                    }
+                }
+                if ($data->payment_status == "Langsung" && $request->status == "Selesai") {
+                    if ($notif->wa_notification  && $notif->anggota) {
+                        // Mengirim pesan ke nomor warga
+                        $response = $this->fonnteService->sendWhatsAppMessage($number, $message, $imageUrl);
+                    }
+                }
 
                 DB::commit();
 
                 if (isset($response['status']) && $response['status'] == 'success') {
                     return redirect()->back()->with('success', 'Pengajuan Pembelian Pulsa sedang di proses, Notifikasi berhasil dikirim!');
                 }
-                return back()->with('error', 'Data tersimpan, Gagal mengirim notifikasi');
+                return back()->with('warning', 'Data tersimpan, Gagal mengirim notifikasi');
 
                 //jika notifikasi email dan wa aktif maka yang di bawah di komen
 
                 // DB::commit();
                 // return redirect()->back()->with('success', 'Pengajuan Pembelian Pulsa sedang di proses');
-            } else {
-                $data = TransaksiKonter::find($id);
-                $data->status = $request->status;
-                $data->update();
-                return redirect()->back()->with('success', 'Pengajuan Pembelian Pulsa sedang di proses');
             }
         } catch (\Exception $e) {
             DB::rollback();
@@ -415,11 +448,21 @@ class KonterController extends Controller
 
     public function transaksi_umum($encryptedProductId, $phoneNumber)
     {
-        // Cek apakah nomor HP memiliki lebih dari 2 transaksi dengan status tertentu
-        $count_transaksi = TransaksiKonter::whereHas('detail', function ($query) use ($phoneNumber) {
-            $query->where('no_hp', $phoneNumber);
-        })->whereIn('status', ['pending', 'Proses', 'Berhasil'])
-            ->count();
+        $product = ProductKonter::find($encryptedProductId);
+        if ($product->kategori->name == "Pulsa") {
+            // Cek apakah nomor HP memiliki lebih dari 2 transaksi dengan status tertentu
+            $count_transaksi = TransaksiKonter::whereHas('detail', function ($query) use ($phoneNumber) {
+                $query->where('no_hp', $phoneNumber);
+            })->whereIn('status', ['pending', 'Proses', 'Berhasil'])
+                ->count();
+        }
+        if ($product->kategori->name == "Listrik") {
+            // Cek apakah nomor HP memiliki lebih dari 2 transaksi dengan status tertentu
+            $count_transaksi = TransaksiKonter::whereHas('detail', function ($query) use ($phoneNumber) {
+                $query->where('no_listrik', $phoneNumber);
+            })->whereIn('status', ['pending', 'Proses', 'Berhasil'])
+                ->count();
+        }
 
         // Jika sudah ada 2 transaksi atau lebih, berikan pesan error
         if ($count_transaksi >= 2) {
@@ -429,11 +472,20 @@ class KonterController extends Controller
             );
         }
 
-        // Cek jika ada transaksi dalam status "pending" atau "Proses" untuk nomor HP tersebut
-        $cek_status = TransaksiKonter::whereHas('detail', function ($query) use ($phoneNumber) {
-            $query->where('no_hp', $phoneNumber);
-        })->whereIn('status', ['pending', 'Proses'])
-            ->exists();
+        if ($product->kategori->name == "Pulsa") {
+            // Cek jika ada transaksi dalam status "pending" atau "Proses" untuk nomor HP tersebut
+            $cek_status = TransaksiKonter::whereHas('detail', function ($query) use ($phoneNumber) {
+                $query->where('no_hp', $phoneNumber);
+            })->whereIn('status', ['pending', 'Proses'])
+                ->exists();
+        }
+        if ($product->kategori->name == "Listrik") {
+            // Cek jika ada transaksi dalam status "pending" atau "Proses" untuk nomor HP tersebut
+            $cek_status = TransaksiKonter::whereHas('detail', function ($query) use ($phoneNumber) {
+                $query->where('no_listrik', $phoneNumber);
+            })->whereIn('status', ['pending', 'Proses'])
+                ->exists();
+        }
 
         if ($cek_status) {
             return redirect()->back()->with(
@@ -441,11 +493,7 @@ class KonterController extends Controller
                 'Nomor HP tersebut sudah dalam pengajuan dan sedang diproses.'
             );
         }
-
         // Lanjutkan proses lainnya jika semua validasi lolos
-
-
-        $product = ProductKonter::find($encryptedProductId);
 
         return view('user.konter.transaksi', [
             'product' => $product,
@@ -455,10 +503,21 @@ class KonterController extends Controller
     public function transaksi_user($encryptedProductId, $phoneNumber)
     {
         // Cek apakah nomor HP memiliki lebih dari 2 transaksi dengan status tertentu
-        $count_transaksi = TransaksiKonter::whereHas('detail', function ($query) use ($phoneNumber) {
-            $query->where('no_hp', $phoneNumber);
-        })->whereIn('status', ['pending', 'Proses', 'Berhasil'])
-            ->count();
+        $product = ProductKonter::find($encryptedProductId);
+        if ($product->kategori->name == "Pulsa") {
+            // Cek apakah nomor HP memiliki lebih dari 2 transaksi dengan status tertentu
+            $count_transaksi = TransaksiKonter::whereHas('detail', function ($query) use ($phoneNumber) {
+                $query->where('no_hp', $phoneNumber);
+            })->whereIn('status', ['pending', 'Proses', 'Berhasil'])
+                ->count();
+        }
+        if ($product->kategori->name == "Listrik") {
+            // Cek apakah nomor HP memiliki lebih dari 2 transaksi dengan status tertentu
+            $count_transaksi = TransaksiKonter::whereHas('detail', function ($query) use ($phoneNumber) {
+                $query->where('no_listrik', $phoneNumber);
+            })->whereIn('status', ['pending', 'Proses', 'Berhasil'])
+                ->count();
+        }
 
         // Jika sudah ada 2 transaksi atau lebih, berikan pesan error
         if ($count_transaksi >= 2) {
@@ -468,11 +527,20 @@ class KonterController extends Controller
             );
         }
 
-        // Cek jika ada transaksi dalam status "pending" atau "Proses" untuk nomor HP tersebut
-        $cek_status = TransaksiKonter::whereHas('detail', function ($query) use ($phoneNumber) {
-            $query->where('no_hp', $phoneNumber);
-        })->whereIn('status', ['pending', 'Proses'])
-            ->exists();
+        if ($product->kategori->name == "Pulsa") {
+            // Cek jika ada transaksi dalam status "pending" atau "Proses" untuk nomor HP tersebut
+            $cek_status = TransaksiKonter::whereHas('detail', function ($query) use ($phoneNumber) {
+                $query->where('no_hp', $phoneNumber);
+            })->whereIn('status', ['pending', 'Proses'])
+                ->exists();
+        }
+        if ($product->kategori->name == "Listrik") {
+            // Cek jika ada transaksi dalam status "pending" atau "Proses" untuk nomor HP tersebut
+            $cek_status = TransaksiKonter::whereHas('detail', function ($query) use ($phoneNumber) {
+                $query->where('no_listrik', $phoneNumber);
+            })->whereIn('status', ['pending', 'Proses'])
+                ->exists();
+        }
 
         if ($cek_status) {
             return redirect()->back()->with(
@@ -480,11 +548,7 @@ class KonterController extends Controller
                 'Nomor HP tersebut sudah dalam pengajuan dan sedang diproses.'
             );
         }
-
         // Lanjutkan proses lainnya jika semua validasi lolos
-
-
-        $product = ProductKonter::find($encryptedProductId);
 
         return view('user.konter.user.transaksi', [
             'product' => $product,
@@ -531,11 +595,22 @@ class KonterController extends Controller
             'deadline_date' => 'nullable',
         ]);
 
-        // Cek apakah nomor HP memiliki lebih dari 2 transaksi dengan status tertentu
-        $count_transaksi = TransaksiKonter::whereHas('detail', function ($query) use ($request) {
-            $query->where('no_hp', $request->phone_number);
-        })->whereIn('status', ['pending', 'Proses', 'Berhasil'])
-            ->count();
+        // Lanjutkan proses lainnya jika semua validasi lolos
+        $filter = ProductKonter::find($request->product_id);
+        if ($filter->kategori->name == "Pulsa") {
+            // Cek apakah nomor HP memiliki lebih dari 2 transaksi dengan status tertentu
+            $count_transaksi = TransaksiKonter::whereHas('detail', function ($query) use ($request) {
+                $query->where('no_hp', $request->phone_number);
+            })->whereIn('status', ['pending', 'Proses', 'Berhasil'])
+                ->count();
+        }
+        if ($filter->kategori->name == "Listrik") {
+            // Cek apakah nomor HP memiliki lebih dari 2 transaksi dengan status tertentu
+            $count_transaksi = TransaksiKonter::whereHas('detail', function ($query) use ($request) {
+                $query->where('no_listrik', $request->phone_number);
+            })->whereIn('status', ['pending', 'Proses', 'Berhasil'])
+                ->count();
+        }
 
         // Jika sudah ada 2 transaksi atau lebih, berikan pesan error
         if ($count_transaksi >= 2) {
@@ -545,11 +620,20 @@ class KonterController extends Controller
             );
         }
 
-        // Cek jika ada transaksi dalam status "pending" atau "Proses" untuk nomor HP tersebut
-        $cek_status = TransaksiKonter::whereHas('detail', function ($query) use ($request) {
-            $query->where('no_hp', $request->phone_number);
-        })->whereIn('status', ['pending', 'Proses'])
-            ->exists();
+        if ($filter->kategori->name == "Pulsa") {
+            // Cek jika ada transaksi dalam status "pending" atau "Proses" untuk nomor HP tersebut
+            $cek_status = TransaksiKonter::whereHas('detail', function ($query) use ($request) {
+                $query->where('no_hp', $request->phone_number);
+            })->whereIn('status', ['pending', 'Proses'])
+                ->exists();
+        }
+        if ($filter->kategori->name == "Listrik") {
+            // Cek jika ada transaksi dalam status "pending" atau "Proses" untuk nomor HP tersebut
+            $cek_status = TransaksiKonter::whereHas('detail', function ($query) use ($request) {
+                $query->where('no_listrik', $request->phone_number);
+            })->whereIn('status', ['pending', 'Proses'])
+                ->exists();
+        }
 
         if ($cek_status) {
             return redirect()->back()->with(
@@ -557,10 +641,6 @@ class KonterController extends Controller
                 'Nomor HP tersebut sudah dalam pengajuan dan sedang diproses.'
             );
         }
-
-        // Lanjutkan proses lainnya jika semua validasi lolos
-        $filter = ProductKonter::find($request->product_id);
-
 
         // Untuk dedline merubah kata sekaran jadi waktu
         if ($request->deadline_date == "Sekarang") {
@@ -625,71 +705,68 @@ class KonterController extends Controller
 
             $data->save();
 
-
-            // Nama-nama yang ingin dikirimkan pesan
-            $selectedNames = ['aldi wahyudi', 'Rifki Alfarez Putra', 'Rangga Mulyana'];
-            // Ambil data dari database berdasarkan nama yang dipilih
-            $access_pengurus = DataWarga::whereIn('name', $selectedNames)
-                ->get();
-
-            // URL gambar dari direktori storage
-            $imageUrl = asset('storage/kas/pengeluaran/ymKJ8SbQ7NLrLAhjAAKMNfOFHCK8O70HiqEiiIPE.jpg');
-
-            // Data untuk link
-            $encryptedId = Crypt::encrypt($data->id); // Mengenkripsi ID untuk keamanan
-            $link = "https://keluargamahaya.com/pulsa/{$encryptedId}";
+            $notif = DataNotification::where('name', 'Konter')
+                ->where('type', 'Pengajuan')
+                ->first();
 
             $product = ProductKonter::find($request->product_id);
 
+            // ============================Notif untuk pengurus=========================================================
+
+            // Mengambil data warga berdasarkan acceess Notif
+            $notifPengurus = AccessNotification::where('notification_id', $notif->id)->where('is_active', true)->get();
 
 
-            // Mengirim pesan ke setiap nomor
-            foreach ($access_pengurus as $access) {
-                $number = $access->no_hp; // Nomor telepon
-                $name = $access->name;   // Nama warga
+            foreach ($notifPengurus as $notif_pengurus) {
+
+                $phoneNumberPengurus = $notif_pengurus->Warga->no_hp ?? null;
+                $encryptedIdpengurus = Crypt::encrypt($data->id); // Mengenkripsi ID untuk keamanan
+                $link = "https://keluargamahaya.com/konters/pengajuan/{$encryptedIdpengurus}";
+
                 // Membuat pesan khusus untuk masing-masing warga
-                $message = "*Pengajuan Pulsa*\n";
-                $message .= "Halo {$name},\n\n";
-                $message .= "Kami informasikan bahwa {$request->submitted_by} mengajukan pembelian {$product->kategori->name} {$product->provider->name}:\n\n";
-                $message .= "- *ID transaksi*: {$transactionCode}\n";
-                $message .= "- *Tanggal Pengajuan*: {$data->created_at}\n";
-                $message .= "- *Number HP*: {$request->phone_number}\n";
-                $message .= "- *Nominal*: Rp" . number_format($product->amount, 0, ',', '.') . "\n";
+                $messagePengurus = "*Pengajuan Pulsa*\n";
+                $messagePengurus .= "Halo {$notif_pengurus->Warga->name},\n\n";
+                $messagePengurus .= "Kami informasikan bahwa {$request->submitted_by} mengajukan pembelian {$product->kategori->name} {$product->provider->name}:\n\n";
+                $messagePengurus .= "- *ID transaksi*: {$transactionCode}\n";
+                $messagePengurus .= "- *Tanggal Pengajuan*: {$data->created_at}\n";
+                $messagePengurus .= "- *Number HP*: {$request->phone_number}\n";
+                $messagePengurus .= "- *Nominal*: Rp" . number_format($product->amount, 0, ',', '.') . "\n";
                 if ($product->kategori->name == "Listrik") {
-                    $message .= "- *No Meteran*: {$data_detail->no_listrik}\n";
-                    $message .= "- *No TOKEN*: *{$data_detail->token_code}* \n";
-                    $message .= "- *A/N*: {$data_detail->name}\n";
+                    $messagePengurus .= "- *No Meteran*: {$data_detail->no_listrik}\n";
+                    $messagePengurus .= "- *No TOKEN*: *{$data_detail->token_code}* \n";
+                    $messagePengurus .= "- *A/N*: {$data_detail->name}\n";
                 }
-                $message .= "- *Harga*: Rp" . number_format($request->price, 0, ',', '.') . "\n";
-                $message .= "- *Pembelian*: {$request->payment_method}\n";
-                $message .= "- *Jatuh Tempo*: {$jatuh_tempo}\n";
-                $message .= "Terima kasih atas kerjasama dan dukungan Anda dalam proses ini.\n\n";
-                $message .= "Silakan klik link berikut untuk info selanjutnya:\n";
-                $message .= $link . "\n\n";
-                $message .= "*Salam hormat,*\n";
-                $message .= "*Sistem Kas Keluarga*";
+                $messagePengurus .= "- *Harga*: Rp" . number_format($request->price, 0, ',', '.') . "\n";
+                $messagePengurus .= "- *Pembelian*: {$request->payment_method}\n";
+                $messagePengurus .= "- *Jatuh Tempo*: {$jatuh_tempo}\n";
+                $messagePengurus .= "Terima kasih atas kerjasama dan dukungan Anda dalam proses ini.\n\n";
+                $messagePengurus .= "Silakan klik link berikut untuk info selanjutnya:\n";
+                $messagePengurus .= $link . "\n\n";
+                $messagePengurus .= "*Salam hormat,*\n";
+                $messagePengurus .= "*Sistem Kas Keluarga*";
 
-                // Mengirim pesan ke nomor warga
-                $response = $this->fonnteService->sendWhatsAppMessage($number, $message, $imageUrl);
+                // URL gambar dari direktori storage
+                $imageUrl = asset('storage/kas/pengeluaran/ymKJ8SbQ7NLrLAhjAAKMNfOFHCK8O70HiqEiiIPE.jpg');
+
+                if ($notif->wa_notification && $notif->pengurus) {
+                    // Mengirim pesan ke Pengurus
+                    $responsePengurus = $this->fonnteService->sendWhatsAppMessage($phoneNumberPengurus, $messagePengurus, $imageUrl);
+                }
             }
-
             DB::commit();
+            $pengurusSuccess = isset($responsePengurus['status']) && $responsePengurus['status'] === 'success';
 
-            if (isset($response['status']) && $response['status'] == 'success') {
-                if ($request->repayment) {
-                    return redirect()->route('konter.index')->with('success', 'Pengajuan Pembelian Pulsa sedang di proses');
-                } else {
-                    return redirect()->route('pulsa')->with('success', 'Pengajuan Pembelian Pulsa sedang di proses, Notifikasi berhasil dikirim!');
-                }
+            if ($pengurusSuccess) {
+                return redirect()->route('pulsa')->with('success', 'Pengajuan Pembelian Pulsa sedang di proses, Notifikasi berhasil dikirim!');
             }
-            return back()->with('error', 'Data tersimpan, Gagal mengirim notifikasi');
+            return redirect()->route('pulsa')->with('warning', 'Data tersimpan, Gagal mengirim notifikasi');
 
-            // //jika notifikasi email dan wa aktif maka yang di bawah di komen
+            //jika notifikasi email dan wa aktif maka yang di bawah di komen
 
             // DB::commit();
-            // if($request->repayment){
+            // if ($request->repayment) {
             //     return redirect()->route('konter.index')->with('success', 'Pengajuan Pembelian Pulsa sedang di proses');
-            // }else{
+            // } else {
             //     return redirect()->route('pulsa')->with('success', 'Pengajuan Pembelian Pulsa sedang di proses');
             // }
         } catch (\Exception $e) {
@@ -707,11 +784,22 @@ class KonterController extends Controller
             'deadline_date' => 'nullable',
         ]);
 
-        // Cek apakah nomor HP memiliki lebih dari 2 transaksi dengan status tertentu
-        $count_transaksi = TransaksiKonter::whereHas('detail', function ($query) use ($request) {
-            $query->where('no_hp', $request->phone_number);
-        })->whereIn('status', ['pending', 'Proses', 'Berhasil'])
-            ->count();
+        // Lanjutkan proses lainnya jika semua validasi lolos
+        $filter = ProductKonter::find($request->product_id);
+        if ($filter->kategori->name == "Pulsa") {
+            // Cek apakah nomor HP memiliki lebih dari 2 transaksi dengan status tertentu
+            $count_transaksi = TransaksiKonter::whereHas('detail', function ($query) use ($request) {
+                $query->where('no_hp', $request->phone_number);
+            })->whereIn('status', ['pending', 'Proses', 'Berhasil'])
+                ->count();
+        }
+        if ($filter->kategori->name == "Listrik") {
+            // Cek apakah nomor HP memiliki lebih dari 2 transaksi dengan status tertentu
+            $count_transaksi = TransaksiKonter::whereHas('detail', function ($query) use ($request) {
+                $query->where('no_listrik', $request->phone_number);
+            })->whereIn('status', ['pending', 'Proses', 'Berhasil'])
+                ->count();
+        }
 
         // Jika sudah ada 2 transaksi atau lebih, berikan pesan error
         if ($count_transaksi >= 2) {
@@ -721,11 +809,20 @@ class KonterController extends Controller
             );
         }
 
-        // Cek jika ada transaksi dalam status "pending" atau "Proses" untuk nomor HP tersebut
-        $cek_status = TransaksiKonter::whereHas('detail', function ($query) use ($request) {
-            $query->where('no_hp', $request->phone_number);
-        })->whereIn('status', ['pending', 'Proses'])
-            ->exists();
+        if ($filter->kategori->name == "Pulsa") {
+            // Cek jika ada transaksi dalam status "pending" atau "Proses" untuk nomor HP tersebut
+            $cek_status = TransaksiKonter::whereHas('detail', function ($query) use ($request) {
+                $query->where('no_hp', $request->phone_number);
+            })->whereIn('status', ['pending', 'Proses'])
+                ->exists();
+        }
+        if ($filter->kategori->name == "Listrik") {
+            // Cek jika ada transaksi dalam status "pending" atau "Proses" untuk nomor HP tersebut
+            $cek_status = TransaksiKonter::whereHas('detail', function ($query) use ($request) {
+                $query->where('no_listrik', $request->phone_number);
+            })->whereIn('status', ['pending', 'Proses'])
+                ->exists();
+        }
 
         if ($cek_status) {
             return redirect()->back()->with(
@@ -733,9 +830,6 @@ class KonterController extends Controller
                 'Nomor HP tersebut sudah dalam pengajuan dan sedang diproses.'
             );
         }
-
-        // Lanjutkan proses lainnya jika semua validasi lolos
-        $filter = ProductKonter::find($request->product_id);
 
 
         // Untuk dedline merubah kata sekaran jadi waktu
@@ -801,73 +895,60 @@ class KonterController extends Controller
 
             $data->save();
 
-
-            // Nama-nama yang ingin dikirimkan pesan
-            $selectedNames = ['aldi wahyudi', 'Rifki'];
-            // Ambil data dari database berdasarkan nama yang dipilih
-            $access_pengurus = DataWarga::whereIn('name', $selectedNames)
-                ->get();
-
-            // URL gambar dari direktori storage
-            $imageUrl = asset('storage/kas/pengeluaran/ymKJ8SbQ7NLrLAhjAAKMNfOFHCK8O70HiqEiiIPE.jpg');
-
-            // Data untuk link
-            $encryptedId = Crypt::encrypt($data->id); // Mengenkripsi ID untuk keamanan
-            $link = "https://keluargamahaya.com/pulsa/{$encryptedId}";
+            $notif = DataNotification::where('name', 'Konter')
+                ->where('type', 'Pengajuan')
+                ->first();
 
             $product = ProductKonter::find($request->product_id);
 
+            // ============================Notif untuk pengurus=========================================================
 
+            // Mengambil data warga berdasarkan acceess Notif
+            $notifPengurus = AccessNotification::where('notification_id', $notif->id)->where('is_active', true)->get();
 
-            // Mengirim pesan ke setiap nomor
-            foreach ($access_pengurus as $access) {
-                $number = $access->no_hp; // Nomor telepon
-                $name = $access->name;   // Nama warga
+            foreach ($notifPengurus as $notif_pengurus) {
+
+                $phoneNumberPengurus = $notif_pengurus->Warga->no_hp ?? null;
+                $encryptedIdpengurus = Crypt::encrypt($data->id); // Mengenkripsi ID untuk keamanan
+                $link = "https://keluargamahaya.com/konters/pengajuan/{$encryptedIdpengurus}";
+
                 // Membuat pesan khusus untuk masing-masing warga
-                $message = "*Pengajuan Pulsa*\n";
-                $message .= "Halo {$name},\n\n";
-                $message .= "Kami informasikan bahwa {$request->submitted_by} mengajukan pembelian {$product->kategori->name} {$product->provider->name}:\n\n";
-                $message .= "- *ID transaksi*: {$transactionCode}\n";
-                $message .= "- *Tanggal Pengajuan*: {$data->created_at}\n";
-                $message .= "- *Number HP*: {$request->phone_number}\n";
-                $message .= "- *Nominal*: Rp" . number_format($product->amount, 0, ',', '.') . "\n";
+                $messagePengurus = "*Pengajuan Pulsa*\n";
+                $messagePengurus .= "Halo {$notif_pengurus->Warga->name},\n\n";
+                $messagePengurus .= "Kami informasikan bahwa {$request->submitted_by} mengajukan pembelian {$product->kategori->name} {$product->provider->name}:\n\n";
+                $messagePengurus .= "- *ID transaksi*: {$transactionCode}\n";
+                $messagePengurus .= "- *Tanggal Pengajuan*: {$data->created_at}\n";
+                $messagePengurus .= "- *Number HP*: {$request->phone_number}\n";
+                $messagePengurus .= "- *Nominal*: Rp" . number_format($product->amount, 0, ',', '.') . "\n";
                 if ($product->kategori->name == "Listrik") {
-                    $message .= "- *No Meteran*: {$data_detail->no_listrik}\n";
-                    $message .= "- *No TOKEN*: *{$data_detail->token_code}* \n";
-                    $message .= "- *A/N*: {$data_detail->name}\n";
+                    $messagePengurus .= "- *No Meteran*: {$data_detail->no_listrik}\n";
+                    $messagePengurus .= "- *No TOKEN*: *{$data_detail->token_code}* \n";
+                    $messagePengurus .= "- *A/N*: {$data_detail->name}\n";
                 }
-                $message .= "- *Harga*: Rp" . number_format($request->price, 0, ',', '.') . "\n";
-                $message .= "- *Pembelian*: {$request->payment_method}\n";
-                $message .= "- *Jatuh Tempo*: {$jatuh_tempo}\n";
-                $message .= "Terima kasih atas kerjasama dan dukungan Anda dalam proses ini.\n\n";
-                $message .= "Silakan klik link berikut untuk info selanjutnya:\n";
-                $message .= $link . "\n\n";
-                $message .= "*Salam hormat,*\n";
-                $message .= "*Sistem Kas Keluarga*";
+                $messagePengurus .= "- *Harga*: Rp" . number_format($request->price, 0, ',', '.') . "\n";
+                $messagePengurus .= "- *Pembelian*: {$request->payment_method}\n";
+                $messagePengurus .= "- *Jatuh Tempo*: {$jatuh_tempo}\n";
+                $messagePengurus .= "Terima kasih atas kerjasama dan dukungan Anda dalam proses ini.\n\n";
+                $messagePengurus .= "Silakan klik link berikut untuk info selanjutnya:\n";
+                $messagePengurus .= $link . "\n\n";
+                $messagePengurus .= "*Salam hormat,*\n";
+                $messagePengurus .= "*Sistem Kas Keluarga*";
 
-                // Mengirim pesan ke nomor warga
-                $response = $this->fonnteService->sendWhatsAppMessage($number, $message, $imageUrl);
+                // URL gambar dari direktori storage
+                $imageUrl = asset('storage/kas/pengeluaran/ymKJ8SbQ7NLrLAhjAAKMNfOFHCK8O70HiqEiiIPE.jpg');
+
+                if ($notif->wa_notification && $notif->pengurus) {
+                    // Mengirim pesan ke Pengurus
+                    $responsePengurus = $this->fonnteService->sendWhatsAppMessage($phoneNumberPengurus, $messagePengurus, $imageUrl);
+                }
             }
-
             DB::commit();
+            $pengurusSuccess = isset($responsePengurus['status']) && $responsePengurus['status'] === 'success';
 
-            if (isset($response['status']) && $response['status'] == 'success') {
-                if ($request->repayment) {
-                    return redirect()->route('konter.index')->with('success', 'Pengajuan Pembelian Pulsa sedang di proses');
-                } else {
-                    return redirect()->route('pulsa')->with('success', 'Pengajuan Pembelian Pulsa sedang di proses, Notifikasi berhasil dikirim!');
-                }
+            if ($pengurusSuccess) {
+                return redirect()->route('konter.index')->with('success', 'Pengajuan Pembelian Pulsa sedang di proses, Notifikasi berhasil dikirim!');
             }
-            return back()->with('error', 'Data tersimpan, Gagal mengirim notifikasi');
-
-            // //jika notifikasi email dan wa aktif maka yang di bawah di komen
-
-            // DB::commit();
-            // if ($request->repayment) {
-            //     return redirect()->route('konter.index')->with('success', 'Pengajuan Pembelian Pulsa sedang di proses');
-            // } else {
-            //     return redirect()->route('dashboard.index')->with('success', 'Pengajuan Pembelian Pulsa sedang di proses');
-            // }
+            return redirect()->route('konter.index')->with('warning', 'Data tersimpan, Gagal mengirim notifikasi');
         } catch (\Exception $e) {
             DB::rollback();
             return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan data.' . $e->getMessage());

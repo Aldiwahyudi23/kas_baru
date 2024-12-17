@@ -159,7 +159,7 @@
         <form id="pulsaForm">
             <div class="mb-3">
                 <label for="no_listrik" class="form-label">Nomor Meteran</label>
-                <input type="text" id="no_listrik" name="no_listrik" placeholder="423xxxxxxx" class="form-control">
+                <input type="number" id="no_listrik" name="no_listrik" placeholder="423xxxxxxx" class="form-control">
                 <small id="phone-validation-message" class="text-danger" style="display: none;">Nomor Meteran tidak
                     boleh
                     lebih dari 12 karakter.</small>

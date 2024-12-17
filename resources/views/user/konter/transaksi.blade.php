@@ -199,7 +199,7 @@
             @if ($product->kategori->name == "Listrik")
             <div class="form-group mt-3">
                 <label for="no_hp">No HP Tujuan</label>
-                <input type="text" id="no_hp" name="no_hp" class="form-control"
+                <input type="number" id="no_hp" name="no_hp" class="form-control"
                     placeholder="Masukkan No Hp Agar TOKEN di kirim no tujuan">
             </div>
             @if (!Auth::check())

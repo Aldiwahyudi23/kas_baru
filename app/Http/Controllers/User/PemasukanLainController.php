@@ -452,8 +452,8 @@ class PemasukanLainController extends Controller
                     $recipientNamePengurus = $name;
                     $status = "Selesai";
                     // Data untuk email pengurus
-                    $bodyMessage = preg_replace('/\*(.*?)\*/', '<b>$1</b>', $messagePengurus);
-                    $actionUrl = $link;
+                    $bodyMessagePengurus = preg_replace('/\*(.*?)\*/', '<b>$1</b>', $messagePengurus);
+                    $actionUrlPengurus = $link;
 
                     if ($notif->email_notification && $notif->program) {
                         // Mengirim email notif_program

@@ -171,7 +171,7 @@
     </div>
 
     <!-- Form pengajuan -->
-    <form action="{{ route('transaksi-proses') }}" method="POST" id="transaction-form">
+    <form action="{{ route('transaksi-proses_user') }}" method="POST" id="transaction-form">
         @csrf
         <input type="hidden" name="product_id" value="{{ $product->id }}">
         <input type="hidden" name="payment_method" id="payment-method" value="">

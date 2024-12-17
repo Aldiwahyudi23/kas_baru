@@ -19,6 +19,7 @@ class KasPayment extends Component
     public $program;
     public $roles = []; // Role list selain Anggota & Warga
     public $roleStatus = []; // Status setiap role checkbox
+    public $usersByRole = []; // Menyimpan pengguna berdasarkan role
 
 
     public function mount($id)
@@ -39,10 +40,18 @@ class KasPayment extends Component
 
         // Inisialisasi status role
         foreach ($this->roles as $role) {
-            $access = AccessNotification::where('notification_id', $this->id)
-                ->first();
+            $users = User::where('role_id', $role->id)->get();
 
-            $this->roleStatus[$role->id] = $access ? $access->is_active : false;
+            // Simpan daftar pengguna untuk role ini
+            $this->usersByRole[$role->id] = $users;
+
+            // Periksa status setiap pengguna
+            $this->roleStatus[$role->id] = $users->every(function ($user) {
+                $access = AccessNotification::where('notification_id', $this->id)
+                    ->where('data_warga_id', $user->id)
+                    ->first();
+                return $access ? $access->is_active : false;
+            });
         }
     }
 
@@ -70,37 +79,29 @@ class KasPayment extends Component
 
     public function toggleRole($roleId)
     {
-        // Cek role dari checkbox
-        $role = Role::find($roleId);
-
-        if (!$role) {
-            return;
-        }
-
-        // Cari user dengan role yang dipilih
-        $users = User::where('role_id', $roleId)->get();
+        $users = $this->usersByRole[$roleId] ?? [];
 
         foreach ($users as $user) {
             $access = AccessNotification::where('notification_id', $this->id)
-                ->where('data_warga_id', $user->data_warga_id)
+                ->where('data_warga_id', $user->id)
                 ->first();
 
             if ($access) {
-                // Jika data sudah ada, toggle is_active
+                // Toggle status jika data ada
                 $access->is_active = !$access->is_active;
                 $access->save();
             } else {
-                // Jika data belum ada, tambahkan
+                // Buat data baru jika tidak ada
                 AccessNotification::create([
                     'notification_id' => $this->id,
-                    'data_warga_id' => $user->data_warga_id,
+                    'data_warga_id' => $user->id,
                     'is_active' => true,
                 ]);
             }
-
-            // Perbarui status di frontend
-            $this->roleStatus[$roleId] = !$this->roleStatus[$roleId];
         }
+
+        // Perbarui status di frontend
+        $this->roleStatus[$roleId] = !$this->roleStatus[$roleId];
     }
 
     public function render()
