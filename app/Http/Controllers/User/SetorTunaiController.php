@@ -351,6 +351,16 @@ class SetorTunaiController extends Controller
 
         DB::beginTransaction();
         try {
+
+            // Ambil pengajuan dengan row-level locking untuk mencegah race condition
+            $pengajuan = Deposit::where('id', $id)->lockForUpdate()->first();
+
+            // Validasi apakah pengajuan sudah disetujui
+            if ($pengajuan->status === 'confirmed') {
+                DB::rollBack();
+                return back()->with('error', 'Pengajuan sudah di Konfirmasi ');
+            }
+
             // Merubah data deposite
             $deposit = Deposit::findOrFail($id);
             $deposit->status = $request->status;

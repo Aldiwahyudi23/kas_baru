@@ -128,7 +128,7 @@ class KonterController extends Controller
             $pengajuan = TransaksiKonter::where('id', $id)->lockForUpdate()->first();
 
             // Validasi apakah pengajuan sudah disetujui
-            if ($pengajuan->status === 'Berhasil') {
+            if ($pengajuan->status === 'Berhasil' && $request->status === 'Berhasil') {
                 DB::rollBack();
                 return back()->with('error', 'Pengajuan sudah di simpan ');
             }

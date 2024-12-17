@@ -74,6 +74,18 @@ class AnggaranSettSeeder extends Seeder
                 'catatan_anggaran' => '30000',
 
             ],
+            [
+                'anggaran_id' => '3',
+                'label_anggaran' => 'Batas Setelah Pinjaman 2 (Minggu)',
+                'catatan_anggaran' => '2',
+
+            ],
+            [
+                'anggaran_id' => '3',
+                'label_anggaran' => 'Batas Normal (Hari)',
+                'catatan_anggaran' => '6',
+
+            ],
         ]);
     }
 }

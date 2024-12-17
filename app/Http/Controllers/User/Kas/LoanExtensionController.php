@@ -215,9 +215,9 @@ class LoanExtensionController extends Controller
                 (isset($responsePengurus['status']) && $responsePengurus['status'] == 'success')
             ) {
                 return redirect()->route('bayar-pinjaman.pembayaran', Crypt::encrypt($request->loan_id))->with('success', 'Data tersimpan, Notifikasi berhasil dikirim ke Warga dan Pengurus!');
+            } else {
+                return redirect()->route('bayar-pinjaman.pembayaran', Crypt::encrypt($request->loan_id))->with('warning', 'Data tersimpan, Notifikasi tidak berhasil dikirim ke Warga dan Pengurus!');
             }
-
-            // return back()->with('error', 'Data tersimpan, Gagal mengirim notifikasi');
 
 
             // DB::commit();
@@ -344,6 +344,15 @@ class LoanExtensionController extends Controller
 
         DB::beginTransaction();
         try {
+            // Ambil pengajuan dengan row-level locking untuk mencegah race condition
+            $pengajuan = LoanExtension::where('id', $id)->lockForUpdate()->first();
+
+            // Validasi apakah pengajuan sudah disetujui
+            if ($pengajuan->status === 'approved') {
+                DB::rollBack();
+                return back()->with('error', 'Pengajuan sudah di Konfirmasi ');
+            }
+
             // Membuat kode ========================================
             // Mengambil waktu saat ini
             $dateTime = now();

@@ -104,9 +104,13 @@ class PinjamanController extends Controller
             return back()->with('error', 'Nominal yang di ajukan melebihi batas max yang telah di sepakati');
         }
         // -------------------------------------------
-
+        if ($request->data_warga_id) {
+            $cek_warga = $request->data_warga_id;
+        } else {
+            $cek_warga = Auth::user()->data_warga_id;
+        }
         // Ambil data pinjaman terbaru dari data_warga_id tertentu
-        $latestLoan = Loan::where('data_warga_id', $request->data_warga_id)
+        $latestLoan = Loan::where('data_warga_id', $cek_warga)
             ->latest()
             ->first();
 
@@ -135,7 +139,16 @@ class PinjamanController extends Controller
                 $pembayaranTanpaLebih = AnggaranSetting::where('label_anggaran', 'Pembayaran tanpa lebih (hari)')
                     ->where('anggaran_id', $dataAnggaran->id)
                     ->first();
+                $BatasPinjaman2 = AnggaranSetting::where('label_anggaran', 'Batas Setelah Pinjaman 2 (Minggu)')
+                    ->where('anggaran_id', $dataAnggaran->id)
+                    ->first();
+                $normal = AnggaranSetting::where('label_anggaran', 'Batas Normal (Hari)')
+                    ->where('anggaran_id', $dataAnggaran->id)
+                    ->first();
+
                 $weeksToAdd = intval($kurangSebulan->catatan_anggaran);
+                $weeksPinjaman2 = intval($BatasPinjaman2->catatan_anggaran);
+
                 $tanpaLebih = intval($pembayaranTanpaLebih->catatan_anggaran);
 
                 // Hitung tanggal pengajuan berikutnya berdasarkan aturan waktu tunggu
@@ -144,8 +157,29 @@ class PinjamanController extends Controller
                 // Cek jika selisih antara pembayaran terakhir dan pengajuan baru kurang dari sebulan
                 $daysDifference = $loanCreationDate->diffInDays($lastPaymentDate);
 
+                $cekpinjaman2 = LoanExtension::where(
+                    'new_loan_id',
+                    $latestLoan->id
+                )
+                    ->latest()->first();
+                // Hitung tanggal pengajuan berikutnya berdasarkan aturan waktu tunggu
+                $nextEligiblePinjaman2 = $lastPaymentDate->copy()->addWeeks($weeksPinjaman2);
+
+
                 if ($daysDifference < $tanpaLebih && now()->lessThan($nextEligibleDate)) {
                     return back()->with('error', 'Pengajuan baru tidak dapat dilakukan. Coba lagi pada tanggal ' . $nextEligibleDate);
+                } elseif ($cekpinjaman2) {
+                    if (now()->lessThan($nextEligiblePinjaman2)) {
+                        return back()->with('error', 'Pengajuan baru tidak dapat dilakukan. Coba lagi pada tanggal ' . $nextEligiblePinjaman2);
+                    }
+                } else {
+                    if ($normal) {
+                        $weeksNormal = intval($normal->catatan_anggaran);
+                        $nextEligibleNormal = $lastPaymentDate->copy()->addDays($weeksNormal);
+                        if (now()->lessThan($nextEligibleNormal)) {
+                            return back()->with('error', 'Pengajuan baru tidak dapat dilakukan. Coba lagi pada tanggal ' . $nextEligibleNormal);
+                        }
+                    }
                 }
             }
         }
@@ -624,6 +658,16 @@ class PinjamanController extends Controller
         DB::beginTransaction();
 
         try {
+
+            // Ambil pengajuan dengan row-level locking untuk mencegah race condition
+            $pengajuan = Loan::where('id', $id)->lockForUpdate()->first();
+
+            // Validasi apakah pengajuan sudah disetujui
+            if ($pengajuan->status === 'approved_by_chairman') {
+                DB::rollBack();
+                return back()->with('error', 'Pengajuan sudah di Konfirmasi ');
+            }
+
             $dateTime = now();
 
             $data = Loan::findOrFail($id);
@@ -772,6 +816,15 @@ class PinjamanController extends Controller
         DB::beginTransaction();
 
         try {
+
+            // Ambil pengajuan dengan row-level locking untuk mencegah race condition
+            $pengajuan = Loan::where('id', $id)->lockForUpdate()->first();
+
+            // Validasi apakah pengajuan sudah disetujui
+            if ($pengajuan->status === 'disbursed_by_treasurer') {
+                DB::rollBack();
+                return back()->with('error', 'Pengajuan sudah di Cairkan ');
+            }
             // Mengambil waktu saat ini
             $dateTime = now();
 
@@ -928,6 +981,15 @@ class PinjamanController extends Controller
         DB::beginTransaction();
 
         try {
+
+            // Ambil pengajuan dengan row-level locking untuk mencegah race condition
+            $pengajuan = Loan::where('id', $id)->lockForUpdate()->first();
+
+            // Validasi apakah pengajuan sudah disetujui
+            if ($pengajuan->status === 'Acknowledged') {
+                DB::rollBack();
+                return back()->with('error', 'Pengajuan sudah di Konfirmasi ');
+            }
             // Mengambil waktu saat ini
             $dateTime = now();
 

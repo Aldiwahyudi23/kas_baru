@@ -120,56 +120,32 @@
                         const bankName = document.getElementById('bank_name');
                         const accountName = document.getElementById('account_name');
                         const accountNumber = document.getElementById('account_number');
-                        const transferReceiptPath = document.getElementById('transfer_receipt_path');
 
                         // Input elemen untuk Cash
                         const cashNotes = document.getElementById('cash_notes');
 
+                        // Reset semua fields
+                        transferFields.style.display = 'none';
+                        cashFields.style.display = 'none';
+                        bankName.removeAttribute('required');
+                        accountName.removeAttribute('required');
+                        accountNumber.removeAttribute('required');
+                        cashNotes.removeAttribute('required');
+
+                        // Tampilkan fields berdasarkan pilihan
                         if (paymentMethod === 'transfer') {
                             transferFields.style.display = 'block';
-                            cashFields.style.display = 'none';
-
-                            // Menjadikan elemen transfer wajib diisi
                             bankName.setAttribute('required', 'required');
                             accountName.setAttribute('required', 'required');
                             accountNumber.setAttribute('required', 'required');
-                            transferReceiptPath.setAttribute('required', 'required');
-
-                            // Nonaktifkan elemen cash
-                            cashNotes.removeAttribute('required');
                         } else if (paymentMethod === 'cash') {
                             cashFields.style.display = 'block';
-                            transferFields.style.display = 'none';
-
-                            // Menjadikan elemen cash wajib diisi
                             cashNotes.setAttribute('required', 'required');
-
-                            // Nonaktifkan elemen transfer
-                            bankName.removeAttribute('required');
-                            accountName.removeAttribute('required');
-                            accountNumber.removeAttribute('required');
-                            transferReceiptPath.removeAttribute('required');
-                        } else {
-                            transferFields.style.display = 'none';
-                            cashFields.style.display = 'none';
-
-                            // Nonaktifkan semua elemen
-                            bankName.removeAttribute('required');
-                            accountName.removeAttribute('required');
-                            accountNumber.removeAttribute('required');
-                            transferReceiptPath.removeAttribute('required');
-                            cashNotes.removeAttribute('required');
                         }
                     }
 
-                    // Initialize fields on page load based on old value (if any)
+                    // Inisialisasi toggle berdasarkan nilai awal pada page load
                     document.addEventListener('DOMContentLoaded', togglePaymentFields);
-                </script>
-                <script>
-                    function toggleInput() {
-                        const inputForm = document.getElementById('inputForm');
-                        inputForm.classList.toggle('hidden');
-                    }
                 </script>
                 @endsection
 

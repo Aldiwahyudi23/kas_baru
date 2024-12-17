@@ -495,6 +495,15 @@ class PemasukanController extends Controller
 
         try {
 
+            // Ambil pengajuan dengan row-level locking untuk mencegah race condition
+            $pengajuan = KasPayment::where('id', $id)->lockForUpdate()->first();
+
+            // Validasi apakah pengajuan sudah disetujui
+            if ($pengajuan->status === 'confirmed') {
+                DB::rollBack();
+                return back()->with('error', 'Pengajuan sudah di Konfirmasi ');
+            }
+
             // Mengambil waktu saat ini
             $dateTime = Carbon::now();
 

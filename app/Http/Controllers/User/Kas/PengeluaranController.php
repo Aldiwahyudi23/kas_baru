@@ -296,6 +296,8 @@ class PengeluaranController extends Controller
 
     public function approved(Request $request, string $id)
     {
+
+
         //Untuk konfirmasi delete
         $title = 'Delete !';
         $text = "Apakah benar anda mau hapus data ini?";
@@ -309,6 +311,16 @@ class PengeluaranController extends Controller
         DB::beginTransaction();
 
         try {
+
+            // Ambil pengajuan dengan row-level locking untuk mencegah race condition
+            $pengajuan = CashExpenditures::where('id', $id)->lockForUpdate()->first();
+
+            // Validasi apakah pengajuan sudah disetujui
+            if ($pengajuan->status === 'disbursed_by_treasurer') {
+                DB::rollBack();
+                return back()->with('error', 'Pengajuan sudah di Konfirmasi ');
+            }
+
             $dateTime = now();
 
             $data = CashExpenditures::findOrFail($id);
@@ -415,6 +427,15 @@ class PengeluaranController extends Controller
         DB::beginTransaction();
 
         try {
+
+            // Ambil pengajuan dengan row-level locking untuk mencegah race condition
+            $pengajuan = CashExpenditures::where('id', $id)->lockForUpdate()->first();
+
+            // Validasi apakah pengajuan sudah disetujui
+            if ($pengajuan->status === 'Acknowledged') {
+                DB::rollBack();
+                return back()->with('error', 'Pengajuan sudah di Konfirmasi ');
+            }
             // Mengambil waktu saat ini
             $dateTime = now();
 
