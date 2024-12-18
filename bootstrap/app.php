@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\AdminRedirectIfAuthenticated;
+use Illuminate\Console\Scheduling\Schedule as SchedulingSchedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -30,8 +31,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })
-    ->withSchedule(function (Schedule $schedule) {
+    ->withSchedule(function (SchedulingSchedule $schedule) {
         $schedule->command('reminder:sendPayment')
-            ->monthlyOn(18, '09:50');  // Tanggal 5 setiap bulan pukul 00:00
+            ->monthlyOn(18, '10:00');  // Tanggal 5 setiap bulan pukul 00:00
     })
     ->create();
