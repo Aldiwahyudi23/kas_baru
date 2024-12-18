@@ -33,6 +33,6 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withSchedule(function (SchedulingSchedule $schedule) {
         $schedule->command('reminder:sendPayment')
-            ->monthlyOn(18, '10:00');  // Tanggal 5 setiap bulan pukul 00:00
+            ->monthlyOn(18, '10:02');  // Tanggal 5 setiap bulan pukul 00:00
     })
     ->create();
