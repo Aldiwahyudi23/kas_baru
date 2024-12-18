@@ -42,12 +42,6 @@ class SendPaymentReminder extends Command
      */
     public function handle()
     {
-        // Periksa apakah hari ini adalah tanggal 5 atau 26
-        $today = now()->day; // Mendapatkan tanggal hari ini
-        if (!in_array($today, [5, 18])) {
-            $this->info('Hari ini bukan tanggal pengingat. Tidak ada pesan yang dikirim.');
-            return;
-        }
 
         $phoneNumber = '083825740395'; // Ganti dengan nomor tujuan
         $message = "Pengingat: Harap melakukan pembayaran kas bulanan. Terima kasih.";
