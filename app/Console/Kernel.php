@@ -13,8 +13,12 @@ class Kernel extends ConsoleKernel
     {
         // Jalankan command setiap tanggal 5 dan 25 pada pukul 9 pagi
         // Jalankan command setiap hari pada pukul 08:00
-        $schedule->command('reminder:sendPayment')->dailyAt('09:05');
-        $schedule->command('loan:reminder')->dailyAt('08:00');
+        $schedule->command('reminder:sendPayment')->dailyAt('09:15')
+            ->timezone('Asia/Jakarta')
+            ->withoutOverlapping();
+        $schedule->command('loan:reminder')->dailyAt('08:00')
+            ->timezone('Asia/Jakarta')
+            ->withoutOverlapping();
     }
 
     protected function commands()
