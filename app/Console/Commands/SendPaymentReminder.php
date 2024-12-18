@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Http;
 
 class SendPaymentReminder extends Command
 {
-
     /**
      * The name and signature of the console command.
      *
@@ -23,22 +22,33 @@ class SendPaymentReminder extends Command
     protected $description = 'Send payment reminder notification via WhatsApp';
 
     /**
-     * Execute the console command.
+     * API Key for Fonnte
+     *
+     * @var string
      */
-
-
     protected $apiKey;
 
+    /**
+     * Create a new command instance.
+     */
     public function __construct()
     {
-        $this->apiKey = env('FONNTE_API_KEY');
-        parent::__construct(); // Memanggil constructor parent
+        parent::__construct();
+        $this->apiKey = env('FONNTE_API_KEY'); // API Key dari .env
     }
 
-
-
+    /**
+     * Execute the console command.
+     */
     public function handle()
     {
+        // Periksa apakah hari ini adalah tanggal 5 atau 26
+        $today = now()->day; // Mendapatkan tanggal hari ini
+        if (!in_array($today, [5, 18])) {
+            $this->info('Hari ini bukan tanggal pengingat. Tidak ada pesan yang dikirim.');
+            return;
+        }
+
         $phoneNumber = '083825740395'; // Ganti dengan nomor tujuan
         $message = "Pengingat: Harap melakukan pembayaran kas bulanan. Terima kasih.";
 
@@ -51,9 +61,7 @@ class SendPaymentReminder extends Command
             'countryCode' => '62',       // Kode negara Indonesia
         ]);
 
-
-
-
+        // Cek apakah berhasil dikirim
         if ($response->successful()) {
             $this->info('Notifikasi pengingat pembayaran berhasil dikirim.');
         } else {

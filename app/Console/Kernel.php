@@ -12,9 +12,9 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         // Jalankan command setiap tanggal 5 dan 25 pada pukul 9 pagi
-        $schedule->command('reminder:sendPayment')->monthlyOn(4, '14:25');
-        $schedule->command('reminder:sendPayment')->monthlyOn(25, '09:00');
-        $schedule->command('loan:reminder')->daily();
+        // Jalankan command setiap hari pada pukul 08:00
+        $schedule->command('reminder:sendPayment')->dailyAt('08:00');
+        $schedule->command('loan:reminder')->dailyAt('08:00');
     }
 
     protected function commands()
