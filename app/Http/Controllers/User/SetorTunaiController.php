@@ -231,7 +231,7 @@ class SetorTunaiController extends Controller
         $data_income = OtherIncomes::where('deposit_id', $deposit->id)->get();
         // Tampah data lain yang terhubung
 
-        return view('user.setor_tunai.detail', compact('deposit', 'data_kas', 'data_loanRepayment', 'data_konter'));
+        return view('user.setor_tunai.detail', compact('deposit', 'data_kas', 'data_loanRepayment', 'data_konter', 'data_income'));
     }
     public function detail_reject(string $id)
     {
