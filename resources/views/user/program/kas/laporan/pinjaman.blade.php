@@ -34,15 +34,16 @@
                         $no = 0; ?>
                         @foreach($pinjaman_proses as $data)
                         <?php $no++;
-                        // Tanggal pembuatan pinjaman terbaru
-                        // $loanCreationDate = Carbon::parse($data->created_at);
-                        $loanCreationDate = Carbon::now();
-                        // Tanggal pembayaran terakhir (cek apakah $lastRepayment ada)
-                        $lastPaymentDate = Carbon::parse($data->deadline_date);
-                        // $lastPaymentDate = Carbon::now();
-                        // Cek jika selisih antara pembayaran terakhir dan pengajuan baru kurang dari sebulan
-                        $waktubayar = $loanCreationDate->diffInDays($lastPaymentDate);
-                        $waktuPembayaran =  round($waktubayar); ?>
+                        // // Tanggal pembuatan pinjaman terbaru
+                        // // $loanCreationDate = Carbon::parse($data->created_at);
+                        // $loanCreationDate = Carbon::now();
+                        // // Tanggal pembayaran terakhir (cek apakah $lastRepayment ada)
+                        // $lastPaymentDate = Carbon::parse($data->deadline_date);
+                        // // $lastPaymentDate = Carbon::now();
+                        // // Cek jika selisih antara pembayaran terakhir dan pengajuan baru kurang dari sebulan
+                        // $waktubayar = $loanCreationDate->diffInDays($lastPaymentDate);
+                        // $waktuPembayaran =  round($waktubayar); 
+                        ?>
                         <tr>
                             <td>{{$no}} </td>
                             <td>
@@ -65,7 +66,16 @@
                                 @endif
                             </td>
                             <td>{{$data->code}} </td>
-                            <td>{{$waktuPembayaran}} </td>
+                            <td>
+                                <div class="alert 
+                                @if($data->remaining_time <= 3 ) alert-danger @elseif($data->remaining_time <=14)
+                                        alert-warning @else alert-success @endif alert-dismissible">
+                                    <center>
+                                        @if($data->remaining_time == 0) Jatuh Tempo
+                                        @elseif($data->remaining_time <= -1) Lewat {{ $data->remaining_time }} hari
+                                            segera bayar @else {{ $data->remaining_time }} hari Lagi @endif </center>
+                                </div>
+                            </td>
                             <td>{{$data->deadline_date}} </td>
                             <td>{{$data->warga->name}} </td>
                             <td>Rp {{number_format($data->loan_amount, 2,',','.')}} </td>

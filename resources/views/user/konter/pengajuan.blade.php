@@ -42,6 +42,20 @@
             </button>
         </div>
     </div>
+
+
+    @if ($pengajuan->payment_status == "Hutang")
+    <div class="alert 
+        @if($remaining_time <= 1 ) alert-danger 
+        @else alert-warning 
+        @endif alert-dismissible">
+        <center>
+            @if($remaining_time == 0) Jatuh Tempo
+            @elseif($remaining_time <= -1) Lewat {{ $remaining_time }} hari @else {{ $remaining_time }} hari Lagi @endif
+                </center>
+    </div>
+    @endif
+
     <!-- /.card-header -->
     <div class="card-body">
         <div class="card-body p-0">
@@ -233,6 +247,8 @@
                         id="description"
                         placeholder="Masukan Catatan Tambahan Jika ada ">{{ old('description') }}</textarea>
             </div>
+
+            @if ($pengajuan->payment_status == "Langsung")
             <div class="form-group">
                 <select class="select2bs4 @error('status') is-invalid @enderror" style="width: 100%;" name="status"
                     id="status">
@@ -245,6 +261,7 @@
                         Batal / Gagal</option>
                 </select>
             </div>
+            @endif
 
             <!-- Untuk status yang pembayarannya langsung atau selesai -->
 

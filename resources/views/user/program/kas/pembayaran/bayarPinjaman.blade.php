@@ -46,6 +46,16 @@
                 </button>
             </div>
         </div>
+        <div class="alert 
+        @if($hitungWaktu <= 3 ) alert-danger 
+        @elseif($hitungWaktu <= 14) alert-warning 
+        @else alert-success
+        @endif alert-dismissible">
+            <center>
+                @if($hitungWaktu == 0) Jatuh Tempo
+                @elseif($hitungWaktu <= -1) Lewat {{ $hitungWaktu }} hari segera bayar @else {{ $hitungWaktu }} hari
+                    Lagi @endif </center>
+        </div>
         <!-- /.card-header -->
         <div class="card-body">
             <div class="card-body  p-0">

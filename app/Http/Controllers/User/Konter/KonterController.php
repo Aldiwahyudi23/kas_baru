@@ -38,9 +38,22 @@ class KonterController extends Controller
     public function index()
     {
         $pengajuan_proses = TransaksiKonter::where('status', ['proses', 'pending'])->get();
-        $transaksi_sukses = TransaksiKonter::where('status', 'Berhasil')->get();
         $transaksi_gagal = TransaksiKonter::where('status', 'Gagal')->get();
         $transaksi_selesai = TransaksiKonter::where('status', 'Selesai')->get();
+
+        // Ambil data transaksi dengan status 'Berhasil'
+        // Ambil data transaksi dengan status 'Berhasil'
+        $transaksi_sukses = TransaksiKonter::where('status', 'Berhasil')->get()->map(function ($transaction) {
+            $deadlineDate = Carbon::parse($transaction->deadline_date);
+            $currentDate = Carbon::now();
+
+            // Hitung sisa waktu
+            $transaction->remaining_time = round(
+                $currentDate->diffInDays($deadlineDate)
+            );
+
+            return $transaction;
+        });
 
         return view('user.konter.index', compact('pengajuan_proses', 'transaksi_sukses', 'transaksi_gagal', 'transaksi_selesai'));
     }
@@ -102,9 +115,18 @@ class KonterController extends Controller
     {
         $id = Crypt::decrypt($id);
         $pengajuan = TransaksiKonter::find($id);
+
+        $deadlineDate = Carbon::parse($pengajuan->deadline_date);
+        $currentDate = Carbon::now();
+
+        // Hitung sisa waktu
+        $remaining_time = round(
+            $currentDate->diffInDays($deadlineDate)
+        );
+
         $data_Warga = DataWarga::all();
 
-        return view('user.konter.pengajuan', compact('pengajuan', 'data_Warga'));
+        return view('user.konter.pengajuan', compact('pengajuan', 'data_Warga', 'remaining_time'));
     }
     // Jika berhasil maka menyimpan data
     public function pengajuan_berhasil(Request $request, $id)

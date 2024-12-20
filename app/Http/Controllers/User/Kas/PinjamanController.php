@@ -1129,7 +1129,17 @@ class PinjamanController extends Controller
     }
     public function laporan()
     {
-        $pinjaman_proses = Loan::where('status', '!=', 'Paid in Full')->get();
+        $pinjaman_proses = Loan::where('status', '!=', 'Paid in Full')->get()->map(function ($transaction) {
+            $deadlineDate = Carbon::parse($transaction->deadline_date);
+            $currentDate = Carbon::now();
+
+            // Hitung sisa waktu
+            $transaction->remaining_time = round(
+                $currentDate->diffInDays($deadlineDate)
+            );
+
+            return $transaction;
+        });
         $pinjaman_selesai = Loan::where('status', 'Paid in Full')->get();
 
         return view('user.program.kas.laporan.pinjaman', compact('pinjaman_selesai', 'pinjaman_proses'));
