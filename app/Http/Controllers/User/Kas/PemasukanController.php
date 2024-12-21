@@ -63,6 +63,38 @@ class PemasukanController extends Controller
         $program = Program::where('name', 'Kas Keluarga')->first();
         $access = AccessProgram::where('program_id', $program->id)->get();
 
+        // =====================menghitung pembayaran yang kosong=========================
+        // // Periode awal (Januari 2025)
+        // $startDate = Carbon::create(2024, 8, 1);
+        // $currentDate = Carbon::now();
+
+        // // Hitung total bulan antara periode
+        // $totalMonths = $startDate->diffInMonths($currentDate) + 1; // +1 untuk menyertakan bulan saat ini
+
+        // // Ambil data bulan dari KasPayment
+        // $pembayaranBulan = KasPayment::where('data_warga_id', Auth::user()->data_warga_id)
+        //     ->whereBetween('created_at', [$startDate, $currentDate])
+        //     ->get()
+        //     ->map(function ($payment) {
+        //         return Carbon::parse($payment->created_at)->format('Y-m'); // Format tahun-bulan
+        //     })
+        //     ->unique()
+        //     ->toArray();
+
+        // // Buat daftar semua bulan dari periode
+        // $allMonths = collect();
+        // for ($i = 0; $i < $totalMonths; $i++) {
+        //     $allMonths->push($startDate->copy()->addMonths($i)->format('Y-m'));
+        // }
+
+        // // Identifikasi bulan kosong
+        // $bulanKosong = $allMonths->diff($pembayaranBulan)->values();
+
+        // // Hitung sisa pembayaran
+        // $kasPerBulan = 50000; // Jumlah kas per bulan
+        // $sisaPembayaran = $bulanKosong->count() * $kasPerBulan;
+
+        // Tambahkan , 'bulanKosong', 'sisaPembayaran' di compak di bawah 
 
         return view('user.program.kas.pembayaran.kas', compact('program', 'cek_kasPayment', 'data_kasAnggota', 'layout_form', 'pembayaran_proses', 'access'));
     }

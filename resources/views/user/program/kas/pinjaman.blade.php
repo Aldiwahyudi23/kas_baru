@@ -5,8 +5,11 @@
 <div class="card bg-primary text-white shadow">
     <div class="card-body">
         <h3> <B>
-                Rp {{number_format( $saldo_pinjam->saldo ?? 0,0,',','.')}}
+                Rp {{number_format( $saldo_pinjam->saldo - $saldo_proses ?? 0,0,',','.')}}
             </B></h3>
+        <div class="text-danger-50 small"> Rp
+            - {{number_format( $saldo_proses ?? 0,0,',','.')}} ( Proses )
+        </div>
         <div class="text-white-50 small"> Rp
             {{number_format( $saldo_pinjam->amount ?? 0,0,',','.')}} ( {{$saldo_pinjam->saldos->code ?? ''}} )
         </div>

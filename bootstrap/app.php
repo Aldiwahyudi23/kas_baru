@@ -39,6 +39,6 @@ return Application::configure(basePath: dirname(__DIR__))
             ->monthlyOn(5, '06:30');  // Tanggal 5 setiap bulan pukul 00:00
 
         $schedule->command('reminder:loan')->dailyAt('07:00');
-        $schedule->command('reminder:konter')->dailyAt('10:15');
+        $schedule->command('reminder:konter')->dailyAt('07:00');
     })
     ->create();

@@ -29,6 +29,7 @@
                 <div class="tab-content" id="custom-tabs-four-tabContent">
                     <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel"
                         aria-labelledby="custom-tabs-four-home-tab">
+
                         @if ($cek_kasPayment >= 1)
                         {!! $layout_form->kas_proses !!}
                         <br>

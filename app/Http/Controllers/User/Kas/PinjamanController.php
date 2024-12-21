@@ -60,9 +60,9 @@ class PinjamanController extends Controller
         $access = AccessProgram::where('program_id', $program->id)->get();
 
         $saldo_pinjam = AnggaranSaldo::where('type', 'Dana Pinjam')->latest()->first();
+        $saldo_proses = Loan::whereIn('status', ['pending', 'approved_by_chairman', 'disbursed_by_treasurer',])->sum('loan_amount');
 
-
-        return view('user.program.kas.pinjaman', compact('layout_form', 'pinjaman', 'anggaran', 'pinjaman_proses', 'access', 'pinjaman_tersambung', 'saldo_pinjam'));
+        return view('user.program.kas.pinjaman', compact('layout_form', 'pinjaman', 'anggaran', 'pinjaman_proses', 'access', 'pinjaman_tersambung', 'saldo_pinjam', 'saldo_proses'));
     }
 
     /**
@@ -88,12 +88,14 @@ class PinjamanController extends Controller
         // Cek apakah Saldo cukup berdasarkan anggaran
 
         $saldo_akhir_request =  AnggaranSaldo::where('type', $dataAnggaran->name)->latest()->first(); //mengambil data yang terakhir berdasarkan type anggaran
+        $saldo_proses = Loan::whereIn('status', ['pending', 'approved_by_chairman', 'disbursed_by_treasurer',])->sum('loan_amount');
+        $sisa_saldo = $saldo_akhir_request->saldo - $saldo_proses;
 
         if (!$saldo_akhir_request || !$saldo_akhir_request->saldo) {
             // Jika tidak ada data saldo atau saldo kosong, redirect dengan pesan error
             return redirect()->back()->with('error', 'Saldo tidak tersedia atau tidak ada nilai untuk anggaran ini.');
         }
-        if ($saldo_akhir_request->saldo <  $request->amount) {
+        if ($sisa_saldo <  $request->amount) {
             return redirect()->back()->with('error', 'Saldo untuk ' . $dataAnggaran->name . ' Kurang dari pengajuan.');
         }
         // -------------------------------------------

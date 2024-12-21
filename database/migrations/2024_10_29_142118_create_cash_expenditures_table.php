@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('anggaran_id')->constrained('anggarans')->onDelete('cascade');
             $table->decimal('amount', 12, 2); // Jumlah pengeluaran
             $table->longText('description'); // Jenis pengeluaran (misal: Operasional)
-            $table->enum('status', ['pending', 'approved_by_chairman', 'disbursed_by_treasurer', 'Acknowledged'])->default('pending');
+            $table->enum('status', ['pending', 'approved_by_chairman', 'disbursed_by_treasurer', 'Acknowledged', 'rejected'])->default('pending');
             $table->bigInteger('submitted_by')->unsigned(); // Sekretaris yang menginput
             $table->bigInteger('approved_by')->unsigned()->nullable(); // Ketua yang menyetujui
             $table->bigInteger('disbursed_by')->unsigned()->nullable(); // Bendahara yang mencairkan
