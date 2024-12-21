@@ -436,17 +436,26 @@ class DataWargaController extends Controller
 
             $phoneNumber = $request->no_hp;
 
-            // Contoh pesan notifikasi untuk pendaftaran berhasil
-            $message = "*Pendaftaran Berhasil* \n";
-            $message .= "Selamat, pendaftaran Anda telah berhasil!\n\n";
+            $message = "*Pendaftaran Berhasil*\n\n";
+            $message .= "Selamat, pendaftaran Anda telah berhasil dan akun Anda kini sudah aktif!\n\n";
             $message .= "Berikut adalah detail akun Anda:\n";
             $message .= "- *Email*: {$request->email}\n";
-            $message .= "- *Kata Sandi*: Keluarga123 \n"; // Pastikan variabel password dienkripsi atau diacak jika aman
-            $message .= "- *Link Login*: " . url('https://kas.keluargamahaya.com/login') . "\n\n";
-            $message .= "*Harap simpan informasi ini dengan baik.*\n";
-            $message .= "Terima kasih telah mendaftar di platform kami!\n\n";
-            $message .= "*Salam,* \n";
-            $message .= "*Terima Kami*";
+            $message .= "- *Kata Sandi*: Keluarga123\n";
+            $message .= "- *Link Login*: " . url('https://keluargamahaya.com/login') . "\n\n";
+            $message .= "⚠️ *Tindakan Selanjutnya:*\n";
+            $message .= "1. Silakan login ke akun Anda menggunakan email dan kata sandi di atas.\n";
+            $message .= "2. Setelah berhasil login, segera lakukan verifikasi email:\n";
+            $message .= "   - Klik tombol *\"Kirim Ulang Email Verifikasi\"* yang tersedia di aplikasi.\n";
+            $message .= "   - Cek email Anda untuk pesan verifikasi.\n";
+            $message .= "   - Klik tombol yang ada di email untuk menyelesaikan proses verifikasi.\n";
+            $message .= "   - Pastikan proses ini selesai agar Anda dapat mengakses aplikasi sepenuhnya.\n";
+            $message .= "3. Setelah masuk ke aplikasi, segera ganti kata sandi Anda di menu *\"Profil\"* untuk keamanan akun Anda.\n\n";
+            $message .= "⛔ *Catatan Penting:*\n";
+            $message .= "- Jangan dulu mengubah informasi profil lainnya sampai proses verifikasi selesai.\n\n";
+            $message .= "Terima kasih telah mendaftar di platform kami. Jika Anda membutuhkan bantuan lebih lanjut, silakan hubungi tim dukungan kami.\n\n";
+            $message .= "*Salam Hormat,*\n";
+            $message .= "*Tim Keluarga Mahaya*";
+
 
 
             // URL gambar dari direktori storage

@@ -7,9 +7,11 @@
         <h3> <B>
                 Rp {{number_format( $saldo_pinjam->saldo - $saldo_proses ?? 0,0,',','.')}}
             </B></h3>
+        @if ($saldo_proses >= 1)
         <div class="text-danger-50 small"> Rp
-            - {{number_format( $saldo_proses ?? 0,0,',','.')}} ( Proses )
+            - {{number_format( $saldo_proses ?? 0,0,',','.')}} ( Pengajuan Pinjaman sedang Proses )
         </div>
+        @endif
         <div class="text-white-50 small"> Rp
             {{number_format( $saldo_pinjam->amount ?? 0,0,',','.')}} ( {{$saldo_pinjam->saldos->code ?? ''}} )
         </div>
