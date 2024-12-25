@@ -38,6 +38,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $schedule->command('reminder:sendPayment')
             ->monthlyOn(2, '06:30');  // Tanggal 5 setiap bulan pukul 00:00
 
+        //Menjalankan pengiriman Laporan Bulanan
+        $schedule->command('send:monthly-report')
+            ->monthlyOn(10, '05:00');  // Tanggal 5 setiap bulan pukul 00:00
+
         $schedule->command('reminder:loan')->dailyAt('07:00');
         $schedule->command('reminder:konter')->dailyAt('07:00');
         // Menjalanlan setiap sejam sekali

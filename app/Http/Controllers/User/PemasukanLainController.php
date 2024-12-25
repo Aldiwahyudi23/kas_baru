@@ -424,7 +424,7 @@ class PemasukanLainController extends Controller
                 // Mengambil data warga yang mengikuti program "Kas Keluarga"
                 $access_program_kas = AccessProgram::whereHas('program', function ($query) {
                     $query->where('name', 'Kas Keluarga');
-                })->get();
+                })->where('is_active', 1)->get();
 
                 // URL gambar dari direktori storage
                 $imageUrl = asset('storage/kas/pengeluaran/ymKJ8SbQ7NLrLAhjAAKMNfOFHCK8O70HiqEiiIPE.jpg');
