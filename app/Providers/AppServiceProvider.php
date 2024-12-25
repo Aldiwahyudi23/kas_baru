@@ -12,10 +12,12 @@ use App\Models\CompanyInformation;
 use App\Models\DataWarga;
 use App\Models\Deposit;
 use App\Models\KasPayment;
+use App\Models\Konter\TransaksiKonter;
 use App\Models\Loan;
 use App\Models\LoanExtension;
 use App\Models\loanRepayment;
 use App\Models\Menu;
+use App\Models\OtherIncomes;
 use App\Models\Program;
 use App\Models\ProgramSetting;
 use App\Models\Role;
@@ -34,6 +36,7 @@ use App\Observers\DataLoanAdmin;
 use App\Observers\DataLoanExtension;
 use App\Observers\DataLoanRepaymen;
 use App\Observers\DataMenuAdmin;
+use App\Observers\DataOtherIncome;
 use App\Observers\DataPekerjaanAdmin;
 use App\Observers\DataProgramAdmin;
 use App\Observers\DataRoleAdmin;
@@ -43,6 +46,7 @@ use App\Observers\DataSaldoAnggaran;
 use App\Observers\DataSettAnggaranAdmin;
 use App\Observers\DataSettProgramAdmin;
 use App\Observers\DataSubMenuAdmin;
+use App\Observers\DataTransaksiKonter;
 use App\Observers\DataUserAdmin;
 use App\Observers\DataWargaAdmin;
 
@@ -86,5 +90,7 @@ class AppServiceProvider extends ServiceProvider
         Saldo::observe(DataSaldoAdmin::class);
         AnggaranSaldo::observe(DataSaldoAnggaran::class);
         Deposit::observe(DataDeposit::class);
+        OtherIncomes::observe(DataOtherIncome::class);
+        TransaksiKonter::observe(DataTransaksiKonter::class);
     }
 }
