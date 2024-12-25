@@ -71,10 +71,13 @@ class SendMonthlyReport extends Command
                 ->where('data_warga_id', $data->data_warga_id)
                 ->get();
 
+
             // Ambil data Tagihan Konter
             $konters = TransaksiKonter::where('status', 'Berhasil')
                 ->where('submitted_by', $name)
                 ->get();
+
+
 
             // Data KasPayment
             $data_kas = KasPayment::whereMonth('payment_date', $currentMonth)
@@ -141,7 +144,8 @@ class SendMonthlyReport extends Command
             if ($loans->isNotEmpty()) {
                 $message .= "Berikut adalah daftar pinjaman yang belum lunas:\n";
                 foreach ($loans as $loan) {
-                    $message .= "- " . $loan->warga->name . ": Rp " . number_format($loan->remaining_balance, 0, ',', '.') . "\n";
+                    $deadlineLoan = round(Carbon::now()->diffInDays(Carbon::parse($loan->deadline_date), false));
+                    $message .= "- " . $loan->warga->name . " : Rp " . number_format($loan->remaining_balance, 0, ',', '.') . "          " . $deadlineLoan . " hari lagi\n";
                 }
             } else {
                 $message .= "Selamat! Anda tidak memiliki tagihan pinjaman bulan ini.\n";
@@ -152,7 +156,9 @@ class SendMonthlyReport extends Command
             if ($konters->isNotEmpty()) {
                 $message .= "Tagihan konter Anda yang belum lunas adalah:\n";
                 foreach ($konters as $konter) {
-                    $message .= "- " . $konter->product->kategori->name . " (" . $konter->product->provider->name . "): Rp " . number_format($konter->invoice, 0, ',', '.') . "\n";
+                    $deadlineKonter = round(Carbon::now()->diffInDays(Carbon::parse($konter->deadline_date), false));
+                    $message .= "- " . $konter->product->kategori->name . " (" . $konter->product->provider->name . "): Rp " . number_format($konter->invoice, 0, ',', '.')
+                        . "          " . $deadlineKonter . " hari lagi\n";
                 }
             } else {
                 $message .= "Tidak ada tagihan konter bulan ini. Good job! 🎉\n";
