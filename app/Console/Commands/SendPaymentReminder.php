@@ -3,9 +3,8 @@
 namespace App\Console\Commands;
 
 use App\Models\AccessProgram;
-use App\Models\DataWarga;
+use App\Services\FonnteService;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Http;
 
 class SendPaymentReminder extends Command
 {
@@ -21,24 +20,18 @@ class SendPaymentReminder extends Command
      *
      * @var string
      */
-    protected $description = 'Send payment reminder notification via WhatsApp';
+    protected $description = 'Command description';
 
     /**
-     * API Key for Fonnte
-     *
-     * @var string
+     * Execute the console command.
      */
-    protected $apiKey;
+    protected $fonnteService;
 
-    /**
-     * Create a new command instance.
-     */
-    public function __construct()
+    public function __construct(FonnteService $fonnteService)
     {
         parent::__construct();
-        $this->apiKey = env('FONNTE_API_KEY'); // API Key dari .env
+        $this->fonnteService = $fonnteService;
     }
-
     /**
      * Execute the console command.
      */
@@ -47,50 +40,41 @@ class SendPaymentReminder extends Command
         // Ambil semua anggota yang terdaftar di program dengan program_id = 1
         $accessPrograms = AccessProgram::where('program_id', 1)->get();
 
-        // Iterasi setiap anggota
-        foreach ($accessPrograms as $access) {
-            // Ambil data warga berdasarkan data_warga_id
-            $dataWarga = DataWarga::find($access->data_warga_id);
+        foreach ($accessPrograms as $data) {
 
-            if ($dataWarga && $dataWarga->no_hp) {
-                // Nomor telepon dan nama warga
-                $phoneNumber = $dataWarga->no_hp;
-                $namaWarga = $dataWarga->name;
+            // Validasi jika Warga memiliki nomor telepon
+            $phoneNumber = $data->dataWarga->no_hp ?? null;
+            if (!$phoneNumber) {
+                continue; // Skip jika tidak ada nomor telepon
+            }
 
-                // Pesan personalisasi
-                $message = "Assalamu'alaikum, {$namaWarga},\n\n";
-                $message .= "Semoga Anda dan keluarga selalu dalam keadaan sehat dan bahagia. Kami ingin mengingatkan mengenai pembayaran kas bulanan untuk mendukung kelancaran program Keluarga kita.\n\n";
-                $message .= "Berikut adalah informasi pembayaran:\n";
-                $message .= "==============================\n";
-                $message .= "Rekening Pembayaran:\n";
-                $message .= "1. Bank NEO: 5859459403511164\n";
-                $message .= "2. DANA: 085942004204\n";
-                $message .= "A/N Rangga Mulayana\n";
-                $message .= "==============================\n\n";
-                $message .= "Kami sangat berterima kasih atas dukungan Anda selama ini. Setiap kontribusi Anda akan sangat berarti dalam mendukung berbagai kegiatan positif di Keluarga kita.\n\n";
-                $message .= "Mohon untuk segera melakukan pembayaran.\n\n";
-                $message .= "Jika Anda telah melakukan pembayaran, silakan abaikan pesan ini. Terima kasih atas perhatian dan kerjasamanya.\n\n";
-                $message .= "Salam hangat,\n";
-                $message .= "Kel Ma HAYA";
+            $namaWarga = $data->dataWarga->name;
 
+            // Pesan personalisasi
+            $message = "Assalamu'alaikum, {$namaWarga},\n\n";
+            $message .= "Semoga Anda dan keluarga selalu dalam keadaan sehat dan bahagia. Kami ingin mengingatkan mengenai pembayaran kas bulanan untuk mendukung kelancaran program Keluarga kita.\n\n";
+            $message .= "Berikut adalah informasi pembayaran:\n";
+            $message .= "==============================\n";
+            $message .= "Rekening Pembayaran:\n";
+            $message .= "1. Bank NEO: 5859459403511164\n";
+            $message .= "2. DANA: 085942004204\n";
+            $message .= "A/N Rangga Mulayana\n";
+            $message .= "==============================\n\n";
+            $message .= "Kami sangat berterima kasih atas dukungan Anda selama ini. Setiap kontribusi Anda akan sangat berarti dalam mendukung berbagai kegiatan positif di Keluarga kita.\n\n";
+            $message .= "Mohon untuk segera melakukan pembayaran.\n\n";
+            $message .= "Jika Anda telah melakukan pembayaran, silakan abaikan pesan ini. Terima kasih atas perhatian dan kerjasamanya.\n\n";
+            $message .= "Salam hangat,\n";
+            $message .= "Kel Ma HAYA";
 
-                // Kirim pesan lewat API Fonnte
-                $response = Http::withHeaders([
-                    'Authorization' => $this->apiKey,
-                ])->post('https://api.fonnte.com/send', [
-                    'target' => $phoneNumber, // Nomor tujuan
-                    'message' => $message,    // Pesan
-                    'countryCode' => '62',    // Kode negara Indonesia
-                ]);
+            // URL gambar dari direktori storage
+            $imageUrl = asset('storage/kas/pengeluaran/ymKJ8SbQ7NLrLAhjAAKMNfOFHCK8O70HiqEiiIPE.jpg');
 
-                // Log hasil pengiriman
-                if ($response->successful()) {
-                    $this->info("Notifikasi berhasil dikirim ke $namaWarga ($phoneNumber).");
-                } else {
-                    $this->error("Gagal mengirim notifikasi ke $namaWarga ($phoneNumber).");
-                }
-            } else {
-                $this->warn("Data warga dengan ID {$access->data_warga_id} tidak ditemukan atau nomor telepon kosong.");
+            // Mengirim pesan WhatsApp hanya jika pengaturan memungkinkan
+            try {
+                // Mengirim pesan ke Pengurus
+                $this->fonnteService->sendWhatsAppMessage($phoneNumber, $message, $imageUrl);
+            } catch (\Exception $e) {
+                \Log::error("Gagal mengirim pesan ke Pengurus: " . $e->getMessage());
             }
         }
     }

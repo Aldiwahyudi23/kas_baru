@@ -246,19 +246,19 @@ class PemasukanController extends Controller
                 $encryptedIdpengurus = Crypt::encrypt($data->id); // Mengenkripsi ID untuk keamanan
                 $actionUrlPengurus = "https://keluargamahaya.com/confirm/kas/{$encryptedIdpengurus}";
 
-                // Pesan untuk Pengurus
+                // Membuat pesan WhatsApp untuk Pengurus
                 $messagePengurus = "*Notifikasi Pembayaran Kas Baru*\n";
                 $messagePengurus .= "Halo {$notif_pengurus->Warga->name}.\n\n";
                 $messagePengurus .= "Telah diterima pembayaran kas yang memerlukan konfirmasi Anda.\n\n";
                 $messagePengurus .= "Berikut adalah detail pembayaran:\n";
-                $messagePengurus .= "- *Kode*: {$code}\n";
+                $messagePengurus .= "- *Kode*: {$data->code}\n";
                 $messagePengurus .= "- *Tanggal Pembayaran*: {$data->payment_date}\n";
-                $messagePengurus .= "- *Nama*: {$data_warga->name}\n";
-                $messagePengurus .= "- *Di Input*: {$pengaju->name}\n";
-                $messagePengurus .= "- *Nominal*: Rp" . number_format($request->amount, 0, ',', '.') . "\n";
-                $messagePengurus .= "- *Keterangan*: {$request->description}\n\n";
+                $messagePengurus .= "- *Nama Pembayar*: {$data->data_warga->name}\n";
+                $messagePengurus .= "- *Di Input oleh*: {$data->submitted->name}\n";
+                $messagePengurus .= "- *Nominal*: Rp" . number_format($data->amount, 0, ',', '.') . "\n";
+                $messagePengurus .= "- *Keterangan*: {$data->description}\n\n";
                 $messagePengurus .= "Silakan cek dan konfirmasi pembayaran ini melalui link berikut:\n";
-                $messagePengurus .= "- *Link Konfirmasi*: " . $actionUrlPengurus . "\n\n";
+                $messagePengurus .= "- *Link Konfirmasi*: {$actionUrlPengurus}\n\n";
                 $messagePengurus .= "*Harap segera melakukan konfirmasi untuk memastikan status pembayaran.*\n\n";
                 $messagePengurus .= "*Salam,*\n";
                 $messagePengurus .= "*Sistem Kas Keluarga*";

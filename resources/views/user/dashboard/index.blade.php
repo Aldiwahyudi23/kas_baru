@@ -67,6 +67,11 @@
             </div>
             <!-- /.row -->
             @endif
+            @if ($total > 0)
+            @include('user.dashboard.tagihan')
+            @endif
+
+
             <!-- ./card-body -->
             <div class="card-footer">
                 <div class="row">

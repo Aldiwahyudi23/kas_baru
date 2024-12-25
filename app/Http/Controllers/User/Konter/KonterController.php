@@ -351,7 +351,8 @@ class KonterController extends Controller
                 if (isset($response['status']) && $response['status'] == 'success') {
                     return redirect()->back()->with('success', 'Pengajuan Pembelian Pulsa sedang di proses, Notifikasi berhasil dikirim!');
                 }
-                return back()->with('warning', 'Data tersimpan, Gagal mengirim notifikasi');
+
+                return redirect()->back()->with('warning', 'Data tersimpan, Gagal mengirim notifikasi');
 
                 //jika notifikasi email dan wa aktif maka yang di bawah di komen
 
@@ -744,6 +745,12 @@ class KonterController extends Controller
                 $phoneNumberPengurus = $notif_pengurus->Warga->no_hp ?? null;
                 $encryptedIdpengurus = Crypt::encrypt($data->id); // Mengenkripsi ID untuk keamanan
                 $link = "https://keluargamahaya.com/konters/pengajuan/{$encryptedIdpengurus}";
+                if ($product->kategori->name == "Listrik") {
+                    $noHP = $request->no_hp;
+                } else {
+                    $noHP = $request->phone_number;
+                }
+
 
                 // Membuat pesan khusus untuk masing-masing warga
                 $messagePengurus = "*Pengajuan Pulsa*\n";
@@ -751,7 +758,7 @@ class KonterController extends Controller
                 $messagePengurus .= "Kami informasikan bahwa {$request->submitted_by} mengajukan pembelian {$product->kategori->name} {$product->provider->name}:\n\n";
                 $messagePengurus .= "- *ID transaksi*: {$transactionCode}\n";
                 $messagePengurus .= "- *Tanggal Pengajuan*: {$data->created_at}\n";
-                $messagePengurus .= "- *Number HP*: {$request->phone_number}\n";
+                $messagePengurus .= "- *Number HP*: {$noHP}\n";
                 $messagePengurus .= "- *Nominal*: Rp" . number_format($product->amount, 0, ',', '.') . "\n";
                 if ($product->kategori->name == "Listrik") {
                     $messagePengurus .= "- *No Meteran*: {$data_detail->no_listrik}\n";
@@ -934,13 +941,19 @@ class KonterController extends Controller
                 $encryptedIdpengurus = Crypt::encrypt($data->id); // Mengenkripsi ID untuk keamanan
                 $link = "https://keluargamahaya.com/konters/pengajuan/{$encryptedIdpengurus}";
 
+                if ($product->kategori->name == "Listrik") {
+                    $noHP = $request->no_hp;
+                } else {
+                    $noHP = $request->phone_number;
+                }
+
                 // Membuat pesan khusus untuk masing-masing warga
                 $messagePengurus = "*Pengajuan Pulsa*\n";
                 $messagePengurus .= "Halo {$notif_pengurus->Warga->name},\n\n";
                 $messagePengurus .= "Kami informasikan bahwa {$request->submitted_by} mengajukan pembelian {$product->kategori->name} {$product->provider->name}:\n\n";
                 $messagePengurus .= "- *ID transaksi*: {$transactionCode}\n";
                 $messagePengurus .= "- *Tanggal Pengajuan*: {$data->created_at}\n";
-                $messagePengurus .= "- *Number HP*: {$request->phone_number}\n";
+                $messagePengurus .= "- *Number HP*: {$noHP}\n";
                 $messagePengurus .= "- *Nominal*: Rp" . number_format($product->amount, 0, ',', '.') . "\n";
                 if ($product->kategori->name == "Listrik") {
                     $messagePengurus .= "- *No Meteran*: {$data_detail->no_listrik}\n";

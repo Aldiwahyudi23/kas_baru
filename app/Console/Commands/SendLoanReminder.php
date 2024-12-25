@@ -6,7 +6,6 @@ use App\Models\Loan;
 use App\Models\loanRepayment;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Http;
 use App\Services\FonnteService;
 use Illuminate\Support\Facades\Crypt;
 
@@ -30,16 +29,15 @@ class SendLoanReminder extends Command
      * Execute the console command.
      */
 
-    protected $apiKey;
+    protected $fonnteService;
 
-    /**
-     * Create a new command instance.
-     */
-    public function __construct()
+    public function __construct(FonnteService $fonnteService)
     {
         parent::__construct();
-        $this->apiKey = env('FONNTE_API_KEY'); // API Key dari .env
+        $this->fonnteService = $fonnteService;
     }
+
+
     public function handle()
     {
         // Ambil data pinjaman dengan status 'Diterima' dan deadline_date valid
@@ -54,7 +52,7 @@ class SendLoanReminder extends Command
             $sisaWaktu = round($daysElapsed); //membulatkan hasil
 
             // Kirim notifikasi berdasarkan sisa waktu yang ditentukan
-            if (in_array($sisaWaktu, [60, 30, 14, 7, 3, 1, 0, -1, -3, -7])) {
+            if (in_array($sisaWaktu, [60, 30, 14, 7, 3, 2, 1, 0, -1, -3, -7, -10, -14, -17, -21, -25, -30])) {
                 $this->sendReminder($loan, $sisaWaktu);
             }
         }
@@ -112,19 +110,8 @@ class SendLoanReminder extends Command
             $pesan .= "Terima kasih atas perhatian Anda.";
         }
 
-        // Kirim pesan lewat API WhatsApp (contoh menggunakan Fonnte)
-        $response = Http::withHeaders([
-            'Authorization' => $this->apiKey,
-        ])->post('https://api.fonnte.com/send', [
-            'target' => $phoneNumber, // Nomor tujuan
-            'message' => $pesan,
-            'countryCode' => '62', // Kode negara Indonesia
-        ]);
+        $imageUrl = "";
 
-        if ($response->successful()) {
-            $this->info("Notifikasi berhasil dikirim ke {$namaPeminjam}.");
-        } else {
-            $this->error("Gagal mengirim notifikasi ke {$namaPeminjam}.");
-        }
+        $this->fonnteService->sendWhatsAppMessage($phoneNumber, $pesan, $imageUrl);
     }
 }

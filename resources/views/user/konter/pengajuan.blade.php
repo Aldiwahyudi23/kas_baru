@@ -45,6 +45,7 @@
 
 
     @if ($pengajuan->payment_status == "Hutang")
+    @if ($pengajuan->status == "Berhasil")
     <div class="alert 
         @if($remaining_time <= 1 ) alert-danger 
         @else alert-warning 
@@ -54,6 +55,7 @@
             @elseif($remaining_time <= -1) Lewat {{ $remaining_time }} hari @else {{ $remaining_time }} hari Lagi @endif
                 </center>
     </div>
+    @endif
     @endif
 
     <!-- /.card-header -->
@@ -261,6 +263,9 @@
                         Batal / Gagal</option>
                 </select>
             </div>
+            @endif
+            @if ($pengajuan->status == "Berhasil")
+            <input type="hidden" name="status" value="Selesai">
             @endif
 
             <!-- Untuk status yang pembayarannya langsung atau selesai -->

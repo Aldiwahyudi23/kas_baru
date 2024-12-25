@@ -4,8 +4,11 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\AnggaranSaldo;
+use App\Models\Konter\TransaksiKonter;
+use App\Models\Loan;
 use App\Models\Saldo;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
@@ -19,7 +22,14 @@ class HomeController extends Controller
         $saldo_amal = AnggaranSaldo::where('type', 'Dana Amal')->latest()->first();
         $saldo_pinjam = AnggaranSaldo::where('type', 'Dana Pinjam')->latest()->first();
         $saldo_darurat = AnggaranSaldo::where('type', 'Dana Darurat')->latest()->first();
-        return view('user.dashboard.index', compact('saldo', 'saldo_kas', 'saldo_amal', 'saldo_pinjam', 'saldo_darurat'));
+
+        // Untuk Tgaihan aktif
+        $pinjaman = Loan::where('submitted_by', Auth::user()->data_warga_id)->whereIn('status', ['Acknowledged', 'In Repayment'])->get();
+        $sisa = $pinjaman->sum('remaining_balance') ?? 0;
+        $konter = TransaksiKonter::where('status', 'Berhasil')->where('submitted_by', Auth::user()->dataWarga->name)->get();
+        $data_konter = $konter->sum('invoice') ?? 0;
+        $total = $sisa +  $data_konter;
+        return view('user.dashboard.index', compact('saldo', 'saldo_kas', 'saldo_amal', 'saldo_pinjam', 'saldo_darurat', 'total', 'konter', 'pinjaman'));
     }
 
     /**

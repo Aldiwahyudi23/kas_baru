@@ -656,16 +656,37 @@ class BayarPinjamanController extends Controller
             $messageWarga = "*Pembayaran Pinjaman Terkonfirmasi*\n";
             $messageWarga .= "Selamat {$data_warga->name}, pembayaran Pinjaman Anda telah berhasil dikonfirmasi oleh " . Auth::user()->name . " \n\n";
             $messageWarga .= "Berikut adalah detail pembayaran Anda:\n";
-            $messageWarga .= "- *Kode*: {$request->code}\n";
-            $messageWarga .= "- *Tanggal Pembayaran*: {$data->payment_date}\n";
-            $messageWarga .= "- *Nama*: {$data_warga->name}\n";
-            $messageWarga .= "- *Di Input Oleh*: {$pengaju->name}\n";
-            $messageWarga .= "- *Nominal*: Rp" . number_format($request->amount, 0, ',', '.') . "\n";
-            $messageWarga .= "- *Keterangan*: {$request->description}\n\n";
-            $messageWarga .= "Terima kasih telah memenuhi kewajiban pembayaran Pinjaman. Jika Anda memiliki pertanyaan lebih lanjut, silakan hubungi pengurus melalui kontak resmi.\n\n";
+            $messageWarga .= "- *Kode* : {$request->code}\n";
+            $messageWarga .= "- *Tanggal Pembayaran* : {$data->payment_date}\n";
+            $messageWarga .= "- *Nama* : {$data_warga->name}\n";
+            $messageWarga .= "- *Di Input Oleh* : {$pengaju->name}\n";
+            $messageWarga .= "- *Nominal* : Rp" . number_format($request->amount, 0, ',', '.') . "\n\n";
+
+            $messageWarga .= "Berikut adalah detail pinjaman Anda:\n";
+            $messageWarga .= "- *Kode Pinjaman* : {$loan->code}\n";
+            $messageWarga .= "- *Status Pinjaman* : " . ($loan->status === 'paid in full' ? 'Lunas' : 'Belum Lunas') . "\n";
+            $messageWarga .= "- *Jumlah Pinjaman* : Rp" . number_format($loan->loan_amount, 0, ',', '.') . "\n";
+            $messageWarga .= "- *Sisa Pinjaman* : Rp" . number_format($loan->remaining_balance, 0, ',', '.') . "\n\n";
+
+            $messageWarga .= "Pembayaran terakhir yang telah masuk:\n";
+
+            // Mengambil pembayaran dari tabel LoanPayment berdasarkan loan_id
+            $payments = LoanRepayment::where('loan_id', $loan->id)->get();
+
+            if ($payments->isNotEmpty()) {
+                foreach ($payments as $payment) {
+                    $messageWarga .= "- Rp" . number_format($payment->amount, 0, ',', '.') . " pada tanggal " . $payment->created_at->format('d-m-Y') . "\n";
+                }
+            } else {
+                $messageWarga .= "Belum ada pembayaran yang tercatat.\n";
+            }
+
+            $messageWarga .= "\nTerima kasih telah memenuhi kewajiban pembayaran pinjaman. Jika Anda memiliki pertanyaan lebih lanjut, silakan hubungi pengurus melalui kontak resmi.\n\n";
             $messageWarga .= "*Semoga hari Anda menyenangkan!*\n\n";
             $messageWarga .= "*Salam hangat,*\n";
             $messageWarga .= "*Pengurus Kas Keluarga*";
+
+
 
             // mengirim ke email 
             $recipientEmail = $data_warga->email;

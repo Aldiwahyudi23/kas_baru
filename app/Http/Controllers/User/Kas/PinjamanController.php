@@ -57,7 +57,8 @@ class PinjamanController extends Controller
         $anggaran = Anggaran::where('name', 'Dana Pinjam')->first();
         // mengambil data anggota kas yng di atur oleh access program
         $program = Program::where('name', 'Kas Keluarga')->first();
-        $access = AccessProgram::where('program_id', $program->id)->get();
+        // $access = AccessProgram::where('program_id', $program->id)->get();
+        $access = DataWarga::all();
 
         $saldo_pinjam = AnggaranSaldo::where('type', 'Dana Pinjam')->latest()->first();
         $saldo_proses = Loan::whereIn('status', ['pending', 'approved_by_chairman', 'disbursed_by_treasurer',])->sum('loan_amount');
@@ -877,7 +878,7 @@ class PinjamanController extends Controller
             $link = "https://keluargamahaya.com/pinjaman/{$encryptedId}";
 
             // Pesan untuk Warga
-            $messageWarga = "*Pengajuan Pinjaman Anda Disetujui dan Dicairkan*\n";
+            $messageWarga = "*Pinjaman Anda Disetujui dan Dicairkan*\n";
             $messageWarga .= "Halo {$data_warga->name},\n\n";
             $messageWarga .= "Kami informasikan bahwa pengajuan pinjaman Anda telah disetujui dan dana telah dicairkan oleh bendahara {$data->bendahara->name}. Berikut adalah detailnya:\n\n";
             $messageWarga .= "- *Kode Pinjaman*: {$data->code}\n";
@@ -893,6 +894,19 @@ class PinjamanController extends Controller
             $messageWarga .= "*Sistem Kas Keluarga*";
 
 
+
+            $messagePenjelasan = "*Penjelasan Terkait Pinjaman Keluarga*\n";
+            $messagePenjelasan .= "Halo {$data_warga->name},\n\n";
+            $messagePenjelasan .= "Kami ingin menegaskan bahwa *Pinjaman Keluarga* bukan layanan komersial atau lembaga pinjaman, melainkan inisiatif untuk membantu keluarga.\n\n";
+            $messagePenjelasan .= "Waktu 3 bulan diberikan agar pembayaran dapat dilakukan bertahap dan tidak menumpuk di akhir. Jika pembayaran dilakukan hanya di akhir periode, ada risiko menjadi beban tambahan ketika situasi kurang mendukung.\n\n";
+            $messagePenjelasan .= "Kami harap Anda dapat mencicil sesuai kemampuan agar tujuan utama pinjaman ini, yaitu membantu keluarga, tetap tercapai tanpa menimbulkan kesan negatif.\n\n";
+            $messagePenjelasan .= "Selama Pinjaman Aktif maka setiap hari ke 60, 30, 14, 7, 3, 1, sebelum jatuh tempo akan muncul pemeritahuan secara Otomatis.\n\n";
+            $messagePenjelasan .= "Terima kasih atas pengertian dan kerjasamanya.\n\n";
+            $messagePenjelasan .= "*Salam hangat,*\n";
+            $messagePenjelasan .= "*Sistem Kas Keluarga*";
+
+
+
             // mengirim ke email 
             $recipientEmail = $data_warga->email;
             $recipientName = $data_warga->name;
@@ -905,6 +919,8 @@ class PinjamanController extends Controller
             if ($notif->wa_notification  && $notif->anggota) {
                 // Mengirim pesan ke Warga
                 $responseWarga = $this->fonnteService->sendWhatsAppMessage($phoneNumberWarga, $messageWarga, $imageUrl);
+
+                $responseWargaPenjelasan = $this->fonnteService->sendWhatsAppMessage($phoneNumberWarga, $messagePenjelasan, $imageUrl);
             }
             if ($notif->email_notification && $notif->anggota) {
                 // Mengirim notifikasi email ke anggota
@@ -957,6 +973,7 @@ class PinjamanController extends Controller
             // Cek hasil pengiriman
             // Evaluasi keberhasilan pengiriman
             $wargaSuccess = isset($responseWarga['status']) && $responseWarga['status'] == 'success';
+            $wargaPenjelasanSuccess = isset($responseWargaPenjelasan['status']) && $responseWargaPenjelasan['status'] == 'success';
             $pengurusSuccess = isset($responsePengurus['status']) && $responsePengurus['status'] == 'success';
             DB::commit();
 

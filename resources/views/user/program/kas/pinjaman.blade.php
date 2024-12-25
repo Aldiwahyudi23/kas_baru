@@ -5,7 +5,7 @@
 <div class="card bg-primary text-white shadow">
     <div class="card-body">
         <h3> <B>
-                Rp {{number_format( $saldo_pinjam->saldo - $saldo_proses ?? 0,0,',','.')}}
+                Rp {{number_format( $saldo_pinjam->saldo ?? 0  - $saldo_proses,0,',','.')}}
             </B></h3>
         @if ($saldo_proses >= 1)
         <div class="text-danger-50 small"> Rp

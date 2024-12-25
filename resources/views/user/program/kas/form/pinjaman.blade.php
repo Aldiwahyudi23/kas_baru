@@ -13,11 +13,9 @@
                             name="data_warga_id" id="data_warga_id">
                             <option value="">--Pilih Anggota--</option>
                             @foreach ($access as $data )
-                            <option value="{{$data->data_warga_id}}"
-                                {{ old('data_warga_id') == $data->data_warga_id ? 'selected' : '' }} @if($data->
-                                is_active == 0) disabled @endif>
-                                {{$data->dataWarga->name}}
-                                @if($data->is_active == 0) (Tidak Aktif) @endif
+                            <option value="{{$data->id}}" {{ old('data_warga_id') == $data->id ? 'selected' : '' }}>
+                                {{$data->name}}
+                                @if(empty($data->no_hp)) (Blm Ada NoHp) @endif
                             </option>
                             @endforeach
                         </select>
@@ -146,6 +144,12 @@
 
                     // Inisialisasi toggle berdasarkan nilai awal pada page load
                     document.addEventListener('DOMContentLoaded', togglePaymentFields);
+                </script>
+                <script>
+                    function toggleInput() {
+                        const inputForm = document.getElementById('inputForm');
+                        inputForm.classList.toggle('hidden');
+                    }
                 </script>
                 @endsection
 
