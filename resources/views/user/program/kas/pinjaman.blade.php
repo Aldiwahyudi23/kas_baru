@@ -15,6 +15,7 @@
         <div class="text-white-50 small"> Rp
             {{number_format( $saldo_pinjam->amount ?? 0,0,',','.')}} ( {{$saldo_pinjam->saldos->code ?? ''}} )
         </div>
+        <h6 class="mt-3 mb-0">Saldo yang sedang dipinjam: Rp {{number_format( $saldo_terpakai ?? 0,0,',','.')}}</h6>
     </div>
     <a href="{{Route('saldo.anggaran', ['type' => 'Dana Pinjam'])}}" class="card-footer text-white clearfix small z-1">
         <span class="float-left">Lihat Detail</span>

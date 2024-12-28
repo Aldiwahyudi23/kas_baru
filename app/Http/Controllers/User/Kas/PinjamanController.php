@@ -62,8 +62,9 @@ class PinjamanController extends Controller
 
         $saldo_pinjam = AnggaranSaldo::where('type', 'Dana Pinjam')->latest()->first();
         $saldo_proses = Loan::whereIn('status', ['pending', 'approved_by_chairman', 'disbursed_by_treasurer',])->sum('loan_amount');
+        $saldo_terpakai = Loan::whereIn('status', ['Acknowledged', 'In Repayment'])->sum('remaining_balance');
 
-        return view('user.program.kas.pinjaman', compact('layout_form', 'pinjaman', 'anggaran', 'pinjaman_proses', 'access', 'pinjaman_tersambung', 'saldo_pinjam', 'saldo_proses'));
+        return view('user.program.kas.pinjaman', compact('layout_form', 'pinjaman', 'anggaran', 'pinjaman_proses', 'access', 'pinjaman_tersambung', 'saldo_pinjam', 'saldo_proses', 'saldo_terpakai'));
     }
 
     /**

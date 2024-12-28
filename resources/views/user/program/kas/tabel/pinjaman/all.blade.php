@@ -1,7 +1,7 @@
 <!-- Kode ini untuk isi tabel di dalam index data_admin -->
 <div class="card">
     <div class="card-header">
-        <h3 class="card-title">Data Pinjaman </h3>
+        <h3 class="card-title">Data Pinjaman Atas Nama </h3>
     </div>
     <!-- /.card-header -->
     <div class="card-body">
