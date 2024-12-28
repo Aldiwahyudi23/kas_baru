@@ -51,6 +51,7 @@
             Auth::user()->role->name == "Sekretaris" || Auth::user()->role->name == "Wakil Sekretaris" ||
             Auth::user()->role->name == "Ketua" || Auth::user()->role->name == "Wakil Ketua")
 
+            @if ($saldo->cash_outside > 0)
             <div class="card bg-primary text-white shadow">
                 <center>
                     <h5>
@@ -66,6 +67,8 @@
                 </a>
             </div>
             <!-- /.row -->
+            @endif
+
             @endif
             @if ($total > 0)
             @include('user.dashboard.tagihan')

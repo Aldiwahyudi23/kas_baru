@@ -39,7 +39,7 @@ class PemasukanController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
 
     {
 
@@ -63,6 +63,28 @@ class PemasukanController extends Controller
         $program = Program::where('name', 'Kas Keluarga')->first();
         $access = AccessProgram::where('program_id', $program->id)->get();
 
+
+        $filter_tahun = $request->get('filter_tahun', Carbon::now()->year);
+
+        // Ambil data dari database berdasarkan tahun
+        $data_kasAnggota = KasPayment::whereYear('created_at', $filter_tahun)
+            ->get();
+
+        // Buat array untuk menyusun data per bulan
+        $monthlyData = collect();
+        foreach (range(1, Carbon::now()->month) as $month) {
+            $monthlyData->put($month, [
+                'month_name' => Carbon::create()->month($month)->translatedFormat('F'),
+                'payments' => $data_kasAnggota->filter(function ($item) use ($month) {
+                    return $item->created_at->month == $month;
+                }),
+            ]);
+        }
+
+        // Mendapatkan tahun yang tersedia dari data
+        $available_years = KasPayment::selectRaw('YEAR(created_at) as year')
+            ->distinct()
+            ->pluck('year');
         // =====================menghitung pembayaran yang kosong=========================
         // // Periode awal (Januari 2025)
         // $startDate = Carbon::create(2024, 8, 1);
@@ -96,7 +118,7 @@ class PemasukanController extends Controller
 
         // Tambahkan , 'bulanKosong', 'sisaPembayaran' di compak di bawah 
 
-        return view('user.program.kas.pembayaran.kas', compact('program', 'cek_kasPayment', 'data_kasAnggota', 'layout_form', 'pembayaran_proses', 'access'));
+        return view('user.program.kas.pembayaran.kas', compact('program', 'cek_kasPayment', 'data_kasAnggota', 'layout_form', 'pembayaran_proses', 'access', 'monthlyData', 'available_years', 'filter_tahun'));
     }
 
     /**
