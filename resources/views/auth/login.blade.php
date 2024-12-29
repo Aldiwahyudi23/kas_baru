@@ -27,15 +27,30 @@
 
                 <div>
                     <x-label for="password" value="{{ __('Password') }}" class="text-lg font-semibold" />
-                    <x-input id="password"
-                        class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 rounded-lg"
-                        type="password" name="password" required autocomplete="current-password" />
+                    <div class="relative">
+                        <!-- Tombol Toggle Password -->
+                        <button type="button" id="togglePassword"
+                            class="absolute inset-y-0 right-0 left-2 pr-3 flex items-center text-gray-500 focus:outline-none">
+                            <!-- Ikon Mata -->
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M15 12m4.8-3.6A7.2 7.2 0 1018 17.2a7.2 7.2 0 001.8-8.8zm0 0a7.2 7.2 0 01-8.8 1.8 7.2 7.2 0 018.8 1.8zm0 0a7.2 7.2 0 01-8.8-8.8 7.2 7.2 0 018.8 8.8z" />
+                            </svg>
+                        </button>
+
+                        <!-- Input Password -->
+                        <x-input id="password"
+                            class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 rounded-lg pl-10"
+                            type="password" name="password" required autocomplete="current-password" />
+                    </div>
                 </div>
+
 
                 <div class="flex items-center justify-between mt-4">
                     <label for="remember_me" class="flex items-center">
                         <x-checkbox id="remember_me" name="remember" class="text-indigo-600 focus:ring-indigo-500" />
-                        <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
+                        <span class="ms-2 text-sm text-gray-600">{{ __('Selalu masuk') }}</span>
                     </label>
 
                     @if (Route::has('password.request'))
@@ -55,20 +70,37 @@
             </form>
         </div>
 
+        <script>
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const passwordInput = document.getElementById('password');
+            const type = passwordInput.type === 'password' ? 'text' : 'password';
+            passwordInput.type = type;
+
+            // Ganti ikon
+            this.querySelector('svg').classList.toggle('text-indigo-600');
+        });
+        </script>
+
+
         <style>
-            @keyframes fade-in {
-                from {
-                    opacity: 0;
-                }
+        button#togglePassword {
+            height: 100%;
+            align-items: center;
+        }
 
-                to {
-                    opacity: 1;
-                }
+        @keyframes fade-in {
+            from {
+                opacity: 0;
             }
 
-            .animate-fade-in {
-                animation: fade-in 0.5s ease-in-out;
+            to {
+                opacity: 1;
             }
+        }
+
+        .animate-fade-in {
+            animation: fade-in 0.5s ease-in-out;
+        }
         </style>
     </x-authentication-card>
 </x-guest-layout>

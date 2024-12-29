@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rule;
 use PHPUnit\Framework\Attributes\UsesTrait;
 
@@ -61,7 +62,31 @@ class UserController extends Controller
         $program = Program::all();
         $activityLogAdmin = ActivityLog::where('code', $dataUser->dataWarga->name)->get();
 
-        return view('admin.master_data.data_user.show', compact('dataUser', 'activityLogAdmin', 'program', 'role'));
+        // // Ambil semua sesi yang terkait dengan pengguna
+        // $sessions = DB::table('sessions')
+        //     ->where('user_id', $id)
+        //     ->get()
+        //     ->map(function ($session) {
+        //         return (object) [
+        //             'agent' => $session->agent,
+        //             'ip_address' => $session->ip_address,
+        //             'last_active' => \Carbon\Carbon::createFromTimestamp($session->last_active)->diffForHumans(),
+        //             'is_current_device' => $session->is_current_device,
+        //         ];
+        //     });
+
+        $sessions = collect(session()->get('sessions'))
+            ->where('user_id', $id)
+            ->map(function ($session) {
+                return (object) [
+                    'agent' => $session->agent,
+                    'ip_address' => $session->ip_address,
+                    'last_active' => \Carbon\Carbon::createFromTimestamp($session->last_active)->diffForHumans(),
+                    'is_current_device' => $session->is_current_device,
+                ];
+            });
+
+        return view('admin.master_data.data_user.show', compact('dataUser', 'activityLogAdmin', 'program', 'role', 'sessions'));
     }
 
     /**
