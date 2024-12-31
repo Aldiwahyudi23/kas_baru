@@ -37,6 +37,10 @@ class OtpLoginController extends Controller
         $otp = rand(1000, 9999); // 4 digit OTP
         $expiresAt = Carbon::now()->addMinutes(2);
 
+        // Simpan OTP dan waktu kedaluwarsa ke dalam database dan session
+        session(['phone' => $request->phone, 'otp' => $otp, 'expires_at' => $expiresAt->timestamp]);
+
+
         Otp::updateOrCreate(
             ['phone' => $request->phone],
             ['otp' => $otp, 'expires_at' => $expiresAt]
@@ -47,7 +51,7 @@ class OtpLoginController extends Controller
         $img = "";
         $this->fonnteService->sendWhatsAppMessage($request->phone, $message, $img);
 
-        return redirect()->route('login')->with([
+        return redirect()->route('login-otp')->with([
             'otp_sent' => true,
             'phone' => $request->phone,
             'expires_at' => $expiresAt->timestamp, // Kirim waktu kedaluwarsa sebagai timestamp
@@ -61,14 +65,22 @@ class OtpLoginController extends Controller
             'otp' => 'required|numeric|digits:4',
         ]);
 
-        $otp = Otp::where('phone', $request->phone)
-            ->where('otp', $request->otp)
-            ->where('expires_at', '>', Carbon::now())
-            ->first();
-
+        $otp = Otp::where('phone', $request->phone) // Menyaring berdasarkan nomor telepon
+            ->where('otp', $request->otp) // Menyaring berdasarkan OTP yang dimasukkan
+            ->where('expires_at', '>', Carbon::now()) // Memastikan waktu kadaluwarsa belum lewat
+            ->first(); // Mengambil satu record yang pertama jika cocok
+        $cek = Otp::where('phone', $request->phone) // Menyaring berdasarkan nomor telepon
+            ->where('expires_at', '>', Carbon::now()) // Memastikan waktu kadaluwarsa belum lewat
+            ->first(); // Mengambil satu record yang pertama jika cocok
         if (!$otp) {
-            return back()->withErrors(['otp' => 'Kode OTP tidak valid atau telah kedaluwarsa.']);
+            // Jika OTP tidak ditemukan atau sudah kedaluwarsa
+            return redirect()->route('login-otp')
+                ->with('otp_sent', true)
+                ->with('phone', $request->phone)
+                ->withErrors(['otp' => 'Kode OTP tidak valid atau telah kedaluwarsa.'])
+                ->with('expires_at',  Carbon::parse($cek->expires_at)->timestamp); // Ambil expires_at dari OTP yang ada, jika tidak ada gunakan waktu default
         }
+
 
         $user = User::where('no_hp', $request->phone)->first();
 
@@ -77,30 +89,43 @@ class OtpLoginController extends Controller
         }
 
         Auth::login($user, true); // Login dengan "Remember Me"
+
         $otp->delete(); // Hapus OTP setelah berhasil login
 
         return redirect()->intended('/dashboard');
     }
 
+
+
     public function resendOtp(Request $request)
     {
-        $phone = session('phone');
-        $otp = rand(1000, 9999); // OTP baru
+
+        $request->validate(['phone' => 'required|numeric']);
+
+        $user = User::where('no_hp', $request->phone)->first();
+
+        if (!$user) {
+            return back()->withErrors(['phone' => 'Nomor HP tidak terdaftar.']);
+        }
+
+        $otp = rand(1000, 9999); // 4 digit OTP
         $expiresAt = Carbon::now()->addMinutes(2);
+        // Simpan OTP dan waktu kedaluwarsa ke dalam database dan session
+        session(['phone' => $request->phone, 'otp' => $otp, 'expires_at' => $expiresAt->timestamp]);
+
 
         Otp::updateOrCreate(
-            ['phone' => $phone],
+            ['phone' => $request->phone],
             ['otp' => $otp, 'expires_at' => $expiresAt]
         );
 
         $message = "Hai! Kode OTP Anda untuk login adalah: $otp. Kode ini berlaku selama 2 menit. Harap masukkan kode OTP di aplikasi untuk melanjutkan proses login. Terima kasih!";
-
         $img = "";
-        $this->fonnteService->sendWhatsAppMessage($phone, $message, $img);
+        $this->fonnteService->sendWhatsAppMessage($request->phone, $message, $img);
 
-        return redirect()->route('login')->with([
+        return redirect()->route('login-otp')->with([
             'otp_sent' => true,
-            'phone' => $phone,
+            'phone' => $request->phone,
             'expires_at' => $expiresAt->timestamp, // Kirim waktu kedaluwarsa sebagai timestamp
         ]);
     }

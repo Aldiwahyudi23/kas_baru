@@ -49,16 +49,18 @@
 
                 <div class="flex items-center justify-between mt-4">
                     <label for="remember_me" class="flex items-center">
-                        <x-checkbox id="remember_me" name="remember" class="text-indigo-600 focus:ring-indigo-500" />
+                        <x-checkbox id="remember_me" name="remember" checked
+                            class="text-indigo-600 focus:ring-indigo-500" />
                         <span class="ms-2 text-sm text-gray-600">{{ __('Selalu masuk') }}</span>
                     </label>
 
                     @if (Route::has('password.request'))
                     <a class="text-sm text-indigo-600 hover:text-indigo-900 transition duration-150 ease-in-out"
                         href="{{ route('password.request') }}">
-                        {{ __('Forgot your password?') }}
+                        {{ __('Lupa Password?') }}
                     </a>
                     @endif
+
                 </div>
 
                 <div class="flex items-center justify-center mt-6">
@@ -66,41 +68,49 @@
                         class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-md focus:outline-none focus:ring focus:ring-indigo-300 transition-transform transform hover:scale-105">
                         {{ __('Log in') }}
                     </x-button>
+                    <!-- Link untuk Login menggunakan OTP -->
                 </div>
+
             </form>
+            <div class="text-center mt-4">
+                <a href="{{ route('login-otp') }}"
+                    class="text-sm text-indigo-600 hover:text-indigo-900 transition duration-150 ease-in-out">
+                    {{ __('Masuk Menggunakan No Hp') }}
+                </a>
+            </div>
         </div>
 
         <script>
-        document.getElementById('togglePassword').addEventListener('click', function() {
-            const passwordInput = document.getElementById('password');
-            const type = passwordInput.type === 'password' ? 'text' : 'password';
-            passwordInput.type = type;
+            document.getElementById('togglePassword').addEventListener('click', function() {
+                const passwordInput = document.getElementById('password');
+                const type = passwordInput.type === 'password' ? 'text' : 'password';
+                passwordInput.type = type;
 
-            // Ganti ikon
-            this.querySelector('svg').classList.toggle('text-indigo-600');
-        });
+                // Ganti ikon
+                this.querySelector('svg').classList.toggle('text-indigo-600');
+            });
         </script>
 
 
         <style>
-        button#togglePassword {
-            height: 100%;
-            align-items: center;
-        }
-
-        @keyframes fade-in {
-            from {
-                opacity: 0;
+            button#togglePassword {
+                height: 100%;
+                align-items: center;
             }
 
-            to {
-                opacity: 1;
-            }
-        }
+            @keyframes fade-in {
+                from {
+                    opacity: 0;
+                }
 
-        .animate-fade-in {
-            animation: fade-in 0.5s ease-in-out;
-        }
+                to {
+                    opacity: 1;
+                }
+            }
+
+            .animate-fade-in {
+                animation: fade-in 0.5s ease-in-out;
+            }
         </style>
     </x-authentication-card>
 </x-guest-layout>

@@ -43,13 +43,17 @@
                     </x-button>
                 </div>
 
-                <div id="resend-link" class="text-center mt-4 hidden">
-                    <a href="{{ route('resendOtp') }}" class="text-indigo-600 hover:underline">
-                        Kirim Ulang OTP
-                    </a>
-                </div>
-
             </form>
+            <div id="resend-link" class="text-center mt-4 hidden">
+                <form action="{{ route('resendOtp') }}" method="POST" class="inline-block">
+                    @csrf
+                    <input type="hidden" name="phone" value="{{ session('phone') }}">
+
+                    <button type="submit" class="text-indigo-600 hover:underline">
+                        Kirim Ulang OTP
+                    </button>
+                </form>
+            </div>
             @else
             <!-- Form Nomor HP -->
             <form action="{{ route('login.check') }}" method="POST" class="space-y-4">
@@ -68,7 +72,14 @@
                     </x-button>
                 </div>
             </form>
+
             @endif
+            <div class="text-center mt-4">
+                <a href="{{ route('login') }}"
+                    class="text-sm text-indigo-600 hover:text-indigo-900 transition duration-150 ease-in-out">
+                    {{ __('Masuk Menggunakan Email') }}
+                </a>
+            </div>
         </div>
 
         <script>

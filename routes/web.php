@@ -131,7 +131,7 @@ Route::get('/', function () {
 });
 Route::post('/send-payment-notification', [notificationController::class, 'sendPaymentSuccessNotification'])->name('notif');
 Route::get('/send-notification', [notificationController::class, 'index']);
-Route::get('/login-otp', [OtpLoginController::class, 'showLoginForm'])->name('login');
+Route::get('/login-otp', [OtpLoginController::class, 'showLoginForm'])->name('login-otp');
 Route::post('/login/check', [OtpLoginController::class, 'checkPhone'])->name('login.check');
 Route::post('/login/verify', [OtpLoginController::class, 'verifyOtp'])->name('login.verify');
 Route::match(['get', 'post'], '/resendOtp', [OtpLoginController::class, 'resendOtp'])->name('resendOtp');
