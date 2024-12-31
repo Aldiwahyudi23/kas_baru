@@ -287,17 +287,17 @@ class PinjamanController extends Controller
             $encryptedId = Crypt::encrypt($data->id); // Mengenkripsi ID untuk keamanan
             $actionUrl = $linkWarga;
 
-            if (
-                $notif->wa_notification  && $notif->anggota
-            ) {
-                // Mengirim pesan ke Warga
+            if ($notif->wa_notification && $notif->anggota && !empty($phoneNumberWarga)) {
+                // Mengirim pesan ke Warga jika nomor WhatsApp ada
                 $responseWarga = $this->fonnteService->sendWhatsAppMessage($phoneNumberWarga, $messageWarga, $imageUrl);
             }
-            if ($notif->email_notification && $notif->anggota) {
-                // Mengirim notifikasi email ke anggota
+
+            if (
+                $notif->email_notification && $notif->anggota && !empty($recipientEmail)
+            ) {
+                // Mengirim notifikasi email ke anggota jika email ada
                 Mail::to($recipientEmail)->send(new Notification($recipientName, $bodyMessage, $status, $actionUrl));
             }
-
             // ============================Notif untuk pengurus=========================================================
 
 
@@ -318,7 +318,7 @@ class PinjamanController extends Controller
                 $messagePengurus .= "- *Kode Pinjaman*: {$code}\n";
                 $messagePengurus .= "- *Nama Anggaran*: {$anggaran->name}\n";
                 $messagePengurus .= "- *Tanggal Pengajuan*: {$dateTime}\n";
-                $messagePengurus .= "- *Nama *: {$data_warga->name}\n";
+                $messagePengurus .= "- *Nama*: {$data_warga->name}\n";
                 $messagePengurus .= "- *Di Input*: {$pengaju->name}\n";
                 $messagePengurus .= "- *Nominal*: Rp" . number_format($request->amount, 0, ',', '.') . "\n\n";
                 $messagePengurus .= "Silakan klik link berikut untuk memberikan persetujuan:\n";
@@ -917,16 +917,18 @@ class PinjamanController extends Controller
 
             $actionUrl = $link;
 
-            if ($notif->wa_notification  && $notif->anggota) {
-                // Mengirim pesan ke Warga
+            if ($notif->wa_notification && $notif->anggota && !empty($phoneNumberWarga)) {
+                // Mengirim pesan ke Warga jika nomor WhatsApp ada
                 $responseWarga = $this->fonnteService->sendWhatsAppMessage($phoneNumberWarga, $messageWarga, $imageUrl);
 
                 $responseWargaPenjelasan = $this->fonnteService->sendWhatsAppMessage($phoneNumberWarga, $messagePenjelasan, $imageUrl);
             }
-            if ($notif->email_notification && $notif->anggota) {
-                // Mengirim notifikasi email ke anggota
+
+            if ($notif->email_notification && $notif->anggota && !empty($recipientEmail)) {
+                // Mengirim notifikasi email ke anggota jika email ada
                 Mail::to($recipientEmail)->send(new Notification($recipientName, $bodyMessage, $status, $actionUrl));
             }
+
 
             // ============================Notif untuk pengurus=========================================================
 

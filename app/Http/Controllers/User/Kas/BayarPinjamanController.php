@@ -184,11 +184,11 @@ class BayarPinjamanController extends Controller
             $encryptedId = Crypt::encrypt($data->id); // Mengenkripsi ID untuk keamanan
             $actionUrl = "https://keluargamahaya.com/bayar-pinjaman/{$encryptedId}";
 
-            if ($notif->wa_notification  && $notif->anggota) {
+            if ($notif->wa_notification  && $notif->anggota && !empty($phoneNumberWarga)) {
                 // Mengirim pesan ke Warga
                 $responseWarga = $this->fonnteService->sendWhatsAppMessage($phoneNumberWarga, $messageWarga, $imageUrl);
             }
-            if ($notif->email_notification && $notif->anggota) {
+            if ($notif->email_notification && $notif->anggota && !empty($recipientEmail)) {
                 // Mengirim notifikasi email ke anggota
                 Mail::to($recipientEmail)->send(new Notification($recipientName, $bodyMessage, $status, $actionUrl));
             }
@@ -697,11 +697,11 @@ class BayarPinjamanController extends Controller
             $encryptedId = Crypt::encrypt($data->id); // Mengenkripsi ID untuk keamanan
             $actionUrl = "https://keluargamahaya.com/bayar-pinjaman/{$encryptedId}";
 
-            if ($notif->wa_notification  && $notif->anggota) {
+            if ($notif->wa_notification  && $notif->anggota && !empty($phoneNumberWarga)) {
                 // Mengirim pesan ke Warga
                 $responseWarga = $this->fonnteService->sendWhatsAppMessage($phoneNumberWarga, $messageWarga, $imageUrl);
             }
-            if ($notif->email_notification && $notif->anggota) {
+            if ($notif->email_notification && $notif->anggota && !empty($recipientEmail)) {
                 // Mengirim notifikasi email ke anggota
                 Mail::to($recipientEmail)->send(new Notification($recipientName, $bodyMessage, $status, $actionUrl));
             }

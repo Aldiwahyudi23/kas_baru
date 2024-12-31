@@ -30,9 +30,9 @@ return new class extends Migration
             $table->string('disbursement_receipt_path')->nullable(); // Tanda bukti pencairan dari bendahara
             $table->timestamps();
 
-            $table->foreign('submitted_by')->references('id')->on('users');
-            $table->foreign('approved_by')->references('id')->on('users');
-            $table->foreign('disbursed_by')->references('id')->on('users');
+            $table->foreign('submitted_by')->references('id')->on('data_wargas');
+            $table->foreign('approved_by')->references('id')->on('data_wargas');
+            $table->foreign('disbursed_by')->references('id')->on('data_wargas');
         });
     }
 

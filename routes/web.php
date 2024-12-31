@@ -30,6 +30,7 @@ use App\Http\Controllers\User\Kas\PengeluaranController;
 use App\Http\Controllers\User\Kas\LoanExtensionController;
 use App\Http\Controllers\Admin\Konter\ProductKonterController;
 use App\Http\Controllers\Admin\Konter\TransaksiKonterController;
+use App\Http\Controllers\Auth\OtpLoginController;
 use App\Http\Controllers\User\HomeController;
 use App\Http\Controllers\User\Konter\KonterController;
 use App\Http\Controllers\User\SetorTunaiController;
@@ -130,6 +131,11 @@ Route::get('/', function () {
 });
 Route::post('/send-payment-notification', [notificationController::class, 'sendPaymentSuccessNotification'])->name('notif');
 Route::get('/send-notification', [notificationController::class, 'index']);
+Route::get('/login-otp', [OtpLoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login/check', [OtpLoginController::class, 'checkPhone'])->name('login.check');
+Route::post('/login/verify', [OtpLoginController::class, 'verifyOtp'])->name('login.verify');
+Route::match(['get', 'post'], '/resendOtp', [OtpLoginController::class, 'resendOtp'])->name('resendOtp');
+
 
 Route::middleware([
     'auth:sanctum',
