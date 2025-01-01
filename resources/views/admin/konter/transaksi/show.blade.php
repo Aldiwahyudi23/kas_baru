@@ -7,7 +7,7 @@
         <!-- About Me Box -->
         <div class="card card-primary">
             <div class="card-header">
-                <h3 class=" text-center">{{$transaksiKonter->provider->name}}</h3>
+                <h3 class=" text-center">{{$transaksiKonter->product->provider->name}}</h3>
                 <p class="text-muted text-center">{{$transaksiKonter->code}}</p>
             </div>
             <!-- /.card-header -->

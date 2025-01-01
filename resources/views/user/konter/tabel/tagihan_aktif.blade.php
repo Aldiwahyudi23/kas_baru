@@ -6,6 +6,7 @@
             <th>Kategori</th>
             <th>Nominal</th>
             <th>Harga</th>
+            <th>Di Input</th>
             <th>Nama</th>
         </tr>
     </thead>
@@ -45,6 +46,7 @@
             <td>Rp {{number_format($data->product->amount,0,',','.')}} </td>
             <td>Rp {{number_format($data->price,0,',','.')}} </td>
             <td>{{$data->submitted_by}} </td>
+            <td>{{$data->detail->name}} </td>
 
         </tr>
         @endforeach

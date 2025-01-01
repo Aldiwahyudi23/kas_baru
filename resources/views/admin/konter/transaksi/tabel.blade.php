@@ -14,6 +14,7 @@
                     <th>Kode</th>
                     <th>Nama Produce</th>
                     <th>Nama</th>
+                    <th>Buy</th>
                     <th>Tanggal di Buat</th>
                     <th>Status</th>
                     <th></th>
@@ -30,6 +31,7 @@
                         {{number_format($data->product->amount,0,',','.' )}}
                     </td>
                     <td>{{$data->submitted_by}} </td>
+                    <td>{{number_format($data->buying_price,0,',','.' )}} </td>
                     <td>{{$data->created_at}} </td>
                     <td>{{$data->status}} </td>
                     <td class="project-actions text-right">

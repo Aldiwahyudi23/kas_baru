@@ -89,7 +89,7 @@ class BayarPinjamanController extends Controller
         );
 
         // Mengecek apakah sudah ada pengajuan kas yang sedang diproses
-        $cek_pembayaran = loanRepayment::where('status', 'process')->count();
+        $cek_pembayaran = loanRepayment::where('status', 'process')->where('data_warga_id', $request->data_warga_id)->count();
         if ($cek_pembayaran >= 1) {
             return redirect()->back()->with('error', 'Pembayaran gagal dikirim. Sudah ada Pembayaran pinjaman yang sedang diproses.');
         }
