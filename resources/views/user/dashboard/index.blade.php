@@ -138,10 +138,7 @@
 </div>
 <!-- /.row -->
 <div class="row">
-    @if(Auth::user()->role->name == "Bendahara" || Auth::user()->role->name == "Wakil Bendahara" ||
-    Auth::user()->role->name == "Sekretaris" || Auth::user()->role->name == "Wakil Sekretaris" ||
-    Auth::user()->role->name == "Ketua" || Auth::user()->role->name == "Wakil Ketua")
-
+    @if($isMemberKonter || $isPengurus)
     <div class="col-3 col-sm-4 col-md-3">
         <a class="users-list-name" href="{{Route('konter.index')}}">
             <div class="info-box">
@@ -151,6 +148,10 @@
         </a>
         <!-- /.info-box -->
     </div>
+    @endif
+
+    @if($isPengurus)
+
     <!-- /.col -->
     <div class="col-3 col-sm-4 col-md-3">
         <a class="users-list-name" href="{{Route('other-income.index')}}">

@@ -1,8 +1,21 @@
 <!-- Kode ini untuk isi tabel di dalam index data_admin -->
+<style>
+.card-header .btn {
+    margin-left: auto;
+    /* Pastikan tombol berada di sebelah kanan */
+}
+</style>
+
 <div class="card">
-    <div class="card-header">
-        <h3 class="card-title">Data Transaksi Sukses </h3>
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h3 class="card-title">Data Transaksi Sukses</h3>
+        @if($isMemberKonter)
+        <a href="{{ route('pendapatan.member') }}" class="btn btn-primary">
+            Pendapatan
+        </a>
+        @endif
     </div>
+
     <!-- /.card-header -->
     <div class="card-body">
         <table id="example1" class="table table-bordered table-striped datatable1 ">

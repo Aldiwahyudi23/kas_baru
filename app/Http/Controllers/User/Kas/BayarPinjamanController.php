@@ -667,7 +667,14 @@ class BayarPinjamanController extends Controller
             $messageWarga .= "- *Status Pinjaman* : " . ($loan->status === 'paid in full' ? 'Lunas' : 'Belum Lunas') . "\n";
             $messageWarga .= "- *Jumlah Pinjaman* : Rp" . number_format($loan->loan_amount, 0, ',', '.') . "\n";
             $messageWarga .= "- *Sisa Pinjaman* : Rp" . number_format($loan->remaining_balance, 0, ',', '.') . "\n\n";
-
+            if ($loan->overpayment_balance > 1) {
+                $messageWarga .= "- *Lebih* : Rp" . number_format(
+                    $loan->overpayment_balance,
+                    0,
+                    ',',
+                    '.'
+                ) . "\n\n";
+            }
             $messageWarga .= "Pembayaran terakhir yang telah masuk:\n";
 
             // Mengambil pembayaran dari tabel LoanPayment berdasarkan loan_id
@@ -717,12 +724,33 @@ class BayarPinjamanController extends Controller
                 $messagePengurus = "*Laporan Pembayaran Pinjaman Terkonfirmasi*\n";
                 $messagePengurus .= "Halo {$notif_pengurus->Warga->name}\n\n";
                 $messagePengurus .= "Berikut adalah laporan pembayaran Pinjaman yang telah berhasil dikonfirmasi oleh  " . Auth::user()->name . " \n\n";
-                $messagePengurus .= "- *Kode*: {$request->code}\n";
-                $messagePengurus .= "- *Tanggal Pembayaran*: {$data->payment_date}\n";
-                $messagePengurus .= "- *Nama Warga*: {$data_warga->name}\n";
-                $messagePengurus .= "- *Di Input Oleh*: {$pengaju->name}\n";
-                $messagePengurus .= "- *Nominal*: Rp" . number_format($request->amount, 0, ',', '.') . "\n";
-                $messagePengurus .= "- *Keterangan*: {$request->description}\n\n";
+                $messagePengurus .= "- *Kode* : {$request->code}\n";
+                $messagePengurus .= "- *Tanggal Pembayaran* : {$data->payment_date}\n";
+                $messagePengurus .= "- *Nama* : {$data_warga->name}\n";
+                $messagePengurus .= "- *Di Input Oleh* : {$pengaju->name}\n";
+                $messagePengurus .= "- *Nominal* : Rp" . number_format($request->amount, 0, ',', '.') . "\n\n";
+
+                $messagePengurus .= "Berikut adalah detail pinjaman nya :\n";
+                $messagePengurus .= "- *Kode Pinjaman* : {$loan->code}\n";
+                $messagePengurus .= "- *Status Pinjaman* : " . ($loan->status === 'paid in full' ? 'Lunas' : 'Belum Lunas') . "\n";
+                $messagePengurus .= "- *Jumlah Pinjaman* : Rp" . number_format($loan->loan_amount, 0, ',', '.') . "\n";
+                $messagePengurus .= "- *Sisa Pinjaman* : Rp" . number_format($loan->remaining_balance, 0, ',', '.') . "\n";
+                if ($loan->overpayment_balance > 1) {
+                    $messagePengurus .= "- *Lebih* : Rp" . number_format($loan->overpayment_balance, 0, ',', '.') . "\n\n";
+                }
+                $messagePengurus .= "Pembayaran terakhir yang telah masuk:\n";
+
+                // Mengambil pembayaran dari tabel LoanPayment berdasarkan loan_id
+                $payments = LoanRepayment::where('loan_id', $loan->id)->get();
+
+                if ($payments->isNotEmpty()) {
+                    foreach ($payments as $payment) {
+                        $messagePengurus .= "- Rp" . number_format($payment->amount, 0, ',', '.') . " pada tanggal " . $payment->created_at->format('d-m-Y') . "\n";
+                    }
+                } else {
+                    $messagePengurus .= "Belum ada pembayaran yang tercatat.\n";
+                }
+
                 $messagePengurus .= "Pembayaran ini telah diproses dan dikonfirmasi oleh pengurus.\n\n";
                 $messagePengurus .= "*Salam hormat,*\n";
                 $messagePengurus .= "*Sistem Kas Keluarga*";

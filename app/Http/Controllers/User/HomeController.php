@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\AnggaranSaldo;
 use App\Models\Konter\TransaksiKonter;
 use App\Models\Loan;
+use App\Models\Member;
+use App\Models\MemberType;
 use App\Models\Saldo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,7 +31,14 @@ class HomeController extends Controller
         $konter = TransaksiKonter::where('status', 'Berhasil')->where('submitted_by', Auth::user()->dataWarga->name)->get();
         $data_konter = $konter->sum('invoice') ?? 0;
         $total = $sisa +  $data_konter;
-        return view('user.dashboard.index', compact('saldo', 'saldo_kas', 'saldo_amal', 'saldo_pinjam', 'saldo_darurat', 'total', 'konter', 'pinjaman'));
+
+        //menu member
+        $user = Auth::user();
+        $memberType = MemberType::where('name', 'Konter')->first();
+        $isMemberKonter = Member::where('member_type_id', $memberType->id)->where('user_id', Auth::user()->id)->where('is_active', true)->exists();
+        $isPengurus = in_array($user->role->name, ['Ketua', 'Bendahara', 'Sekretaris', 'Wakil Ketua', 'Wakil Bendahara', 'Wakil Sekretaris']);
+
+        return view('user.dashboard.index', compact('saldo', 'saldo_kas', 'saldo_amal', 'saldo_pinjam', 'saldo_darurat', 'total', 'konter', 'pinjaman', 'isMemberKonter', 'isPengurus'));
     }
 
     /**

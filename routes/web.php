@@ -33,6 +33,8 @@ use App\Http\Controllers\Admin\Konter\TransaksiKonterController;
 use App\Http\Controllers\Auth\OtpLoginController;
 use App\Http\Controllers\User\HomeController;
 use App\Http\Controllers\User\Konter\KonterController;
+use App\Http\Controllers\User\Member\MemberController;
+use App\Http\Controllers\User\Member\MemberTypeController;
 use App\Http\Controllers\User\SetorTunaiController;
 use App\Models\LoanExtension;
 use Illuminate\Support\Facades\Route;
@@ -214,6 +216,12 @@ Route::middleware([
     Route::get('/transaksi-user/{encryptedProductId}/{phoneNumber}', [KonterController::class, 'transaksi_user'])->name('transaksi-user');
     Route::post('/transaksi-user/proses', [KonterController::class, 'transaksi_proses_user'])->name('transaksi-proses_user');
     Route::get('/repayment/konter/{id}', [KonterController::class, 'repayment_pulsa'])->name('repayment.pulsa');
+    Route::get('/members/konter/', [KonterController::class, 'pendapatan_member'])->name('pendapatan.member');
+
+
+    Route::resource('/members', MemberController::class);
+    Route::patch('/members/{id}/toggle-active', [MemberController::class, 'toggleActive'])->name('members.toggle-active');
+    Route::resource('/member-types', MemberTypeController::class);
 });
 Route::post('/detect-provider', [KonterController::class, 'detectProvider'])->name('detect.provider');
 Route::get('/pulsa', [KonterController::class, 'pulsa'])->name('pulsa');

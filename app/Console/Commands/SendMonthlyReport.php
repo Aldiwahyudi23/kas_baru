@@ -68,7 +68,7 @@ class SendMonthlyReport extends Command
 
             // Ambil data Tagihan Pinjaman
             $loans = Loan::whereIn('status',  ['Acknowledged', 'In Repayment'])
-                ->where('data_warga_id', $data->data_warga_id)
+                ->where('submitted_by', $data->data_warga_id)
                 ->get();
 
 

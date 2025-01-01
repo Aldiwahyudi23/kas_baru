@@ -13,6 +13,8 @@ use App\Models\Konter\KategoriKonter;
 use App\Models\Konter\ProductKonter;
 use App\Models\Konter\ProviderKonter;
 use App\Models\Konter\TransaksiKonter;
+use App\Models\Member;
+use App\Models\MemberType;
 use App\Models\Saldo;
 use App\Services\FonnteService;
 use Carbon\Carbon;
@@ -37,25 +39,51 @@ class KonterController extends Controller
      */
     public function index()
     {
-        $pengajuan_proses = TransaksiKonter::where('status', ['proses', 'pending'])->get();
-        $transaksi_gagal = TransaksiKonter::where('status', 'Gagal')->get();
-        $transaksi_selesai = TransaksiKonter::where('status', 'Selesai')->get();
 
-        // Ambil data transaksi dengan status 'Berhasil'
-        // Ambil data transaksi dengan status 'Berhasil'
-        $transaksi_sukses = TransaksiKonter::where('status', 'Berhasil')->get()->map(function ($transaction) {
-            $deadlineDate = Carbon::parse($transaction->deadline_date);
-            $currentDate = Carbon::now();
 
-            // Hitung sisa waktu
-            $transaction->remaining_time = round(
-                $currentDate->diffInDays($deadlineDate)
-            );
+        //menu member
+        $user = Auth::user();
+        $memberType = MemberType::where('name', 'Konter')->first();
+        $isMemberKonter = Member::where('member_type_id', $memberType->id)->where('user_id', Auth::user()->id)->where('is_active', true)->exists();
+        $isPengurus = in_array($user->role->name, ['Ketua', 'Bendahara', 'Sekretaris', 'Wakil Ketua', 'Wakil Bendahara', 'Wakil Sekretaris']);
 
-            return $transaction;
-        });
+        if ($isMemberKonter) {
+            $pengajuan_proses = TransaksiKonter::where('submitted_by', Auth::user()->name)->where('status', ['proses', 'pending'])->get();
+            $transaksi_gagal = TransaksiKonter::where('submitted_by', Auth::user()->name)->where('status', 'Gagal')->get();
+            $transaksi_selesai = TransaksiKonter::where('submitted_by', Auth::user()->name)->where('status', 'Selesai')->get();
+            // Ambil data transaksi dengan status 'Berhasil'
+            $transaksi_sukses = TransaksiKonter::where('submitted_by', Auth::user()->name)->where('status', 'Berhasil')->get()->map(function ($transaction) {
+                $deadlineDate = Carbon::parse($transaction->deadline_date);
+                $currentDate = Carbon::now();
 
-        return view('user.konter.index', compact('pengajuan_proses', 'transaksi_sukses', 'transaksi_gagal', 'transaksi_selesai'));
+                // Hitung sisa waktu
+                $transaction->remaining_time = round(
+                    $currentDate->diffInDays($deadlineDate)
+                );
+
+                return $transaction;
+            });
+        }
+        if ($isPengurus) {
+            $pengajuan_proses = TransaksiKonter::where('status', ['proses', 'pending'])->get();
+            $transaksi_gagal = TransaksiKonter::where('status', 'Gagal')->get();
+            $transaksi_selesai = TransaksiKonter::where('status', 'Selesai')->get();
+            // Ambil data transaksi dengan status 'Berhasil'
+            $transaksi_sukses = TransaksiKonter::where('status', 'Berhasil')->get()->map(function ($transaction) {
+                $deadlineDate = Carbon::parse($transaction->deadline_date);
+                $currentDate = Carbon::now();
+
+                // Hitung sisa waktu
+                $transaction->remaining_time = round(
+                    $currentDate->diffInDays($deadlineDate)
+                );
+
+                return $transaction;
+            });
+        }
+
+
+        return view('user.konter.index', compact('pengajuan_proses', 'transaksi_sukses', 'transaksi_gagal', 'transaksi_selesai', 'isMemberKonter', 'isPengurus'));
     }
 
     /**
@@ -126,7 +154,14 @@ class KonterController extends Controller
 
         $data_Warga = DataWarga::all();
 
-        return view('user.konter.pengajuan', compact('pengajuan', 'data_Warga', 'remaining_time'));
+        //menu member
+        $user = Auth::user();
+        $memberType = MemberType::where('name', 'Konter')->first();
+        $isMemberKonter = Member::where('member_type_id', $memberType->id)->where('user_id', Auth::user()->id)->where('is_active', true)->exists();
+        $isPengurus = in_array($user->role->name, ['Ketua', 'Bendahara', 'Sekretaris', 'Wakil Ketua', 'Wakil Bendahara', 'Wakil Sekretaris']);
+
+
+        return view('user.konter.pengajuan', compact('pengajuan', 'data_Warga', 'remaining_time', 'isMemberKonter', 'isPengurus'));
     }
     // Jika berhasil maka menyimpan data
     public function pengajuan_berhasil(Request $request, $id)
@@ -1022,5 +1057,38 @@ class KonterController extends Controller
         }
 
         return view('user.konter.repayment.transaksi', compact('product', 'phoneNumber', 'pengajuan'));
+    }
+
+    public function pendapatan_member(Request $request)
+    {
+        //menu member
+        $user = Auth::user();
+        $memberType = MemberType::where('name', 'Konter')->first();
+        $isMemberKonter = Member::where('member_type_id', $memberType->id)->where('user_id', Auth::user()->id)->where('is_active', true)->exists();
+        $isPengurus = in_array($user->role->name, ['Ketua', 'Bendahara', 'Sekretaris', 'Wakil Ketua', 'Wakil Bendahara', 'Wakil Sekretaris']);
+
+        $transaksi = TransaksiKonter::where('submitted_by', $user->name)->where('status', 'Selesai')->get();
+
+        // Ambil data yang dikelompokkan berdasarkan bulan
+        $laporanBulan = TransaksiKonter::selectRaw('MONTH(created_at) as bulan, YEAR(created_at) as tahun, COUNT(*) as total_transaksi, SUM(margin) as total_keuntungan')
+            ->groupBy(
+                'bulan',
+                'tahun'
+            )
+            ->orderBy(
+                'tahun',
+                'asc'
+            )
+            ->orderBy(
+                'bulan',
+                'asc'
+            )
+            ->where('submitted_by', $user->name)
+            ->where('status', 'Selesai')
+            ->get();
+
+        return view('user.konter.pendapatan', [
+            'laporanBulan' => $laporanBulan,
+        ]);
     }
 }

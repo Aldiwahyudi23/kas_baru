@@ -143,6 +143,7 @@ $total = $kas->count() + $loan->count() + $ex->count() + $rePayment->count() + $
                 </li>
             </ul>
         </li>
+
         <li class="nav-item">
             <a href="{{route('setor-tunai.index')}}" class="nav-link">
                 <i class="nav-icon fas fa-th"></i>
@@ -151,6 +152,33 @@ $total = $kas->count() + $loan->count() + $ex->count() + $rePayment->count() + $
                     <span class="right badge badge-danger">New</span>
                 </p>
             </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="#" class="nav-link">
+                <i class="nav-icon fas fa-tachometer-alt"></i>
+                <p>
+                    Member
+                    <i class="right fas fa-angle-left">
+                    </i>
+                </p>
+            </a>
+            <ul class="nav nav-treeview">
+
+                <li class="nav-item">
+                    <a href="{{route('member-types.index')}}" class="nav-link">
+                        <i class="far fa-circle nav-icon"></i>
+                        <p>Type Member</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{route('members.index')}}" class="nav-link">
+                        <i class="far fa-circle nav-icon"></i>
+                        <p>Data Member
+                        </p>
+                    </a>
+                </li>
+            </ul>
         </li>
         @endif
 
