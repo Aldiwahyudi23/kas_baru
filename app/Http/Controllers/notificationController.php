@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\Notification;
 use App\Models\AccessProgram;
 use App\Models\Program;
 use App\Models\User;
 use App\Services\FonnteService;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -21,18 +24,20 @@ class notificationController extends Controller
     public function sendPaymentSuccessNotification(Request $request)
     {
         // $program = Program::where('name', 'Kas Keluarga')->first();
-        // $access_program_kas = AccessProgram::where('program_id', $program->id)->get();
-        $access_program_kas = AccessProgram::whereHas('program', function ($query) {
-            $query->where('name', 'Kas Keluarga');
-        })->get();
+        // // $access_program_kas = AccessProgram::where('program_id', $program->id)->get();
+        // $access_program_kas = AccessProgram::whereHas('program', function ($query) {
+        //     $query->where('name', 'Kas Keluarga');
+        // })->get();
 
-        $target = [];
-        foreach ($access_program_kas as $data) {
-            // Menambahkan nomor telepon lengkap ke dalam array target
-            $target[] = $data->dataWarga->no_hp;
-        }
+        // $target = [];
+        // foreach ($access_program_kas as $data) {
+        //     // Menambahkan nomor telepon lengkap ke dalam array target
+        //     $target[] = $data->dataWarga->no_hp;
+        // }
         // Menghasilkan array yang berisi semua nomor telepon
-        $numbers = $target;
+        // $numbers = $target;
+
+        $number = $request->phone;
 
         $message = "*Percobaan* \n";
         $message .= "Halo, pembayaran kas Anda sebesar \n  Rp " . number_format($request->amount, 2, ',', '.') . " telah berhasil.\n\n";
@@ -42,12 +47,28 @@ class notificationController extends Controller
         $message .= "- Keterangan: Pembayaran kas keluarga.\n\n";
         $message .= "*Terima kasih telah melakukan pembayaran.* \n\n";
 
-        // URL gambar dari direktori storage
+
+        // Tombol untuk pesan
+        $buttons = [
+            [
+                'type' => 'url', // Tombol dengan URL
+                'label' => 'Lihat Detail', // Label tombol
+                'url' => route('kas.index') // Link tujuan
+            ],
+            // 'url' => route('kas.index', ['id' => $request->id]) // Link tujuan
+            [
+                'type' => 'reply', // Tombol balasan cepat
+                'label' => 'Hubungi Kami', // Label tombol
+                'reply' => 'Saya butuh bantuan' // Pesan balasan
+            ]
+        ];
+        // / URL gambar dari direktori storage
         $imageUrl = asset('storage/kas/pengeluaran/ymKJ8SbQ7NLrLAhjAAKMNfOFHCK8O70HiqEiiIPE.jpg');
 
-        foreach ($numbers as $number) {
-            $response = $this->fonnteService->sendWhatsAppMessage($number, $message, $imageUrl);
-        }
+        // foreach ($numbers as $number) {
+        //     $response = $this->fonnteService->sendWhatsAppMessage($number, $message, $imageUrl);
+        // }
+        $response = $this->fonnteService->sendWhatsAppMessage($number, $message, $imageUrl, $buttons);
         if (isset($response['status']) && $response['status'] == 'success') {
             return back()->with('success', 'Notifikasi berhasil dikirim!');
         }

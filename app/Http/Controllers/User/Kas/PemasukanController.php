@@ -42,7 +42,6 @@ class PemasukanController extends Controller
     public function index(Request $request)
 
     {
-
         //Untuk konfirmasi delete
         $title = 'Delete !';
         $text = "Apakah benar anda mau hapus data ini?";
@@ -67,7 +66,7 @@ class PemasukanController extends Controller
         $filter_tahun = $request->get('filter_tahun', Carbon::now()->year);
 
         // Ambil data dari database berdasarkan tahun
-        $data_kasAnggota = KasPayment::whereYear('created_at', $filter_tahun)
+        $data_kasAnggota = KasPayment::whereYear('created_at', $filter_tahun)->where('data_warga_id', Auth::user()->data_warga_id)
             ->get();
 
         // Buat array untuk menyusun data per bulan

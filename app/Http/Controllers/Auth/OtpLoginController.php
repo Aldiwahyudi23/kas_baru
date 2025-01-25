@@ -74,12 +74,30 @@ class OtpLoginController extends Controller
             ->first(); // Mengambil satu record yang pertama jika cocok
         if (!$otp) {
             // Jika OTP tidak ditemukan atau sudah kedaluwarsa
+            // $otpData = Otp::where('phone', $request->phone)->latest()->first(); // Ambil OTP terakhir untuk mendapatkan `expires_at`
+            // $expiresAt = $otpData ? $otpData->expires_at : Carbon::now()->addMinutes(2); // Jika tidak ditemukan, set default waktu mundur 2 menit
+
+            // Jika OTP tidak ditemukan atau sudah kedaluwarsa
+            // return redirect()->route('login-otp')
+            // ->with('otp_sent', true)
+            // ->with('phone', $request->phone)
+            //->withErrors(['otp' => 'Kode OTP tidak valid atau telah kedaluwarsa.'])
+            // ->with('expires_at',  Carbon::parse($cek->expires_at)->timestamp); // Ambil expires_at dari OTP yang ada, jika tidak ada gunakan waktu default
+            // }
+
+
+            // Jika OTP tidak ditemukan atau sudah kedaluwarsa
+            $otpData = Otp::where('phone', $request->phone)->latest()->first(); // Ambil OTP terakhir untuk mendapatkan `expires_at`
+            $expiresAt = $otpData ? $otpData->expires_at : Carbon::now()->addMinutes(2); // Jika tidak ditemukan, set default waktu mundur 2 menit
+
             return redirect()->route('login-otp')
                 ->with('otp_sent', true)
                 ->with('phone', $request->phone)
                 ->withErrors(['otp' => 'Kode OTP tidak valid atau telah kedaluwarsa.'])
-                ->with('expires_at',  Carbon::parse($cek->expires_at)->timestamp); // Ambil expires_at dari OTP yang ada, jika tidak ada gunakan waktu default
+                ->with('expires_at', Carbon::parse($expiresAt)->timestamp); // Gunakan waktu dari database atau waktu default
         }
+
+
 
 
         $user = User::where('no_hp', $request->phone)->first();

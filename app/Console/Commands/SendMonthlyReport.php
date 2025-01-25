@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Mail\Notification;
+use App\Mail\ReportMail;
 use App\Models\AccessProgram;
 use App\Models\AnggaranSaldo;
 use App\Models\CashExpenditures;
@@ -13,6 +14,7 @@ use App\Models\OtherIncomes;
 use App\Models\Saldo;
 use Illuminate\Console\Command;
 use App\Services\FonnteService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 
@@ -66,7 +68,7 @@ class SendMonthlyReport extends Command
                 ->where('data_warga_id', $data->data_warga_id)
                 ->get();
 
-            // Ambil data Tagihan Pinjaman
+            // Ambil data Tagihan Pinjaman User
             $loans = Loan::whereIn('status',  ['Acknowledged', 'In Repayment'])
                 ->where('submitted_by', $data->data_warga_id)
                 ->get();
@@ -105,6 +107,7 @@ class SendMonthlyReport extends Command
                 ->get();
 
             $totalRemainingBalance = $Data_loan->sum('remaining_balance');
+            $totalOverPaymentBalance = Loan::where('status',  'Paid in Full')->sum('overpayment_balance');
 
             $data_konter = TransaksiKonter::whereMonth('created_at', $currentMonth)
                 ->whereYear('created_at', $currentYear)
@@ -117,7 +120,15 @@ class SendMonthlyReport extends Command
 
 
             // Hitung Saldo dan AnggaranSaldo
+            $endOfLastMonth = Carbon::now()->subMonth()->endOfMonth();
+            // Mengambil data saldo untuk akhir bulan lalu
+            $saldo_bulan_lalu = Saldo::whereMonth('created_at', $endOfLastMonth)
+                ->orderBy('created_at', 'desc')  // Mengurutkan berdasarkan created_at, terbaru di atas
+                ->first();  // Mengambil hanya satu data terakhir
+            //mengambil saldo yang terbaru
             $saldoTotal = Saldo::latest()->first();
+            $data_saldo = Saldo::whereMonth('created_at', $currentMonth)
+                ->whereYear('created_at', $currentYear)->get();
 
             $saldoKas = AnggaranSaldo::where('type', 'Dana Kas')->latest()->first();
             $saldoDarurat = AnggaranSaldo::where('type', 'Dana Darurat')->latest()->first();
@@ -181,7 +192,9 @@ class SendMonthlyReport extends Command
             $message .= "- Saldo Pinjaman: Rp " . number_format($saldoPinjam->saldo, 0, ',', '.') . "\n";
             $message .= "- Saldo Darurat: Rp " . number_format($saldoDarurat->saldo, 0, ',', '.') . "\n";
             $message .= "- Saldo Amal: Rp " . number_format($saldoAmal->saldo, 0, ',', '.') . "\n";
-            $message .= "========================\n";
+            $message .= "========================\n\n";
+
+            $message .= "Cek Email agar bisa melihat Mutasi setiap pemasukan dan pengeluaran perbulan, ada di File PDF\n";
 
             $message .= "\nTerima kasih, Jangan ragu untuk menghubungi kami jika ada pertanyaan. 😊";
 
@@ -193,8 +206,43 @@ class SendMonthlyReport extends Command
             $bodyMessagePengurus = preg_replace('/\*(.*?)\*/', '<b>$1</b>', $message);
             $actionUrlPengurus = "http://keluargamahaya.com";
 
-            // Mengirim ke email
-            Mail::to($recipientEmailPengurus)->send(new Notification($recipientNamePengurus, $bodyMessagePengurus, $status, $actionUrlPengurus));
+
+            // Generate konten PDF
+            $pdf = Pdf::loadView('reports.monthly', compact(
+                'data_saldo',
+                'data_kas',
+                'Data_loan',
+                'kasPayments',
+                'loans',
+                'konters',
+                'kasPaymentsTotal',
+                'otherIncomesTotal',
+                'cashExpendituresTotal',
+                'totalRemainingBalance',
+                'totalOverPaymentBalance',
+                'totalKonter',
+                'saldoTotal',
+                'saldoKas',
+                'saldoPinjam',
+                'saldoDarurat',
+                'saldoAmal',
+                'currentMonth',
+                'currentYear',
+                'saldo_bulan_lalu',
+                'name'
+            ));
+
+            // Simpan PDF ke storage
+            $fileName = 'laporan_' . strtolower(Carbon::now()->format('FY')) . '.pdf';
+            $filePath = public_path('laporan/' . $fileName);
+            $pdf->save($filePath); // Simpan file PDF
+
+
+            Mail::to($recipientEmailPengurus)->send(new ReportMail($recipientNamePengurus, $bodyMessagePengurus, $status, $actionUrlPengurus, $filePath, $fileName));
+            // Hapus file setelah email terkirim
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
 
             // Kirim laporan (contoh pengiriman melalui log atau WhatsApp/email)
             $this->fonnteService->sendWhatsAppMessage($phoneNumber, $message, $img);

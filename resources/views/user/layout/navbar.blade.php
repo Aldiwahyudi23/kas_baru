@@ -10,7 +10,7 @@
                     <a href="{{route('kas.index')}}" class="nav-link">Bayar</a>
                 </li>
                 <li class="nav-item d-none d-sm-inline-block">
-                    <a href="{{route('tentang.index')}}" class="nav-link">profile</a>
+                    <a href="user/profile" class="nav-link">profile</a>
                 </li>
                 <li class="nav-item d-none d-sm-inline-block">
                     <a href="{{route('pinjaman.index')}}" class="nav-link">Pinjam</a>

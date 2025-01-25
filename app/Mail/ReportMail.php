@@ -7,28 +7,34 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Queue\SerializesModels;
-use Parsedown;
 
-class Notification extends Mailable
+class ReportMail extends Mailable
 {
     use Queueable, SerializesModels;
+
+    public $filePath;
+    public $fileName;
 
     public $recipientName;
     public $bodyMessage;
     public $status;
     public $actionUrl;
 
-
     /**
      * Create a new message instance.
      */
-    public function __construct($recipientName, $bodyMessage, $status, $actionUrl)
+    public function __construct(string $recipientName, $bodyMessage, $status, $actionUrl, $filePath, $fileName)
     {
+
         $this->recipientName = $recipientName;
         $this->bodyMessage = $bodyMessage;
         $this->status = $status;
         $this->actionUrl = $actionUrl;
+
+        $this->filePath = $filePath;
+        $this->fileName = $fileName;
     }
 
     /**
@@ -37,7 +43,7 @@ class Notification extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Notification',
+            subject: 'Laporan Bulanan',
         );
     }
 
@@ -58,6 +64,10 @@ class Notification extends Mailable
      */
     public function attachments(): array
     {
-        return [];
+        return [
+            Attachment::fromPath($this->filePath)
+                ->as($this->fileName)
+                ->withMime('application/pdf'),
+        ];
     }
 }

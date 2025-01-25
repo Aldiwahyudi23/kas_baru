@@ -6,6 +6,7 @@ use App\Http\Controllers\User\Kas\BayarPinjamanController;
 use App\Http\Controllers\User\Kas\PemasukanController;
 use App\Http\Controllers\User\Kas\PinjamanController;
 use App\Http\Controllers\User\KasController;
+use App\Http\Controllers\User\LaporanController;
 use App\Http\Controllers\User\PemasukanLainController;
 use App\Http\Middleware\CheckActiveStatusAdmin;
 use App\Http\Controllers\Admin\AdminAuthController;
@@ -222,6 +223,8 @@ Route::middleware([
     Route::resource('/members', MemberController::class);
     Route::patch('/members/{id}/toggle-active', [MemberController::class, 'toggleActive'])->name('members.toggle-active');
     Route::resource('/member-types', MemberTypeController::class);
+
+    Route::resource('/laporan-user', LaporanController::class);
 });
 Route::post('/detect-provider', [KonterController::class, 'detectProvider'])->name('detect.provider');
 Route::get('/pulsa', [KonterController::class, 'pulsa'])->name('pulsa');
