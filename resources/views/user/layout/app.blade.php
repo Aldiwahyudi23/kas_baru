@@ -268,6 +268,8 @@
                 "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
             }).buttons().container().appendTo($(this).closest('.dataTables_wrapper').find(
                 '.col-md-6:eq(0)'));
+
+
         });
 
         $(".datatable1").each(function() {
@@ -318,6 +320,34 @@
                 },
             }).buttons().container().appendTo($(this).closest('.dataTables_wrapper').find(
                 '.col-md-6:eq(0)'));
+        });
+
+    });
+
+    $(document).ready(function() {
+
+        // Filter berdasarkan bulan
+        $("#filter-bulan").on("change", function() {
+            const bulan = $(this).val().toLowerCase(); // Ubah ke lowercase agar pencocokan lebih mudah
+            if (bulan) {
+                table.column(1) // Kolom yang berisi created_at (kolom 1)
+                    .search(bulan, true, false) // Mencari berdasarkan nama bulan
+                    .draw();
+            } else {
+                table.column(1).search("").draw(); // Reset filter
+            }
+        });
+
+        // Filter berdasarkan tahun
+        $("#filter-tahun").on("change", function() {
+            const tahun = $(this).val();
+            if (tahun) {
+                table.column(1) // Kolom yang berisi created_at (kolom 1)
+                    .search(tahun, true, false) // Mencari berdasarkan tahun
+                    .draw();
+            } else {
+                table.column(1).search("").draw(); // Reset filter
+            }
         });
     });
     </script>

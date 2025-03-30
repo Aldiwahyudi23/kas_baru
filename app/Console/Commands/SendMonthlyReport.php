@@ -114,6 +114,9 @@ class SendMonthlyReport extends Command
                 ->where('status', 'Selesai')
                 ->get();
 
+            $konterAktif = TransaksiKonter::where('status', 'Berhasil')
+                ->sum('invoice');
+
             $totalMargin = $data_konter->sum('margin');
             $totalDiskon = $data_konter->sum('diskon');
             $totalKonter = $totalMargin + $totalDiskon;
@@ -187,6 +190,8 @@ class SendMonthlyReport extends Command
             $message .= "========================\n";
             $message .= "*💰 Saldo Keseluruhan*\n";
             $message .= "Berikut adalah rincian saldo Anda:\n";
+            $message .= " *Saldo Cash (blm setor tunai): Rp " . number_format($saldoTotal->cash_outside, 0, ',', '.') . "*\n";
+            $message .= " *Saldo Bank: Rp " . number_format($saldoTotal->atm_balance, 0, ',', '.') . "*\n";
             $message .= " *Saldo Total: Rp " . number_format($saldoTotal->total_balance, 0, ',', '.') . "*\n";
             $message .= "- Saldo Kas: Rp " . number_format($saldoKas->saldo, 0, ',', '.') . "\n";
             $message .= "- Saldo Pinjaman: Rp " . number_format($saldoPinjam->saldo, 0, ',', '.') . "\n";
@@ -194,7 +199,9 @@ class SendMonthlyReport extends Command
             $message .= "- Saldo Amal: Rp " . number_format($saldoAmal->saldo, 0, ',', '.') . "\n";
             $message .= "========================\n\n";
 
-            $message .= "Cek Email agar bisa melihat Mutasi setiap pemasukan dan pengeluaran perbulan, ada di File PDF\n";
+            $message .= "Saldo seharusnya adalah *Saldo Total* ditambah uang yang masih di Pinjam \n\n";
+
+            $message .= "Cek Email agar bisa melihat Mutasi setiap pemasukan dan pengeluaran perbulan, ada di File PDF\n\n";
 
             $message .= "\nTerima kasih, Jangan ragu untuk menghubungi kami jika ada pertanyaan. 😊";
 
@@ -229,7 +236,8 @@ class SendMonthlyReport extends Command
                 'currentMonth',
                 'currentYear',
                 'saldo_bulan_lalu',
-                'name'
+                'name',
+                'konterAktif',
             ));
 
             // Simpan PDF ke storage

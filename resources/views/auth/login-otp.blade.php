@@ -83,41 +83,41 @@
         </div>
 
         <script>
-            document.addEventListener("DOMContentLoaded", function() {
-                // Ambil waktu kedaluwarsa dari session flash dengan Blade Syntax
-                const expiresAt = @json(session(
-                    'expires_at')); // Menggunakan Blade untuk mengirimkan data session sebagai JSON
-                const currentTime = Math.floor(Date.now() / 1000); // Waktu saat ini dalam detik
+        document.addEventListener("DOMContentLoaded", function() {
+            // Ambil waktu kedaluwarsa dari session flash dengan Blade Syntax
+            const expiresAt = @json(session(
+            'expires_at')); // Menggunakan Blade untuk mengirimkan data session sebagai JSON
+            const currentTime = Math.floor(Date.now() / 1000); // Waktu saat ini dalam detik
 
-                let timer = expiresAt - currentTime; // Waktu hitung mundur (dalam detik)
+            let timer = expiresAt - currentTime; // Waktu hitung mundur (dalam detik)
 
-                const countdownElement = document.getElementById('countdown');
-                const resendLink = document.getElementById('resend-link');
-                const otpInput = document.getElementById('otp');
-                const otpForm = document.getElementById('otpForm');
+            const countdownElement = document.getElementById('countdown');
+            const resendLink = document.getElementById('resend-link');
+            const otpInput = document.getElementById('otp');
+            const otpForm = document.getElementById('otpForm');
 
-                // Tampilkan countdown jika elemen countdown tersedia
-                if (countdownElement) {
-                    const interval = setInterval(() => {
-                        if (timer > 0) {
-                            countdownElement.textContent = `Kode OTP berlaku dalam ${timer--} detik.`;
-                        } else {
-                            clearInterval(interval);
-                            countdownElement.textContent = "Kode OTP sudah tidak berlaku.";
-                            resendLink.classList.remove('hidden'); // Menampilkan link Kirim Ulang OTP
-                        }
-                    }, 1000);
-                }
+            // Tampilkan countdown jika elemen countdown tersedia
+            if (countdownElement) {
+                const interval = setInterval(() => {
+                    if (timer > 0) {
+                        countdownElement.textContent = `Kode OTP berlaku dalam ${timer--} detik.`;
+                    } else {
+                        clearInterval(interval);
+                        countdownElement.textContent = "Kode OTP sudah tidak berlaku.";
+                        resendLink.classList.remove('hidden'); // Menampilkan link Kirim Ulang OTP
+                    }
+                }, 1000);
+            }
 
-                // Submit otomatis ketika OTP 4 digit sudah dimasukkan
-                if (otpInput) {
-                    otpInput.addEventListener('input', function() {
-                        if (otpInput.value.length === 4) {
-                            otpForm.submit(); // Submit form secara otomatis jika OTP sudah lengkap
-                        }
-                    });
-                }
-            });
+            // Submit otomatis ketika OTP 4 digit sudah dimasukkan
+            if (otpInput) {
+                otpInput.addEventListener('input', function() {
+                    if (otpInput.value.length === 4) {
+                        otpForm.submit(); // Submit form secara otomatis jika OTP sudah lengkap
+                    }
+                });
+            }
+        });
         </script>
 
     </x-authentication-card>

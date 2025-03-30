@@ -6,119 +6,121 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laporan Bulanan</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            font-size: 12px;
-            margin: 0;
-            padding: 20px;
-            line-height: 1.5;
-        }
+    body {
+        font-family: Arial, sans-serif;
+        font-size: 12px;
+        margin: 0;
+        padding: 20px;
+        line-height: 1.5;
+    }
 
-        h2 {
-            font-size: 12px;
-            font-weight: bold;
-        }
+    h2 {
+        font-size: 12px;
+        font-weight: bold;
+    }
 
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
 
-        th,
-        td {
-            padding: 10px;
-            text-align: left;
-            border: 1px solid #ddd;
-        }
+    th,
+    td {
+        padding: 4px 8px;
+        text-align: left;
+        border: 1px solid #ddd;
+    }
 
-        th {
-            background-color: #f4f4f4;
-            text-align: center;
-        }
+    th {
+        background-color: #f4f4f4;
+        text-align: center;
+    }
 
-        .positive-row {
-            background-color: #d4edda;
-            color: #155724;
-        }
+    .positive-row {
+        background-color: #d4edda;
+        color: #155724;
+    }
 
-        .negative-row {
-            background-color: #f8d7da;
-            color: rgb(14, 13, 13);
-        }
+    .negative-row {
+        background-color: #f8d7da;
+        color: rgb(14, 13, 13);
+    }
     </style>
 
 
     <style>
-        .table-description {
-            font-size: 14px;
-            color: #555;
-            margin-bottom: 10px;
-        }
+    .table-description {
+        font-size: 12px;
+        color: #555;
+        margin-bottom: 10px;
+    }
 
-        .custom-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-            margin-bottom: 20px;
-        }
+    .custom-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        margin-bottom: 20px;
+    }
 
-        .custom-table td {
-            padding: 8px 10px;
-            border-bottom: 1px solid #ddd;
-            text-align: left;
-            border: none;
-            /* Menghapus border antar kolom */
-        }
+    .custom-table td {
+        padding: 4px 8px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+        border: none;
+        /* Menghapus border antar kolom */
+        line-height: 1.2;
+        /* Mengurangi tinggi baris */
+    }
 
-        .custom-table td:nth-child(2) {
-            text-align: right;
-            font-weight: bold;
+    .custom-table td:nth-child(2) {
+        text-align: right;
+        font-weight: bold;
 
-        }
+    }
     </style>
 
     <style>
-        .page-break {
-            page-break-before: always;
-        }
+    .page-break {
+        page-break-before: always;
+    }
 
-        @page {
-            margin: 100px 50px 100px 50px;
-            /* Top, Right, Bottom, Left */
-        }
+    @page {
+        margin: 100px 50px 100px 50px;
+        /* Top, Right, Bottom, Left */
+    }
 
-        /* Header */
-        header {
-            position: fixed;
-            top: -80px;
-            left: 0;
-            right: 0;
-            height: 50px;
-            text-align: center;
-            font-size: 16px;
-            font-weight: bold;
-            border-bottom: 1px solid #ddd;
-            padding: 10px 0;
-        }
+    /* Header */
+    header {
+        position: fixed;
+        top: -80px;
+        left: 0;
+        right: 0;
+        height: 50px;
+        text-align: center;
+        font-size: 16px;
+        font-weight: bold;
+        border-bottom: 1px solid #ddd;
+        padding: 10px 0;
+    }
 
-        /* Footer */
-        footer {
-            position: fixed;
-            bottom: -80px;
-            left: 0;
-            right: 0;
-            height: 50px;
-            text-align: center;
-            font-size: 12px;
-            border-top: 1px solid #ddd;
-            padding: 10px 0;
-        }
+    /* Footer */
+    footer {
+        position: fixed;
+        bottom: -80px;
+        left: 0;
+        right: 0;
+        height: 50px;
+        text-align: center;
+        font-size: 12px;
+        border-top: 1px solid #ddd;
+        padding: 10px 0;
+    }
 
-        /* Page Numbering */
-        .page-number:after {
-            content: counter(page);
-        }
+    /* Page Numbering */
+    .page-number:after {
+        content: counter(page);
+    }
     </style>
 
 </head>
@@ -204,9 +206,9 @@
                 <tbody>
                     @foreach ($loans as $data)
                     <tr>
-                        <td>{{$data->warga->name}}</td>
-                        <td>Pinjaman Rp {{ number_format($data->loan_amount, 0, ',', '.') }}</td>
-                        <td>Tagihan Rp {{ number_format($data->remaining_balance, 0, ',', '.') }}</td>
+                        <td>{{$data->warga->name}} Pinjaman Rp {{ number_format($data->loan_amount, 0, ',', '.') }}
+                        </td>
+                        <td>Tagihan/Sisa Rp {{ number_format($data->remaining_balance, 0, ',', '.') }}</td>
                     </tr>
                     @endforeach
                 </tbody>
@@ -248,6 +250,10 @@
                         <td>Rp {{ number_format($totalRemainingBalance, 2, ',', '.') }}</td>
                     </tr>
                     <tr>
+                        <td>Uang yang dipake Konter (Bayar Nanti)</td>
+                        <td>Rp {{ number_format($konterAktif, 2, ',', '.') }}</td>
+                    </tr>
+                    <tr>
                         <td>Pengeluaran KAS</td>
                         <td>Rp {{ number_format($cashExpendituresTotal, 2, ',', '.') }}</td>
                     </tr>
@@ -282,11 +288,26 @@
                         <td>Rp {{ number_format($saldoAmal->saldo, 2, ',', '.') }}</td>
                     </tr>
                     <tr>
-                        <td>Total</td>
+                        <td>Total Tercatat (Belum termasuk nominal yang masih di Pinjam)</td>
                         <td>Rp {{ number_format($saldoTotal->total_balance, 2, ',', '.') }}</td>
+                    </tr>
+                    <tr>
+                        <td>Total Saldo keseluruhan (Total Tercatat + Uang yang Masih di pinjam + Konter (Bayar Nanti) )
+                        </td>
+                        <td>Rp
+                            {{ number_format($saldoTotal->total_balance + $totalRemainingBalance + $konterAktif, 2, ',', '.') }}
+                        </td>
                     </tr>
                 </tbody>
             </table>
+            <p class="table-description">
+                Keterangan: <br>
+                - <b>Saldo Tercatat</b> adalah saldo yang telah dihitung dan dicatat berdasarkan jumlah aktual yang
+                tersedia di bank. Saldo ini tidak termasuk dana yang masih dipinjam. <br>
+                - Untuk mengetahui total saldo keseluruhan, jumlahkan <b>Saldo Tercatat</b> dengan <b>Uang yang Masih
+                    Dipinjam</b> dan <b>Konter Bayar Nanti</b>.
+
+            </p>
         </div>
         <div class="page-break"></div>
         <!-- Transaksi Kas Table -->
@@ -330,6 +351,7 @@
                     <th>No</th>
                     <th>Kode</th>
                     <th>Nominal</th>
+                    <th>Sisa</th>
                     <th>Status</th>
                     <th>Dibuat</th>
                 </tr>
@@ -342,6 +364,7 @@
                     <td>{{ $no }}</td>
                     <td>{{ $data->code }}</td>
                     <td>Rp {{ number_format($data->loan_amount, 2, ',', '.') }}</td>
+                    <td>Rp {{ number_format($data->remaining_balance, 2, ',', '.') }}</td>
                     <td>
                         @if($data->status === 'Acknowledged')
                         <span class="badge badge-success">Uang sudah diterima</span>
