@@ -561,7 +561,7 @@ class PengeluaranController extends Controller
             }
         } catch (\Exception $e) {
             DB::rollback();
-            return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan data pengeluaran.');
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan data pengeluaran.' . $e);
         }
     }
 }

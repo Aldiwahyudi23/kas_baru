@@ -99,7 +99,7 @@ class ReminderProsesPengeluaran extends Command
         $proses = CashExpenditures::where('status', 'disbursed_by_treasurer')->get();
         foreach ($proses as $data) {
             $notif = DataNotification::where('name', 'Pengeluaran')
-                ->where('type', 'Pengajuan')
+                ->where('type', 'Konfirmasi')
                 ->first();
 
             // ============================Notif untuk pengurus=========================================================
