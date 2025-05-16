@@ -24,6 +24,8 @@ class HomeController extends Controller
         $saldo_amal = AnggaranSaldo::where('type', 'Dana Amal')->latest()->first();
         $saldo_pinjam = AnggaranSaldo::where('type', 'Dana Pinjam')->latest()->first();
         $saldo_darurat = AnggaranSaldo::where('type', 'Dana Darurat')->latest()->first();
+        $saldo_acara = AnggaranSaldo::where('type', 'Dana Acara')->latest()->first();
+        $saldo_usaha = AnggaranSaldo::where('type', 'Dana Usaha')->latest()->first();
 
         // Untuk Tgaihan aktif
         $pinjaman = Loan::where('submitted_by', Auth::user()->data_warga_id)->whereIn('status', ['Acknowledged', 'In Repayment'])->get();
@@ -38,7 +40,7 @@ class HomeController extends Controller
         $isMemberKonter = Member::where('member_type_id', $memberType->id)->where('user_id', Auth::user()->id)->where('is_active', true)->exists();
         $isPengurus = in_array($user->role->name, ['Ketua', 'Bendahara', 'Sekretaris', 'Wakil Ketua', 'Wakil Bendahara', 'Wakil Sekretaris']);
 
-        return view('user.dashboard.index', compact('saldo', 'saldo_kas', 'saldo_amal', 'saldo_pinjam', 'saldo_darurat', 'total', 'konter', 'pinjaman', 'isMemberKonter', 'isPengurus'));
+        return view('user.dashboard.index', compact('saldo', 'saldo_kas', 'saldo_amal', 'saldo_pinjam', 'saldo_darurat', 'total', 'konter', 'pinjaman', 'isMemberKonter', 'isPengurus', 'saldo_acara', 'saldo_usaha'));
     }
 
     /**

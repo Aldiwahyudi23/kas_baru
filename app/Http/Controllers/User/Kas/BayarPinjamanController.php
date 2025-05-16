@@ -623,12 +623,18 @@ class BayarPinjamanController extends Controller
             $saldo_anggaran->saldo_id = $saldo->id; //mengambil id dari model saldo di atas
             $saldo_anggaran->save();
 
+
+            // mengecek untuk data yang telah di atau runtuk pembayaran yang tanpa lebih
+            $lebihPinjaman = AnggaranSetting::where('label_anggaran', 'Alokasi Lebih Pinjaman')
+                ->where('anggaran_id', $loan->anggaran_id)
+                ->first();
             // Jika ada overpayment, masukkan ke Dana Kas
             $percenAmount = (abs($cek_sisa) / $loan->loan_amount) * 100;
-            $saldo_akhir_kas =  AnggaranSaldo::where('type', 'Dana Kas')->latest()->first(); //mengambil data yang terakhir berdasarkan type anggaran
+            // $saldo_akhir_kas =  AnggaranSaldo::where('type', 'Dana Kas')->latest()->first(); //mengambil data yang terakhir berdasarkan type anggaran
+            $saldo_akhir_kas =  AnggaranSaldo::where('type', $lebihPinjaman->catatan_anggaran)->latest()->first(); //mengambil data yang terakhir berdasarkan type anggaran
             if ($cek_sisa < 0) {
                 $saldoAnggaranKas = new AnggaranSaldo();
-                $saldoAnggaranKas->type = 'Dana Kas';
+                $saldoAnggaranKas->type = $lebihPinjaman->catatan_anggaran;
                 $saldoAnggaranKas->percentage = $percenAmount;
                 $saldoAnggaranKas->amount += abs($cek_sisa); // Masukkan nominal overpayment
                 $saldoAnggaranKas->saldo = $saldo_akhir_kas->saldo + abs($cek_sisa);

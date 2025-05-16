@@ -37,7 +37,10 @@
                 <tr onclick="window.location='{{ route('konter.show',Crypt::encrypt($data->id)) }}'"
                     style="cursor: pointer;">
                     <td>{{$no}} </td>
-                    <td>{{$data->product->kategori->name}} {{$data->product->provider->name}} </td>
+                    <td>
+                        {{ $data->product->kategori->name ?? '-' }}
+                        {{ $data->product->provider->name ?? '-' }}
+                    </td>
                     <td>
                         @if($data->status === 'Selesai')
                         <span class="badge badge-success">Selesai</span>
@@ -55,7 +58,7 @@
                     </td>
                     <td>{{$data->detail->name}}</td>
 
-                    <td>Rp {{number_format($data->product->amount,0,',','.')}} </td>
+                    <td>Rp {{number_format($data->product->amount ?? 0 ,0,',','.') }} </td>
                     <td>{{$data->detail->no_hp ?? 0}}</td>
                     <td>{{$data->detail->no_listrik ?? 0}}</td>
                 </tr>
