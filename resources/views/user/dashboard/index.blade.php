@@ -139,7 +139,7 @@
                         </a>
                         <!-- /.description-block -->
                     </div>
-                    <div class="col-sm-3 col-6">
+                    {{-- <div class="col-sm-3 col-6">
                         <a href="{{Route('saldo.anggaran', ['type' => 'Dana Usaha'])}}"
                             class="text-white no-underline hover:text-gray-300">
                             <div class="description-block">
@@ -149,7 +149,7 @@
                                 <span class="description-text">DANA USAHA</span>
                             </div>
                         </a>
-                    </div>
+                    </div> --}}
                 </div>
                 <!-- /.row -->
             </div>

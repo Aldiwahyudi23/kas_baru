@@ -395,7 +395,8 @@ class PemasukanLainController extends Controller
                 // -------------------------------------------
                 $anggaran = Anggaran::find($request->anggaran_id);
                 // Cek apakah Saldo cukup berdasarkan anggaran
-                if ($anggaran->name === "Dana Usaha" || $anggaran->name === "Dana Acara" || $anggaran->name === "Dana Kas") {
+                // if ($anggaran->name === "Dana Usaha" || $anggaran->name === "Dana Acara" || $anggaran->name === "Dana Kas") {
+                if ($anggaran->name === "Dana Usaha" || $anggaran->name === "Dana Kas") {
                     $saldo_akhir_request =  "Dana Kas";
                 } else {
                     $saldo_akhir_request = $anggaran->name;

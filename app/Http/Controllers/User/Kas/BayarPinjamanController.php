@@ -476,8 +476,48 @@ class BayarPinjamanController extends Controller
         confirmDelete($title, $text);
 
         $id = Crypt::decrypt($id);
-        $bayarPinjaman = loanRepayment::findOrFail($id);
-        return view('user.program.kas.konfirmasi.bayarPinjaman', compact('bayarPinjaman'));
+        $pembayarPinjaman = loanRepayment::findOrFail($id);
+        $pinjaman = Loan::findOrFail($pembayarPinjaman->loan_id);
+        $bayarPinjaman = loanRepayment::where('loan_id', $pinjaman->id)->get();
+         // Ambil tanggal pembayaran terakhir
+        $lastRepayment = LoanRepayment::where('loan_id', $pinjaman->id)->where('status', 'confirmed')
+            ->latest('payment_date')
+            ->first();
+        // Tanggal pembuatan pinjaman terbaru
+        $loanCreationDate = Carbon::parse($pinjaman->created_at);
+        // Tanggal pembayaran terakhir (cek apakah $lastRepayment ada)
+        if ($lastRepayment) {
+            $lastPaymentDate = Carbon::parse($lastRepayment->payment_date);
+            // Cek jika selisih antara pembayaran terakhir dan pengajuan baru kurang dari sebulan
+        } else {
+            // Jika tidak ada data pembayaran, beri nilai default atau abaikan logika tertentu
+            $lastPaymentDate = $loanCreationDate; // Bisa diganti dengan default sesuai kebutuhan
+            // Logika alternatif jika pembayaran terakhir tidak ada
+            // Misalnya, lanjutkan pengajuan pinjaman
+        }
+        // Cek jika selisih antara pembayaran terakhir dan pengajuan baru kurang dari sebulan
+        $waktubayar = $loanCreationDate->diffInDays($lastPaymentDate);
+        $waktuPembayaran =  round($waktubayar);
+        // mengecek untuk data yang telah di atau runtuk pembayaran yang tanpa lebih
+        $pembayaranTanpaLebih = AnggaranSetting::where('label_anggaran', 'Pembayaran tanpa lebih (hari)')
+            ->where('anggaran_id', $pinjaman->anggaran_id)
+            ->first();
+        $tanpaLebih = intval($pembayaranTanpaLebih->catatan_anggaran);
+        $waktuDitentukan = $tanpaLebih;
+        // Menghitung hari pinjaman dari awal pinjaman sampai sekarang
+        $waktuSekarang = Carbon::now();
+        $jatuhTempo = Carbon::parse($pinjaman->deadline_date);
+        $daysElapsed = $waktuSekarang->diffInDays($jatuhTempo, false); //mengambil data yang di hitung hari
+        $hitungWaktu = round($daysElapsed); //membulatkan hasil
+        // mengecek pengajuan ke 2
+        $cek_pengajuan = LoanExtension::where('loan_id', $pinjaman->id)->where('status',  'pending')->latest('created_at')->first();
+        $cek_pinjaman_2 = LoanExtension::where('new_loan_id', $pinjaman->id)->where('status',  'approved')->latest('created_at')->first();
+
+        $layout_form = LayoutsForm::first();
+        $cek_pembayaran = loanRepayment::where('loan_id', $id)->where('status', '!=', 'confirmed')->first();
+
+
+        return view('user.program.kas.konfirmasi.bayarPinjaman', compact('pembayarPinjaman','pinjaman', 'cek_pembayaran', 'layout_form', 'bayarPinjaman', 'waktuPembayaran', 'waktuDitentukan', 'hitungWaktu', 'cek_pengajuan', 'cek_pinjaman_2'));
     }
 
     public function confirm(Request $request, string $id)

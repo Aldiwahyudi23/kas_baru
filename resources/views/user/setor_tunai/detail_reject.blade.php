@@ -200,14 +200,12 @@
 
             <br>
             <!-- Thumbnail Tanda Bukti Transfer -->
-            @if ($deposit->payment_method == "transfer")
             <div class="form-group col-6 col-sm-2 justify-between">
                 <a href="{{ asset($deposit->receipt_path) }}" data-toggle="lightbox"
                     data-title="Tanda Bukti Transfer - {{$deposit->code}}" data-gallery="gallery">
                     <img src="{{ asset($deposit->receipt_path) }}" class="img-fluid mb-2" alt="white sample" />
                 </a>
             </div>
-            @endif
         </div>
     </div>
     <!-- /.card-body -->
