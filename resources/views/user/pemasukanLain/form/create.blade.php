@@ -42,7 +42,8 @@
                     <div class="form-group">
                         <label for="description" class="col-sm-12 col-form-label">Keterangan
                             <span class="text-danger">*</span></label>
-                        <textarea class="form-control col-12 @error('description') is-invalid @enderror"
+                        <textarea
+                            class="summernote-textarea form-control col-12 @error('description') is-invalid @enderror"
                             name="description" id="description">{{ old('description') }}</textarea>
                     </div>
 

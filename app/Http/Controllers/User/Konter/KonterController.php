@@ -51,6 +51,7 @@ class KonterController extends Controller
             $pengajuan_proses = TransaksiKonter::where('submitted_by', Auth::user()->name)->where('status', ['proses', 'pending'])->get();
             $transaksi_gagal = TransaksiKonter::where('submitted_by', Auth::user()->name)->where('status', 'Gagal')->get();
             $transaksi_selesai = TransaksiKonter::where('submitted_by', Auth::user()->name)->where('status', 'Selesai')->get();
+            $transaksi_all = TransaksiKonter::where('submitted_by', Auth::user()->name)->get();
             // Ambil data transaksi dengan status 'Berhasil'
             $transaksi_sukses = TransaksiKonter::where('submitted_by', Auth::user()->name)->where('status', 'Berhasil')->get()->map(function ($transaction) {
                 $deadlineDate = Carbon::parse($transaction->deadline_date);
@@ -68,6 +69,7 @@ class KonterController extends Controller
             $pengajuan_proses = TransaksiKonter::where('status', ['proses', 'pending'])->get();
             $transaksi_gagal = TransaksiKonter::where('status', 'Gagal')->get();
             $transaksi_selesai = TransaksiKonter::where('status', 'Selesai')->get();
+            $transaksi_all = TransaksiKonter::all();
             // Ambil data transaksi dengan status 'Berhasil'
             $transaksi_sukses = TransaksiKonter::where('status', 'Berhasil')->get()->map(function ($transaction) {
                 $deadlineDate = Carbon::parse($transaction->deadline_date);
@@ -83,7 +85,7 @@ class KonterController extends Controller
         }
 
 
-        return view('user.konter.index', compact('pengajuan_proses', 'transaksi_sukses', 'transaksi_gagal', 'transaksi_selesai', 'isMemberKonter', 'isPengurus'));
+        return view('user.konter.index', compact('pengajuan_proses', 'transaksi_sukses', 'transaksi_gagal', 'transaksi_selesai', 'isMemberKonter', 'isPengurus','transaksi_all'));
     }
 
     /**

@@ -46,7 +46,7 @@
 
     <div class="col-12 col-sm-6">
         <!-- Mengambil data tabel  -->
-        @include('user.konter.tabel.data_sukses')
+        @include('user.konter.tabel.data_all')
     </div>
 </div>
 <!-- /.row -->

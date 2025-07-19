@@ -30,6 +30,7 @@
                 @else
                 <span class="badge badge-light">Unknown</span> <!-- default if status is undefined -->
                 @endif
+                <span class="badge badge-warning">{{ $data->code }}</span>
             </td>
             <td>
                 <div class="alert 

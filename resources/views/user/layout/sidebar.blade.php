@@ -30,12 +30,12 @@ use App\Models\LoanExtension;
 use App\Models\loanRepayment;
 use App\Models\OtherIncomes;
 
-$kas = KasPayment::where('status', 'process')->get();
+$kas = KasPayment::whereIn('status', ['pending','process'])->get();
 $loan = Loan::whereIn('status', ['pending', 'approved_by_chairman', 'disbursed_by_treasurer'])->get();
 $ex = CashExpenditures::whereIn('status', ['approved_by_chairman', 'disbursed_by_treasurer'])->get();
-$rePayment = loanRepayment::where('status', 'process')->get();
+$rePayment = loanRepayment::whereIn('status', ['pending','process'])->get();
 $konter = TransaksiKonter::where('status', 'Proses')->get();
-$income = OtherIncomes::where('status', 'process')->get();
+$income = OtherIncomes::whereIn('status', ['pending','process'])->get();
 $loan2 = LoanExtension::where('status', 'pending')->get();
 $deposit = Deposit::where('status', 'pending')->get();
 

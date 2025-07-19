@@ -24,11 +24,11 @@
                         <input type="checkbox" class="konterCheckbox" name="selected_ids[]"
                             value="konter-{{ $data->id }}" data-amount="{{ $data->invoice }}">
                     </td>
-                    <td>{{ $data->warga->name }}</td>
-                    <td>{{ $data->code }}</td>
-                    <td>{{ $data->detail->name }}</td>
-                    <td>Rp{{ number_format($data->invoice, 0, ',', '.') }}</td>
-                    <td>{{ $data->updated_at }}</td>
+                    <td>{{ $data->warga->name ?? "Tidak di ketahui" }}</td>
+                    <td>{{ $data->code ?? "Tidak di ketahui" }}</td>
+                    <td>{{ $data->detail->name ?? "Tidak di ketahui" }}</td>
+                    <td>Rp{{ number_format($data->invoice, 0, ',', '.') ?? "Tidak di ketahui" }}</td>
+                    <td>{{ $data->updated_at ?? "Tidak di ketahui" }}</td>
                 </tr>
                 @endforeach
             </tbody>

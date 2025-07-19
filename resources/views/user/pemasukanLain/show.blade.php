@@ -102,7 +102,7 @@
             <div class="card-footer">
                 <p>
                     Keterangan : <br>
-                    {{$income->description}}
+                    {!!$income->description!!}
                 </p>
             </div>
             <br>
