@@ -109,9 +109,27 @@ class HomeController extends Controller
         // Fetch all Saldo records ordered by created_at descending
         $saldoData = Saldo::orderBy('created_at', 'desc')->get();
 
-        return view('user.dashboard.saldo.utama', compact('saldoData','bankBalances','bankAccounts'));
+          // Calculate total actual balance from all bank accounts (sum of latest balances)
+    $totalActualBalance = $bankBalances->sum('balance');
+
+    // Get system balance (atm_balance) from latest saldo record
+    $latestSaldo = Saldo::latest()->first();
+    $systemBalance = $latestSaldo ? $latestSaldo->atm_balance : 0;
+    
+    // Calculate difference between actual and system balance
+    $difference = $totalActualBalance - $systemBalance;
+
+        return view('user.dashboard.saldo.utama', compact(
+        'saldoData',
+        'bankBalances',
+        'bankAccounts',
+        'totalActualBalance',
+        'systemBalance',
+        'difference'
+    ));
     }
 
+    
     
     public function saldo_anggaran($type)
     {
