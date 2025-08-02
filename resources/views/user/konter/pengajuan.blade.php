@@ -277,6 +277,24 @@
             <!-- Untuk status yang pembayarannya langsung atau selesai -->
 
             @endif
+
+            <div class="form-group">
+                  <label for="payment_method">Rekening Bank Sumber</label>
+                <span class="text-danger">*</span></label>
+                <select class="select2bs4 @error('bank_account_id') is-invalid @enderror" style="width: 100%;" name="bank_account_id" id="bank_account_id" required>
+                    <option value="">-- Pilih Rekening Bank --</option>
+                    @foreach($bankAccounts as $account)
+                    <option value="{{ $account->id }}" {{ old('bank_account_id', isset($selectedAccount) ? $selectedAccount->id : '') == $account->id ? 'selected' : '' }}>
+                        {{ $account->bank_name }} - {{ $account->account_number }} ({{ $account->account_holder_name }})
+                    </option>
+                    @endforeach
+                </select>
+                @error('bank_account_id')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                @enderror
+            </div>
             <!-- Button Submit -->
             <button type="submit" class="btn btn-success" id="submitBtns">kirim</button>
         </form>

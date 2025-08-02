@@ -9,6 +9,8 @@ use App\Models\AccessProgram;
 use App\Models\Anggaran;
 use App\Models\AnggaranSaldo;
 use App\Models\AnggaranSetting;
+use App\Models\BankAccount;
+use App\Models\BankTransaction;
 use App\Models\CashExpenditures;
 use App\Models\DataNotification;
 use App\Models\DataWarga;
@@ -289,9 +291,10 @@ class PengeluaranController extends Controller
         $text = "Apakah benar anda mau hapus data ini?";
         confirmDelete($title, $text);
 
+          $bankAccounts = BankAccount::where('is_active', true)->get(); 
         $id = Crypt::decrypt($id);
         $pengeluaran = CashExpenditures::findOrFail($id);
-        return view('user.program.kas.konfirmasi.pengeluaran', compact('pengeluaran'));
+        return view('user.program.kas.konfirmasi.pengeluaran', compact('pengeluaran','bankAccounts'));
     }
 
     public function approved(Request $request, string $id)
@@ -488,6 +491,24 @@ class PengeluaranController extends Controller
             $saldo_anggaran->saldo_id = $saldo->id; //mengambil id dari model saldo di atas
 
             $saldo_anggaran->save();
+
+              $lastTransaction = BankTransaction::where('bank_account_id', $request->bank_account_id)
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+                
+                $newBalance = ($lastTransaction ? $lastTransaction->balance : 0) - $request->amount;
+
+                  if ($newBalance < 0) {
+                    throw new \Exception('Saldo tidak mencukupi');
+                }
+
+                            // Simpan transaksi baru
+                $bankTransaction = new BankTransaction();
+                $bankTransaction->bank_account_id = $request->bank_account_id;
+                $bankTransaction->saldo_id = $saldo->id; // Mengaitkan dengan saldo yang baru dibuat
+                $bankTransaction->balance = $newBalance;
+                $bankTransaction->description = 'Pencairan Pengeluaran ' . $data->code ;
+                $bankTransaction->save();
 
             // ------------------------------------------------------------
             $notif = DataNotification::where('name', 'Pengeluaran')

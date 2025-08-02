@@ -8,6 +8,8 @@ use App\Models\AccessNotification;
 use App\Models\Anggaran;
 use App\Models\AnggaranSaldo;
 use App\Models\AnggaranSetting;
+use App\Models\BankAccount;
+use App\Models\BankTransaction;
 use App\Models\DataNotification;
 use App\Models\DataWarga;
 use App\Models\LayoutsForm;
@@ -475,6 +477,8 @@ class BayarPinjamanController extends Controller
         $text = "Apakah benar anda mau hapus data ini?";
         confirmDelete($title, $text);
 
+         $bankAccounts = BankAccount::where('is_active', true)->get();
+
         $id = Crypt::decrypt($id);
         $pembayarPinjaman = loanRepayment::findOrFail($id);
         $pinjaman = Loan::findOrFail($pembayarPinjaman->loan_id);
@@ -517,7 +521,7 @@ class BayarPinjamanController extends Controller
         $cek_pembayaran = loanRepayment::where('loan_id', $id)->where('status', '!=', 'confirmed')->first();
 
 
-        return view('user.program.kas.konfirmasi.bayarPinjaman', compact('pembayarPinjaman','pinjaman', 'cek_pembayaran', 'layout_form', 'bayarPinjaman', 'waktuPembayaran', 'waktuDitentukan', 'hitungWaktu', 'cek_pengajuan', 'cek_pinjaman_2'));
+        return view('user.program.kas.konfirmasi.bayarPinjaman', compact('pembayarPinjaman','pinjaman', 'cek_pembayaran', 'layout_form', 'bayarPinjaman', 'waktuPembayaran', 'waktuDitentukan', 'hitungWaktu', 'cek_pengajuan', 'cek_pinjaman_2','bankAccounts'));
     }
 
     public function confirm(Request $request, string $id)
@@ -681,6 +685,24 @@ class BayarPinjamanController extends Controller
                 $saldoAnggaranKas->saldo_id = $saldo->id; // ID saldo dari model Saldo
                 $saldoAnggaranKas->save();
             }
+
+             if ($request->payment_method === "transfer") {
+             $lastTransaction = BankTransaction::where('bank_account_id', $request->bank_account_id)
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+                
+                $newBalance = ($lastTransaction ? $lastTransaction->balance : 0) + $request->amount;
+            
+
+                            // Simpan transaksi baru
+                $bankTransaction = new BankTransaction();
+                $bankTransaction->bank_account_id = $request->bank_account_id;
+                $bankTransaction->saldo_id = $saldo->id;
+                $bankTransaction->balance = $newBalance;
+                $bankTransaction->description = 'Pembayaran Pinjaman';
+                $bankTransaction->save();
+
+             }
 
             $notif = DataNotification::where('name', 'Bayar Pinjaman')
                 ->where('type', 'Konfirmasi')

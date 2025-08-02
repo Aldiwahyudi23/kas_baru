@@ -12,6 +12,7 @@ use App\Http\Middleware\CheckActiveStatusAdmin;
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\AllRouteUrlController;
 use App\Http\Controllers\Admin\AnggaranController;
+use App\Http\Controllers\Admin\BankAccountController;
 use App\Http\Controllers\Admin\CashExpenditureController;
 use App\Http\Controllers\Admin\CompanyInformationController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -32,6 +33,7 @@ use App\Http\Controllers\User\Kas\LoanExtensionController;
 use App\Http\Controllers\Admin\Konter\ProductKonterController;
 use App\Http\Controllers\Admin\Konter\TransaksiKonterController;
 use App\Http\Controllers\Auth\OtpLoginController;
+use App\Http\Controllers\User\BankTransactionController;
 use App\Http\Controllers\User\HomeController;
 use App\Http\Controllers\User\Konter\KonterController;
 use App\Http\Controllers\User\Member\MemberController;
@@ -124,6 +126,14 @@ Route::prefix('admin')->group(
             Route::resource('/konter-transaksi-detail', TransaksiKonterController::class);
 
             Route::resource('/access-notification', AccessNotificationController::class);
+
+            Route::resource('bank-accounts', BankAccountController::class);
+
+            // Untuk soft delete
+            Route::get('bank-accounts/{id}/restore', [BankAccountController::class, 'restore'])->name('bank-accounts.restore');
+            Route::delete('bank-accounts/{id}/force-delete', [BankAccountController::class, 'forceDelete'])->name('bank-accounts.force-delete');
+            Route::patch('bank-accounts/{id}/toggle-status', [BankAccountController::class, 'toggleStatus'])
+            ->name('bank-accounts.toggle-status');
         });
     }
 );
@@ -153,6 +163,13 @@ Route::middleware([
     Route::get('/dashboards/saldo', [HomeController::class, 'saldo'])->name('dashboard.saldo');
     Route::get('dashboards/saldo/{type}', [HomeController::class, 'saldo_anggaran'])->name('saldo.anggaran');
 
+    // Route untuk menampilkan form transfer
+    Route::get('/bank/transfer/{bankAccount}', [BankTransactionController::class, 'showTransferForm'])
+        ->name('bank.transfer.form');
+
+    // Route untuk proses transfer
+    Route::post('/bank/transfer', [BankTransactionController::class, 'processTransfer'])
+        ->name('bank.transfer.submit');
 
     // Untuk pembayaran kas user
     Route::resource('/kas', PemasukanController::class);

@@ -5,6 +5,8 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Mail\Notification;
 use App\Models\AccessNotification;
+use App\Models\BankAccount;
+use App\Models\BankTransaction;
 use App\Models\DataNotification;
 use App\Models\DataWarga;
 use App\Models\Deposit;
@@ -325,9 +327,11 @@ class SetorTunaiController extends Controller
         $data_loanRepayment = loanRepayment::where('deposit_id', $deposit->id)->get();
         $data_konter = TransaksiKonter::where('deposit_id', $deposit->id)->get();
         $data_income = OtherIncomes::where('deposit_id', $deposit->id)->get();
+
+        $bankAccounts = BankAccount::where('is_active', true)->get(); 
         // Tampah data lain yang terhubung
 
-        return view('user.setor_tunai.konfirmasi', compact('deposit', 'data_kas', 'data_loanRepayment', 'data_konter', 'data_income'));
+        return view('user.setor_tunai.konfirmasi', compact('deposit', 'data_kas', 'data_loanRepayment', 'data_konter', 'data_income','bankAccounts'));
     }
 
     // sementara di balik dengan yang bawag
@@ -436,6 +440,21 @@ class SetorTunaiController extends Controller
                 $saldo->cash_outside = $saldo_terbaru->cash_outside - $request->amount;
 
                 $saldo->save();
+
+                   $lastTransaction = BankTransaction::where('bank_account_id', $request->bank_account_id)
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+                
+                $newBalance = ($lastTransaction ? $lastTransaction->balance : 0) + $request->amount;
+            
+
+                            // Simpan transaksi baru
+                $bankTransaction = new BankTransaction();
+                $bankTransaction->bank_account_id = $request->bank_account_id;
+                $bankTransaction->saldo_id = $saldo->id;
+                $bankTransaction->balance = $newBalance;
+                $bankTransaction->description = 'Setor Tunai';
+                $bankTransaction->save();
 
                 DB::commit();
                 return redirect()->back()->with('success', 'Setor tunai sudah di setujui atos merubah data');

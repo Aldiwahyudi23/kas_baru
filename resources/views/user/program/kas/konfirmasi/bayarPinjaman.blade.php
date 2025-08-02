@@ -282,6 +282,28 @@
             <input type="hidden" name="is_deposited" value="{{$pembayarPinjaman->is_deposited}}">
             <input type="hidden" name="code" value="{{$pembayarPinjaman->code}}">
 
+            
+            {{-- Untuk menamngkap data Bank accounbt --}}
+            @if ($pembayarPinjaman->payment_method == "transfer")
+            <div class="form-group">
+                  <label for="payment_method">Rekening Bank Yang di Tujuan </label>
+                <span class="text-danger">*</span></label>
+                <select class="select2bs4 @error('bank_account_id') is-invalid @enderror" style="width: 100%;" name="bank_account_id" id="bank_account_id" required>
+                    <option value="">-- Pilih Rekening Bank --</option>
+                    @foreach($bankAccounts as $account)
+                    <option value="{{ $account->id }}" {{ old('bank_account_id', isset($selectedAccount) ? $selectedAccount->id : '') == $account->id ? 'selected' : '' }}>
+                        {{ $account->bank_name }} - {{ $account->account_number }} ({{ $account->account_holder_name }})
+                    </option>
+                    @endforeach
+                </select>
+                @error('bank_account_id')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                @enderror
+            </div>
+            @endif
+
             <div class="form-group">
                 <label for="status">Satus Konfirmasi</label>
                 <select class="select2bs4 @error('status') is-invalid @enderror" style="width: 100%;" name="status"

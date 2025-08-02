@@ -4,6 +4,8 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\AnggaranSaldo;
+use App\Models\BankAccount;
+use App\Models\BankTransaction;
 use App\Models\Konter\TransaksiKonter;
 use App\Models\Loan;
 use App\Models\Member;
@@ -92,11 +94,25 @@ class HomeController extends Controller
     }
     public function saldo()
     {
+     // Ambil saldo terbaru dari masing-masing bank account
+    $bankBalances = BankTransaction::with(['bankAccount.warga'])
+        ->whereIn('id', function($query) {
+            $query->selectRaw('MAX(id)')
+                  ->from('bank_transactions')
+                  ->groupBy('bank_account_id');
+        })
+        ->whereHas('bankAccount', function($query) {
+            $query->where('is_active', true); // Hanya bank yang aktif
+        })
+        ->get();
+        $bankAccounts = BankAccount::where('is_active', true)->get();
         // Fetch all Saldo records ordered by created_at descending
         $saldoData = Saldo::orderBy('created_at', 'desc')->get();
 
-        return view('user.dashboard.saldo.utama', compact('saldoData'));
+        return view('user.dashboard.saldo.utama', compact('saldoData','bankBalances','bankAccounts'));
     }
+
+    
     public function saldo_anggaran($type)
     {
         // Ambil data berdasarkan type

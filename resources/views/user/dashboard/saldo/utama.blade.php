@@ -10,6 +10,59 @@
 
     <!-- /.card-header -->
     <div class="card-body">
+       <!-- Section untuk menampilkan saldo bank -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h4 class="mb-3">Saldo Rekening Bank</h4>
+        <div class="row">
+            @foreach($bankBalances as $balance)
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                       <!-- Nama Bank dan Saldo -->
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title font-weight-bold mb-0 text-truncate" style="max-width: 60%">
+                                {{ $balance->bankAccount->bank_name }}
+                            </h5>
+                            <h5 class="{{ $balance->balance >= 0 ? 'text-success' : 'text-danger' }} font-weight-bold mb-0">
+                                Rp {{ number_format($balance->balance, 2, ',', '.') }}
+                            </h5>
+                        </div>
+
+                        <!-- Info Rekening dan Pemilik -->
+                        <div class="mb-3">
+                            <div class="d-flex align-items-center mb-1">
+                                <i class="fas fa-credit-card mr-2 text-muted" style="width: 20px"></i>
+                                <small class="text-muted">{{ $balance->bankAccount->account_number }}</small>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-user mr-2 text-muted" style="width: 20px"></i>
+                                <small class="text-muted">{{ $balance->bankAccount->warga->name ?? '-' }}</small>
+                            </div>
+                        </div>
+                        <!-- Update dan Tombol -->
+                        <div class="d-flex justify-content-between align-items-center border-top pt-2">
+                            <small class="text-muted">
+                                Update: {{ \Carbon\Carbon::parse($balance->created_at)->format('d M Y') }}
+                            </small>
+                            @if ($balance->bankAccount->warga->id == auth()->user()->data_warga_id)
+                                <a href="{{ route('bank.transfer.form', ['bankAccount' => $balance->bank_account_id]) }}" 
+                            class="btn btn-sm btn-outline-primary"
+                            title="Transfer Dana">
+                                <i class="fas fa-exchange-alt"></i> Transfer Dana
+                            </a>
+                            @endif
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+</div>
+
+        <!-- Filter dan Tabel -->
         <div class="row mb-3">
             <div class="col-md-3">
                 <select id="filter-bulan" class="form-control">

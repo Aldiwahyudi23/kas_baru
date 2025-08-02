@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\AccessNotification;
 use App\Models\Anggaran;
 use App\Models\AnggaranSaldo;
+use App\Models\BankAccount;
+use App\Models\BankTransaction;
 use App\Models\DataNotification;
 use App\Models\DataWarga;
 use App\Models\Konter\DetailTransaksiKonter;
@@ -156,6 +158,8 @@ class KonterController extends Controller
 
         $data_Warga = DataWarga::all();
 
+        $bankAccounts = BankAccount::where('is_active', true)->get();
+
         //menu member
         $user = Auth::user();
         $memberType = MemberType::where('name', 'Konter')->first();
@@ -163,7 +167,7 @@ class KonterController extends Controller
         $isPengurus = in_array($user->role->name, ['Ketua', 'Bendahara', 'Sekretaris', 'Wakil Ketua', 'Wakil Bendahara', 'Wakil Sekretaris']);
 
 
-        return view('user.konter.pengajuan', compact('pengajuan', 'data_Warga', 'remaining_time', 'isMemberKonter', 'isPengurus'));
+        return view('user.konter.pengajuan', compact('pengajuan', 'data_Warga', 'remaining_time', 'isMemberKonter', 'isPengurus','bankAccounts'));
     }
     // Jika berhasil maka menyimpan data
     public function pengajuan_berhasil(Request $request, $id)
@@ -339,6 +343,24 @@ class KonterController extends Controller
                 $saldo_kas->saldo = $saldo_akhir_kas->saldo + $nominal_anggaran;
                 $saldo_kas->saldo_id = $saldo->id; //mengambil id dari model saldo di atas
                 $saldo_kas->save();
+
+                 $lastTransaction = BankTransaction::where('bank_account_id', $request->bank_account_id)
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+                
+                $newBalance = ($lastTransaction ? $lastTransaction->balance : 0) - $request->buying_price;
+                
+                if ($newBalance < 0) {
+                    throw new \Exception('Saldo tidak mencukupi');
+                }
+
+                            // Simpan transaksi baru
+                $bankTransaction = new BankTransaction();
+                $bankTransaction->bank_account_id = $request->bank_account_id;
+                $bankTransaction->saldo_id = $saldo->id;
+                $bankTransaction->balance = $newBalance;
+                $bankTransaction->description = 'Pengeluaran konter ';
+                $bankTransaction->save();
 
                 $notif = DataNotification::where('name', 'Konter')
                     ->where('type', 'Berhasil')
@@ -960,6 +982,7 @@ class KonterController extends Controller
             $data->status = "Proses";
 
             $data->save();
+
 
             $notif = DataNotification::where('name', 'Konter')
                 ->where('type', 'Pengajuan')
