@@ -362,6 +362,25 @@ class KonterController extends Controller
                 $bankTransaction->description = 'Pengeluaran konter ';
                 $bankTransaction->save();
 
+                 $lastTransaction1 = BankTransaction::where('bank_account_id', $request->bank_account_id1)
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+                
+                    
+                  if ($request->payment_method == "transfer") {
+                       $nominal12 = $request->invoice; // Nominal amount is taken directly from the invoice
+                  }
+                $newBalance = ($lastTransaction1 ? $lastTransaction1->balance : 0) + $nominal12;
+
+                            // Simpan transaksi baru
+                $bankTransaction1 = new BankTransaction();
+                $bankTransaction1->bank_account_id = $request->bank_account_id1;
+                $bankTransaction1->saldo_id = $saldo->id;
+                $bankTransaction1->balance = $newBalance;
+                $bankTransaction1->description = 'Pengeluaran konter ';
+                $bankTransaction1->save();
+
+
                 $notif = DataNotification::where('name', 'Konter')
                     ->where('type', 'Berhasil')
                     ->first();

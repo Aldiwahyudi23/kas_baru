@@ -159,6 +159,24 @@
                 <input type="hidden" name="diskon" id="diskon" value="{{ old('diskon') }}">
             </div>
 
+              <div class="form-group">
+                  <label for="payment_method">Rekening Bank Sumber</label>
+                <span class="text-danger">*</span></label>
+                <select class="select2bs4 @error('bank_account_id') is-invalid @enderror" style="width: 100%;" name="bank_account_id" id="bank_account_id" required>
+                    <option value="">-- Pilih Rekening Bank --</option>
+                    @foreach($bankAccounts as $account)
+                    <option value="{{ $account->id }}" {{ old('bank_account_id', isset($selectedAccount) ? $selectedAccount->id : '') == $account->id ? 'selected' : '' }}>
+                        {{ $account->bank_name }} - {{ $account->account_number }} ({{ $account->account_holder_name }})
+                    </option>
+                    @endforeach
+                </select>
+                @error('bank_account_id')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                @enderror
+            </div>
+
             @if ($pengajuan->product->provider->name == "Token Listrik")
             <div class="form-group">
                 <label for="token_code">Token Listrik<span class="text-danger">*</span></label>
@@ -214,22 +232,40 @@
             @if ($pengajuan->status == "Berhasil" || $pengajuan->payment_status == "Langsung")
             <!-- Metode Pembayaran -->
 
-            <div class="form-group">
-                <label for="payment_method">Metode Pembayaran</label>
-                <span class="text-danger">*</span></label>
-                <select class="select2bs4 @error('payment_method') is-invalid @enderror" style="width: 100%;"
-                    name="payment_method" id="payment_method" onchange="togglePembayaran()">
-                    <option value="">--Pilih Pembayaran--</option>
-                    <option value="cash" {{ old('payment_method') == 'cash' ? 'selected' : '' }}>Cash
-                    </option>
-                    <option value=" transfer" {{ old('payment_method') == 'transfer' ? 'selected' : '' }}>
-                        Transfer</option>
-                </select>
-            </div>
+        <div class="form-group">
+            <label for="payment_method">Metode Pembayaran</label>
+            <span class="text-danger">*</span></label>
+            <select class="select2bs4 @error('payment_method') is-invalid @enderror" style="width: 100%;"
+                name="payment_method" id="payment_method" onchange="togglePembayaran()">
+                <option value="">--Pilih Pembayaran--</option>
+                <option value="cash" {{ old('payment_method') == 'cash' ? 'selected' : '' }}>Cash</option>
+                <option value="transfer" {{ old('payment_method') == 'transfer' ? 'selected' : '' }}>Transfer</option>
+            </select>
+        </div>
 
             <!-- Upload Bukti Transfer (jika metode transfer) -->
-            <div class="form-group" id="transfer_receipt"
-                style="display: {{ old('payment_method') == 'cash' ? 'block' : 'none' }};">
+            {{-- @if ($pengajuan->status == "Berhasil" ) --}}
+
+             <div class="form-group" id="bank_selection" style="display: {{ old('payment_method') == 'transfer' ? 'block' : 'none' }};">
+                  <label for="payment_method">Rekening Bank Tujuan</label>
+                <span class="text-danger">*</span></label>
+                <select class="select2bs4 @error('bank_account_id1') is-invalid @enderror" style="width: 100%;" name="bank_account_id1" id="bank_account_id1" required>
+                    <option value="">-- Pilih Rekening Bank --</option>
+                    @foreach($bankAccounts as $account)
+                    <option value="{{ $account->id }}" {{ old('bank_account_id1', isset($selectedAccount) ? $selectedAccount->id : '') == $account->id ? 'selected' : '' }}>
+                        {{ $account->bank_name }} - {{ $account->account_number }} ({{ $account->account_holder_name }})
+                    </option>
+                    @endforeach
+                </select>
+                @error('bank_account_id')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                @enderror
+            </div>
+{{-- @endif --}}
+            <!-- Uang dipegang siapa (jika metode cash) -->
+            <div class="form-group" id="transfer_receipt" style="display: {{ old('payment_method') == 'cash' ? 'block' : 'none' }};">
                 <label for="warga_id">Uang Di Pegang siapa</label>
                 @if($isPengurus)
                 <select class="select2bs4 @error('warga_id') is-invalid @enderror" style="width: 100%;" name="warga_id"
@@ -246,7 +282,6 @@
                 <p>{{Auth::user()->name}}</p>
                 <input type="hidden" name="warga_id" id="warga_id" value="{{Auth::user()->data_warga_id}}">
                 @endif
-
             </div>
 
             <div class="form-group row">
@@ -278,23 +313,7 @@
 
             @endif
 
-            <div class="form-group">
-                  <label for="payment_method">Rekening Bank Sumber</label>
-                <span class="text-danger">*</span></label>
-                <select class="select2bs4 @error('bank_account_id') is-invalid @enderror" style="width: 100%;" name="bank_account_id" id="bank_account_id" required>
-                    <option value="">-- Pilih Rekening Bank --</option>
-                    @foreach($bankAccounts as $account)
-                    <option value="{{ $account->id }}" {{ old('bank_account_id', isset($selectedAccount) ? $selectedAccount->id : '') == $account->id ? 'selected' : '' }}>
-                        {{ $account->bank_name }} - {{ $account->account_number }} ({{ $account->account_holder_name }})
-                    </option>
-                    @endforeach
-                </select>
-                @error('bank_account_id')
-                    <span class="invalid-feedback" role="alert">
-                        <strong>{{ $message }}</strong>
-                    </span>
-                @enderror
-            </div>
+          
             <!-- Button Submit -->
             <button type="submit" class="btn btn-success" id="submitBtns">kirim</button>
         </form>
@@ -489,10 +508,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!-- Untuk memunculkan Input tanda bukti Tf -->
 <script>
-// Function to toggle the visibility of the transfer receipt input based on selected payment method
+// Function to toggle the visibility of the transfer receipt input and bank selection based on selected payment method
 function togglePembayaran() {
     var paymentMethod = document.getElementById('payment_method').value;
     var transferReceipt = document.getElementById('transfer_receipt');
+    var bankSelection = document.getElementById('bank_selection');
+    
+    // Toggle uang dipegang siapa (show for cash)
     transferReceipt.style.display = (paymentMethod === 'cash') ? 'block' : 'none';
+    
+    // Toggle bank selection (show for transfer)
+    bankSelection.style.display = (paymentMethod === 'transfer') ? 'block' : 'none';
 }
 </script>
